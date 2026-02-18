@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Pay Central</title>
+  <link rel="stylesheet" href="styles.css">
+</head>
+
+<body>
+
+  <!-- Header -->
+  <header>
+    <h1>Pay Central</h1>
+    <nav>
+      <a href="#employees">Employees</a>
+      <a href="#payroll">Run Payroll</a>
+    </nav>
+  </header>
+
+  <!-- Employees Section -->
+  <section id="employees">
+    <h2>Employees</h2>
+
+    <!-- Table -->
+    <table>
+      <tr>
+        <th>Name</th>
+        <th>Pay Type</th>
+        <th>Rate</th>
+      </tr>
+      <tr>
+        <td>John Smith</td>
+        <td>Hourly</td>
+        <td>$20</td>
+      </tr>
+    </table>
+
+    <!-- Add Employee -->
+    <h3>Add Employee</h3>
+    <form>
+      <input type="text" placeholder="Name">
+      <select>
+        <option>Hourly</option>
+        <option>Salaried</option>
+      </select>
+      <input type="number" placeholder="Rate">
+      <button type="submit">Save</button>
+    </form>
+  </section>
+
+  <!-- Payroll Section -->
+  <section id="payroll">
+    <h2>Run Payroll</h2>
+
+    <form>
+      <label>Start Date</label>
+      <input type="date">
+
+      <label>End Date</label>
+      <input type="date">
+
+      <button type="submit">Run Payroll</button>
+    </form>
+  </section>
+
+</body>
+</html>
