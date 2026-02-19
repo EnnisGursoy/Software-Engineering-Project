@@ -9,7 +9,3 @@ app = FastAPI(Title = "PAY CENTRAL API", version = "1.0.0", description = "API f
 Base.metadata.create_all(bind=engine)
 
 app.include_router(Auth.router, prefix = "/auth", tags=["Authentication"])
-
-@app.get("/")
-def root():
-    return {"message": "PAY CENTRAL Backend is running!"}
