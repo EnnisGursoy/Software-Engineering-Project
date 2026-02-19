@@ -9,4 +9,4 @@ Base.metadata.create_all(bind=engine)
 
 @app.get("/")
 def root():
-    return {"message": "SQLITE FastAPI Backend is running!"}
+    return {"message": "MYSQL FastAPI Backend is running!"}
