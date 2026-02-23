@@ -1,28 +1,19 @@
 from pydantic import BaseModel
-from datetime import date
+from datetime import date, datetime
+from typing import Optional
 
-class Employee(BaseModel):
-    id: int
-    name: str
-    position: str
-    department: str
-    date_joined: date
 
-    class Config:
-        orm_mode = True
 
 class EmployeeCreate(BaseModel):
-    name: str
-    position: str
-    department: str
-    date_joined: date
-    class Config:
-        orm_mode = True
-
-class EmployeeUpdate(BaseModel):
-    name: str
-    position: str
-    department: str
-    class Config:
-        orm_mode = True
-
+    first_name: str
+    last_name: str
+    email: str
+    phone: Optional[str] = None
+    address: Optional[str] = None
+    city: Optional[str] = None
+    state: Optional[str] = None
+    zip_code: Optional[str] = None
+    date_of_birth: Optional[date] = None
+    hire_date: date
+    ssn: Optional[str] = None
+    employment_status: str = "active"
