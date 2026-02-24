@@ -1,0 +1,260 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Settings</title>
+  <style>
+    :root {
+      --bg: #f6f9fc;
+      --text: #1f2937;
+      --surface: #ffffff;
+      --border: #d1d5db;
+      --accent: #0f766e;
+      --muted: #6b7280;
+    }
+
+    body.dark {
+      --bg: #0b1220;
+      --surface: #111827;
+      --text: #f3f4f6;
+      --muted: #9ca3af;
+      --border: #374151;
+      --accent: #14b8a6;
+    }
+
+    * { box-sizing: border-box; }
+
+    body {
+      margin: 0;
+      font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      transition: background 0.2s ease, color 0.2s ease;
+    }
+
+    header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 14px 20px;
+      background: var(--surface);
+      border-bottom: 1px solid var(--border);
+      position: relative;
+    }
+
+    h1 {
+      margin: 0;
+      font-size: 1.3rem;
+    }
+
+    main {
+      padding: 24px 20px;
+    }
+
+    .settings-card {
+      max-width: 560px;
+      margin: 0 auto;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 20px;
+    }
+
+    .settings-card p {
+      margin: 0 0 18px;
+      color: var(--muted);
+    }
+
+    .setting-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 12px 0;
+      border-top: 1px solid var(--border);
+    }
+
+    .setting-row label {
+      font-weight: 600;
+    }
+
+    .switch {
+      position: relative;
+      width: 52px;
+      height: 30px;
+      display: inline-block;
+    }
+
+    .switch input {
+      opacity: 0;
+      width: 0;
+      height: 0;
+    }
+
+    .slider {
+      position: absolute;
+      cursor: pointer;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: #9ca3af;
+      transition: .2s;
+      border-radius: 999px;
+    }
+
+    .slider:before {
+      position: absolute;
+      content: "";
+      height: 22px;
+      width: 22px;
+      left: 4px;
+      top: 4px;
+      background: #fff;
+      transition: .2s;
+      border-radius: 50%;
+    }
+
+    input:checked + .slider {
+      background: var(--accent);
+    }
+
+    input:checked + .slider:before {
+      transform: translateX(22px);
+    }
+
+    .menu-wrap {
+      position: relative;
+    }
+
+    .menu-btn {
+      width: 42px;
+      height: 42px;
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      background: var(--surface);
+      cursor: pointer;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      gap: 5px;
+      padding: 0;
+    }
+
+    .menu-btn span {
+      width: 20px;
+      height: 2px;
+      background: var(--text);
+      border-radius: 10px;
+      display: block;
+    }
+
+    .menu {
+      position: absolute;
+      right: 0;
+      top: 50px;
+      min-width: 210px;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+      padding: 8px;
+      display: none;
+      z-index: 20;
+    }
+
+    .menu.open {
+      display: block;
+    }
+
+    .menu a {
+      display: block;
+      text-decoration: none;
+      color: var(--text);
+      padding: 10px 12px;
+      border-radius: 8px;
+      font-size: 0.95rem;
+    }
+
+    .menu a:hover {
+      background: #ecfeff;
+      color: var(--accent);
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <h1>Settings</h1>
+
+    <div class="menu-wrap">
+      <button class="menu-btn" id="menuBtn" aria-label="Open menu" aria-expanded="false" aria-controls="hrMenu">
+        <span></span>
+        <span></span>
+        <span></span>
+      </button>
+
+      <nav class="menu" id="hrMenu" aria-hidden="true">
+        <a href="profile.html">Profile</a>
+        <a href="employees.html">Employees</a>
+        <a href="shifts.html">Shifts</a>
+        <a href="payroll.html">Payroll</a>
+        <a href="taxes.html">Taxes</a>
+        <a href="reports.html">Reports</a>
+        <a href="settings.html">Settings</a>
+      </nav>
+    </div>
+  </header>
+
+  <main>
+    <section class="settings-card">
+      <p>Manage your app preferences.</p>
+
+      <div class="setting-row">
+        <label for="darkModeToggle">Dark mode</label>
+        <label class="switch" aria-label="Toggle dark mode">
+          <input type="checkbox" id="darkModeToggle">
+          <span class="slider"></span>
+        </label>
+      </div>
+    </section>
+  </main>
+
+  <script>
+    const menuBtn = document.getElementById('menuBtn');
+    const hrMenu = document.getElementById('hrMenu');
+    const toggle = document.getElementById('darkModeToggle');
+    const STORAGE_KEY = 'payroll_dark_mode';
+
+    menuBtn.addEventListener('click', () => {
+      const isOpen = hrMenu.classList.toggle('open');
+      menuBtn.setAttribute('aria-expanded', String(isOpen));
+      hrMenu.setAttribute('aria-hidden', String(!isOpen));
+    });
+
+    document.addEventListener('click', (event) => {
+      if (!event.target.closest('.menu-wrap')) {
+        hrMenu.classList.remove('open');
+        menuBtn.setAttribute('aria-expanded', 'false');
+        hrMenu.setAttribute('aria-hidden', 'true');
+      }
+    });
+
+    const savedTheme = localStorage.getItem(STORAGE_KEY);
+    if (savedTheme === 'enabled') {
+      document.body.classList.add('dark');
+      toggle.checked = true;
+    }
+
+    toggle.addEventListener('change', () => {
+      if (toggle.checked) {
+        document.body.classList.add('dark');
+        localStorage.setItem(STORAGE_KEY, 'enabled');
+      } else {
+        document.body.classList.remove('dark');
+        localStorage.setItem(STORAGE_KEY, 'disabled');
+      }
+    });
+  </script>
+</body>
+</html>
