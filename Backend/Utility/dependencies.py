@@ -1,5 +1,5 @@
 from Backend.Database.connection import SessionLocal
-from Utility.security import decode_access_token
+from Backend.Utility.security import decode_access_token
 from fastapi import Depends, HTTPException, status
 from sqlalchemy.orm import Session
 from Backend.Models import Employee
@@ -13,7 +13,6 @@ def get_db():
         yield db
     finally:
         db.close()
-
 
 def get_current_user(token: str = Depends(oauth2_scheme), db: Session = Depends(get_db)):
     credentials_exception = HTTPException(
@@ -31,6 +30,3 @@ def get_current_user(token: str = Depends(oauth2_scheme), db: Session = Depends(
     if user is None:
         raise credentials_exception
     return user
-
-
-
