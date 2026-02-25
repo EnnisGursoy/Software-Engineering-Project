@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>HR Home Page</title>
+  <title>Employees</title>
   <style>
     :root {
       --bg: #f6f9fc;
@@ -11,7 +11,6 @@
       --surface: #ffffff;
       --border: #d1d5db;
       --accent: #0f766e;
-      --accent-hover: #115e59;
     }
 
     * { box-sizing: border-box; }
@@ -37,6 +36,18 @@
       margin: 0;
       font-size: 1.3rem;
       color: #ffffff;
+    }
+
+    main {
+      padding: 24px 20px;
+    }
+
+    .card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 20px;
+      max-width: 780px;
     }
 
     .menu-wrap {
@@ -97,33 +108,11 @@
       background: #ecfeff;
       color: var(--accent);
     }
-
-    main {
-      padding: 24px 20px;
-    }
-
-    .card {
-      background: var(--surface);
-      border: 1px solid var(--border);
-      border-radius: 12px;
-      padding: 20px;
-      max-width: 780px;
-    }
-
-    .card p {
-      margin: 0;
-      line-height: 1.5;
-    }
-
-    @media (max-width: 600px) {
-      h1 { font-size: 1.1rem; }
-      .menu { min-width: 180px; }
-    }
   </style>
 </head>
 <body>
   <header>
-    <h1>HR Home Page</h1>
+    <h1>Employees</h1>
 
     <div class="menu-wrap">
       <button class="menu-btn" id="menuBtn" aria-label="Open menu" aria-expanded="false" aria-controls="hrMenu">
@@ -146,7 +135,7 @@
 
   <main>
     <section class="card">
-      <p>Select an option from the top-right menu to manage HR tasks.</p>
+      <p>Employees page content goes here.</p>
     </section>
   </main>
 
