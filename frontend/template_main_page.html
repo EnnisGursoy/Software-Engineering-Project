@@ -6,12 +6,19 @@
   <title>HR Home Page</title>
   <style>
     :root {
-      --bg: #f6f9fc;
+      --bg: #eef3f9;
       --text: #1f2937;
       --surface: #ffffff;
-      --border: #d1d5db;
+      --surface-soft: #f8fbff;
+      --border: #d4dde8;
       --accent: #0f766e;
       --accent-hover: #115e59;
+      --primary: #1d4ed8;
+      --primary-dark: #1e40af;
+      --muted: #64748b;
+      --success: #0f766e;
+      --warning: #b45309;
+      --danger: #b91c1c;
     }
 
     * { box-sizing: border-box; }
@@ -19,7 +26,10 @@
     body {
       margin: 0;
       font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
-      background: var(--bg);
+      background:
+        radial-gradient(circle at top left, #dbeafe 0%, transparent 35%),
+        radial-gradient(circle at top right, #e0f2fe 0%, transparent 30%),
+        var(--bg);
       color: var(--text);
     }
 
@@ -28,8 +38,8 @@
       justify-content: space-between;
       align-items: center;
       padding: 14px 20px;
-      background: #1d4ed8;
-      border-bottom: 1px solid #1e40af;
+      background: var(--primary);
+      border-bottom: 1px solid var(--primary-dark);
       position: relative;
     }
 
@@ -99,7 +109,9 @@
     }
 
     main {
-      padding: 24px 20px;
+      padding: 28px 20px 36px;
+      max-width: 1160px;
+      margin: 0 auto;
     }
 
     .card {
@@ -107,7 +119,6 @@
       border: 1px solid var(--border);
       border-radius: 12px;
       padding: 20px;
-      max-width: 780px;
     }
 
     .card p {
@@ -115,9 +126,187 @@
       line-height: 1.5;
     }
 
+    .hero {
+      display: grid;
+      grid-template-columns: 1.3fr 0.9fr;
+      gap: 16px;
+      margin-bottom: 16px;
+    }
+
+    .hero h2 {
+      margin: 0 0 8px;
+      font-size: 1.35rem;
+    }
+
+    .muted {
+      color: var(--muted);
+    }
+
+    .quick-actions {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      margin-top: 14px;
+    }
+
+    .btn {
+      border: 1px solid transparent;
+      border-radius: 8px;
+      padding: 9px 12px;
+      font-size: 0.9rem;
+      cursor: default;
+      background: var(--surface-soft);
+      color: var(--text);
+    }
+
+    .btn.primary {
+      background: #dbeafe;
+      color: #1e3a8a;
+      border-color: #bfdbfe;
+    }
+
+    .stats {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 12px;
+      margin-bottom: 16px;
+    }
+
+    .stat {
+      padding: 14px;
+      border-radius: 12px;
+      border: 1px solid var(--border);
+      background: var(--surface);
+    }
+
+    .stat .label {
+      font-size: 0.82rem;
+      color: var(--muted);
+      margin-bottom: 6px;
+      display: block;
+    }
+
+    .stat .value {
+      font-size: 1.3rem;
+      font-weight: 700;
+      letter-spacing: 0.2px;
+    }
+
+    .stat.success .value { color: var(--success); }
+    .stat.warning .value { color: var(--warning); }
+    .stat.danger .value { color: var(--danger); }
+
+    .content-grid {
+      display: grid;
+      grid-template-columns: 1.2fr 0.8fr;
+      gap: 16px;
+    }
+
+    .table-wrap {
+      overflow-x: auto;
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      margin-top: 10px;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      min-width: 560px;
+      background: var(--surface);
+    }
+
+    th, td {
+      padding: 11px 12px;
+      text-align: left;
+      border-bottom: 1px solid #e5e7eb;
+      font-size: 0.9rem;
+    }
+
+    th {
+      font-size: 0.82rem;
+      letter-spacing: 0.3px;
+      text-transform: uppercase;
+      color: #475569;
+      background: #f8fafc;
+    }
+
+    tr:last-child td {
+      border-bottom: none;
+    }
+
+    .status {
+      font-size: 0.78rem;
+      border-radius: 999px;
+      padding: 4px 9px;
+      display: inline-block;
+      border: 1px solid transparent;
+    }
+
+    .status.pending {
+      background: #fffbeb;
+      color: #92400e;
+      border-color: #fde68a;
+    }
+
+    .status.ready {
+      background: #ecfdf5;
+      color: #065f46;
+      border-color: #a7f3d0;
+    }
+
+    .status.issue {
+      background: #fef2f2;
+      color: #991b1b;
+      border-color: #fecaca;
+    }
+
+    .list {
+      margin: 12px 0 0;
+      padding: 0;
+      list-style: none;
+      display: grid;
+      gap: 10px;
+    }
+
+    .list li {
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 10px 12px;
+      background: #fbfdff;
+    }
+
+    .list strong {
+      display: block;
+      margin-bottom: 4px;
+      font-size: 0.92rem;
+    }
+
+    .list span {
+      color: var(--muted);
+      font-size: 0.85rem;
+    }
+
     @media (max-width: 600px) {
       h1 { font-size: 1.1rem; }
       .menu { min-width: 180px; }
+    }
+
+    @media (max-width: 940px) {
+      .hero,
+      .content-grid {
+        grid-template-columns: 1fr;
+      }
+
+      .stats {
+        grid-template-columns: repeat(2, 1fr);
+      }
+    }
+
+    @media (max-width: 520px) {
+      .stats {
+        grid-template-columns: 1fr;
+      }
     }
   </style>
 </head>
@@ -145,8 +334,50 @@
   </header>
 
   <main>
-    <section class="card">
-      <p>Select an option from the top-right menu to manage HR tasks.</p>
+    <section class="hero">
+      <article class="card">
+        <h2>Welcome back, HR Team</h2>
+        <p class="muted">This dashboard gives a quick view of attendance, payroll readiness, and pending actions for the week.</p>
+        <div class="quick-actions">
+          <button class="btn primary" type="button">Run Payroll Preview</button>
+          <button class="btn" type="button">Create Shift Plan</button>
+          <button class="btn" type="button">Export Monthly Report</button>
+        </div>
+      </article>
+
+      <aside class="card">
+        <h2>Today Snapshot</h2>
+        <p>Example</p>
+      </aside>
+    </section>
+
+    <section class="stats" aria-label="Key metrics">
+      <article class="stat">
+        <span class="label">Active Employees</span>
+        <div class="value">0</div>
+      </article>
+      <article class="stat success">
+        <span class="label">Payroll Ready</span>
+        <div class="value">0</div>
+      </article>
+      <article class="stat warning">
+        <span class="label">Pending Leave Requests</span>
+        <div class="value">0</div>
+      </article>
+      <article class="stat danger">
+        <span class="label">Compliance Alerts</span>
+        <div class="value">0</div>
+      </article>
+    </section>
+
+    <section class="content-grid">
+      <article class="card">
+        <h2>Recent Payroll Activity</h2>
+      </article>
+
+      <aside class="card">
+        <h2>Action Items</h2>
+      </aside>
     </section>
   </main>
 
@@ -170,4 +401,3 @@
   </script>
 </body>
 </html>
-
