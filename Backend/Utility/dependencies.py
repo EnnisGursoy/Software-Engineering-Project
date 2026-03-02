@@ -4,6 +4,7 @@ from fastapi import Depends, HTTPException, status
 from sqlalchemy.orm import Session
 from Backend.Models import Employee
 from fastapi.security import OAuth2PasswordBearer
+from Backend.Models.User import User
 
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="token")
 
@@ -30,3 +31,21 @@ def get_current_user(token: str = Depends(oauth2_scheme), db: Session = Depends(
     if user is None:
         raise credentials_exception
     return user
+
+
+def admin_only(admin : User = Depends(get_current_user)) -> User :
+    if admin.role != "admin":
+        raise HTTPException(status_code=400, detail = "Admin access required")
+    
+    return admin
+
+
+def hr_only(hr : User = Depends(get_current_user)) -> User :
+    if hr.role not in ["hr", "admin"] :
+        raise HTTPException(status_code = 400, detail = "HR or Admin access is required")
+    return hr
+ 
+def manager_only(manager : User = Depends(get_current_user)) -> User :
+    if manager.role not in ["manager", "admin", "hr"] :
+        raise HTTPException(status_code = 400, details = "Manager or Admin or HR access is required")
+    return manager

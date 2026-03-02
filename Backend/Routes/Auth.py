@@ -38,7 +38,7 @@ async def auth_login(
         raise HTTPException(status_code=401, detail="Incorrect username or password")
 
     token_data = {
-        "sub": str(user.user_id),   # FIXED
+        "sub": str(user.user_id),   
         "role": user.role
     }
 
