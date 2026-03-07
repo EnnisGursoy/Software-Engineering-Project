@@ -107,8 +107,21 @@ def delete_employee(id: int, db: Session):
             status_code=404,
             detail="Employee does not exist in the database"
         )
+    
 
-    db.delete(employee)
+    if employee.employment_status == "terminated":
+       return {"message": "Employee is already terminated"}
+    
+    else :
+         employee.employment_status = "terminated"
+
     db.commit()
+    db.refresh(employee)
 
-    return {"message": "Employee deleted successfully"}
+    return {"message": "Employee terminated successfully"}
+
+    
+
+    
+
+   
