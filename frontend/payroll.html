@@ -1,19 +1,29 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Payroll</title>
   <style>
     :root {
       --bg: #f6f9fc;
       --text: #1f2937;
+      --muted: #6b7280;
       --surface: #ffffff;
       --border: #d1d5db;
       --accent: #0f766e;
+      --primary: #1d4ed8;
+      --primary-dark: #1e40af;
+      --success-bg: #dcfce7;
+      --success-text: #166534;
+      --warning-bg: #fef3c7;
+      --warning-text: #92400e;
+      --shadow: 0 10px 25px rgba(0, 0, 0, 0.08);
     }
 
-    * { box-sizing: border-box; }
+    * {
+      box-sizing: border-box;
+    }
 
     body {
       margin: 0;
@@ -27,9 +37,11 @@
       justify-content: space-between;
       align-items: center;
       padding: 14px 20px;
-      background: #1d4ed8;
-      border-bottom: 1px solid #1e40af;
-      position: relative;
+      background: var(--primary);
+      border-bottom: 1px solid var(--primary-dark);
+      position: sticky;
+      top: 0;
+      z-index: 100;
     }
 
     h1 {
@@ -39,15 +51,9 @@
     }
 
     main {
-      padding: 24px 20px;
-    }
-
-    .card {
-      background: var(--surface);
-      border: 1px solid var(--border);
-      border-radius: 12px;
-      padding: 20px;
-      max-width: 780px;
+      padding: 24px 20px 40px;
+      max-width: 1200px;
+      margin: 0 auto;
     }
 
     .menu-wrap {
@@ -85,7 +91,7 @@
       background: var(--surface);
       border: 1px solid var(--border);
       border-radius: 10px;
-      box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+      box-shadow: var(--shadow);
       padding: 8px;
       display: none;
       z-index: 20;
@@ -107,6 +113,204 @@
     .menu a:hover {
       background: #ecfeff;
       color: var(--accent);
+    }
+
+    .page-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 16px;
+      flex-wrap: wrap;
+      margin-bottom: 20px;
+    }
+
+    .page-header p {
+      margin: 6px 0 0;
+      color: var(--muted);
+    }
+
+    .btn {
+      border: none;
+      border-radius: 10px;
+      padding: 11px 16px;
+      font-size: 0.95rem;
+      cursor: pointer;
+      font-weight: 600;
+    }
+
+    .btn-primary {
+      background: var(--primary);
+      color: white;
+    }
+
+    .btn-primary:hover {
+      background: var(--primary-dark);
+    }
+
+    .card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      padding: 20px;
+      box-shadow: var(--shadow);
+    }
+
+    .stats-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(210px, 1fr));
+      gap: 16px;
+      margin-bottom: 24px;
+    }
+
+    .stat-card h3 {
+      margin: 0;
+      font-size: 0.95rem;
+      color: var(--muted);
+      font-weight: 600;
+    }
+
+    .stat-card p {
+      margin: 10px 0 0;
+      font-size: 1.7rem;
+      font-weight: 700;
+    }
+
+    .layout-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 20px;
+      margin-bottom: 24px;
+    }
+
+    .section-title {
+      margin: 0 0 16px;
+      font-size: 1.1rem;
+    }
+
+    .form-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+      gap: 14px;
+    }
+
+    input,
+    select {
+      width: 100%;
+      padding: 12px 14px;
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      font-size: 0.95rem;
+      background: #fff;
+    }
+
+    input:focus,
+    select:focus {
+      outline: 2px solid rgba(29, 78, 216, 0.15);
+      border-color: var(--primary);
+    }
+
+    .form-actions {
+      margin-top: 16px;
+      display: flex;
+      gap: 10px;
+      flex-wrap: wrap;
+    }
+
+    .pay-period-box p {
+      margin: 8px 0;
+      color: var(--text);
+    }
+
+    .highlight {
+      display: inline-block;
+      padding: 6px 10px;
+      border-radius: 999px;
+      font-size: 0.82rem;
+      font-weight: 700;
+      background: var(--success-bg);
+      color: var(--success-text);
+    }
+
+    .results-box {
+      margin-top: 16px;
+      padding: 16px;
+      border-radius: 12px;
+      background: #f9fafb;
+      border: 1px solid #e5e7eb;
+    }
+
+    .results-box p {
+      margin: 8px 0;
+    }
+
+    .table-card {
+      margin-top: 4px;
+    }
+
+    .table-wrap {
+      overflow-x: auto;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      min-width: 950px;
+    }
+
+    thead {
+      background: #eff6ff;
+    }
+
+    th,
+    td {
+      text-align: left;
+      padding: 14px 12px;
+      border-bottom: 1px solid #e5e7eb;
+      font-size: 0.95rem;
+      vertical-align: middle;
+    }
+
+    th {
+      color: #374151;
+      font-weight: 700;
+    }
+
+    tbody tr:hover {
+      background: #f9fafb;
+    }
+
+    .status {
+      display: inline-block;
+      padding: 6px 10px;
+      border-radius: 999px;
+      font-size: 0.82rem;
+      font-weight: 700;
+    }
+
+    .status.processed {
+      background: var(--success-bg);
+      color: var(--success-text);
+    }
+
+    .status.pending {
+      background: var(--warning-bg);
+      color: var(--warning-text);
+    }
+
+    @media (max-width: 900px) {
+      .layout-grid {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    @media (max-width: 768px) {
+      main {
+        padding: 18px 14px 30px;
+      }
+
+      .page-header {
+        align-items: flex-start;
+      }
     }
   </style>
 </head>
@@ -134,29 +338,212 @@
   </header>
 
   <main>
-    <section class="card">
-      <p>Payroll page content goes here.</p>
+    <section class="page-header">
+      <div>
+        <h2 style="margin: 0;">Payroll Management</h2>
+        <p>Track pay periods, calculate wages, deductions, and employee net pay.</p>
+      </div>
+      <button class="btn btn-primary">Run Payroll</button>
+    </section>
+
+    <section class="stats-grid">
+      <div class="card stat-card">
+        <h3>Total Payroll</h3>
+        <p id="totalPayroll">$0.00</p>
+      </div>
+      <div class="card stat-card">
+        <h3>Total Employees Paid</h3>
+        <p id="employeesPaid">0</p>
+      </div>
+      <div class="card stat-card">
+        <h3>Total Deductions</h3>
+        <p id="totalDeductions">$0.00</p>
+      </div>
+      <div class="card stat-card">
+        <h3>Current Pay Period</h3>
+        <p id="payPeriodLabel">Bi-Weekly</p>
+      </div>
+    </section>
+
+    <section class="layout-grid">
+      <div class="card pay-period-box">
+        <h3 class="section-title">Current Pay Period</h3>
+        <p><strong>Pay Schedule:</strong> <span class="highlight">Bi-Weekly</span></p>
+        <p><strong>Period Start:</strong> March 1, 2026</p>
+        <p><strong>Period End:</strong> March 14, 2026</p>
+        <p><strong>Pay Date:</strong> March 18, 2026</p>
+        <p><strong>Status:</strong> Open for processing</p>
+      </div>
+
+      <div class="card">
+        <h3 class="section-title">Payroll Calculator</h3>
+        <form id="payrollForm">
+          <div class="form-grid">
+            <input type="text" id="employeeName" placeholder="Employee Name" required />
+            <input type="number" id="hoursWorked" placeholder="Hours Worked" min="0" step="0.01" required />
+            <input type="number" id="hourlyRate" placeholder="Hourly Rate" min="0" step="0.01" required />
+            <input type="number" id="deductions" placeholder="Deductions" min="0" step="0.01" required />
+          </div>
+
+          <div class="form-actions">
+            <button type="submit" class="btn btn-primary">Calculate Pay</button>
+          </div>
+        </form>
+
+        <div class="results-box" id="resultsBox">
+          <p><strong>Gross Pay:</strong> $0.00</p>
+          <p><strong>Deductions:</strong> $0.00</p>
+          <p><strong>Net Pay:</strong> $0.00</p>
+        </div>
+      </div>
+    </section>
+
+    <section class="card table-card">
+      <h3 class="section-title">Payroll Records</h3>
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th>Employee ID</th>
+              <th>Name</th>
+              <th>Hours Worked</th>
+              <th>Hourly Rate</th>
+              <th>Gross Pay</th>
+              <th>Deductions</th>
+              <th>Net Pay</th>
+              <th>Status</th>
+            </tr>
+          </thead>
+          <tbody id="payrollTableBody"></tbody>
+        </table>
+      </div>
     </section>
   </main>
 
   <script>
-    const menuBtn = document.getElementById('menuBtn');
-    const hrMenu = document.getElementById('hrMenu');
+    const menuBtn = document.getElementById("menuBtn");
+    const hrMenu = document.getElementById("hrMenu");
 
-    menuBtn.addEventListener('click', () => {
-      const isOpen = hrMenu.classList.toggle('open');
-      menuBtn.setAttribute('aria-expanded', String(isOpen));
-      hrMenu.setAttribute('aria-hidden', String(!isOpen));
+    menuBtn.addEventListener("click", () => {
+      const isOpen = hrMenu.classList.toggle("open");
+      menuBtn.setAttribute("aria-expanded", String(isOpen));
+      hrMenu.setAttribute("aria-hidden", String(!isOpen));
     });
 
-    document.addEventListener('click', (event) => {
-      if (!event.target.closest('.menu-wrap')) {
-        hrMenu.classList.remove('open');
-        menuBtn.setAttribute('aria-expanded', 'false');
-        hrMenu.setAttribute('aria-hidden', 'true');
+    document.addEventListener("click", (event) => {
+      if (!event.target.closest(".menu-wrap")) {
+        hrMenu.classList.remove("open");
+        menuBtn.setAttribute("aria-expanded", "false");
+        hrMenu.setAttribute("aria-hidden", "true");
       }
     });
+
+    const payrollForm = document.getElementById("payrollForm");
+    const resultsBox = document.getElementById("resultsBox");
+    const payrollTableBody = document.getElementById("payrollTableBody");
+
+    let payrollRecords = [
+      {
+        id: "EMP001",
+        name: "John Smith",
+        hoursWorked: 80,
+        hourlyRate: 24.5,
+        deductions: 180,
+        status: "Processed"
+      },
+      {
+        id: "EMP002",
+        name: "Maria Lopez",
+        hoursWorked: 76,
+        hourlyRate: 31.25,
+        deductions: 220,
+        status: "Processed"
+      },
+      {
+        id: "EMP003",
+        name: "David Chen",
+        hoursWorked: 64,
+        hourlyRate: 27.75,
+        deductions: 160,
+        status: "Pending"
+      }
+    ];
+
+    function renderPayrollTable() {
+      payrollTableBody.innerHTML = "";
+
+      payrollRecords.forEach((record) => {
+        const grossPay = record.hoursWorked * record.hourlyRate;
+        const netPay = grossPay - record.deductions;
+
+        const row = document.createElement("tr");
+        row.innerHTML = `
+          <td>${record.id}</td>
+          <td>${record.name}</td>
+          <td>${record.hoursWorked}</td>
+          <td>$${record.hourlyRate.toFixed(2)}</td>
+          <td>$${grossPay.toFixed(2)}</td>
+          <td>$${record.deductions.toFixed(2)}</td>
+          <td>$${netPay.toFixed(2)}</td>
+          <td>
+            <span class="status ${record.status === "Processed" ? "processed" : "pending"}">
+              ${record.status}
+            </span>
+          </td>
+        `;
+        payrollTableBody.appendChild(row);
+      });
+
+      updatePayrollStats();
+    }
+
+    function updatePayrollStats() {
+      const totalPayroll = payrollRecords.reduce((sum, record) => {
+        return sum + (record.hoursWorked * record.hourlyRate - record.deductions);
+      }, 0);
+
+      const totalDeductions = payrollRecords.reduce((sum, record) => {
+        return sum + record.deductions;
+      }, 0);
+
+      document.getElementById("totalPayroll").textContent = `$${totalPayroll.toFixed(2)}`;
+      document.getElementById("employeesPaid").textContent = payrollRecords.length;
+      document.getElementById("totalDeductions").textContent = `$${totalDeductions.toFixed(2)}`;
+    }
+
+    payrollForm.addEventListener("submit", (e) => {
+      e.preventDefault();
+
+      const employeeName = document.getElementById("employeeName").value.trim();
+      const hoursWorked = parseFloat(document.getElementById("hoursWorked").value);
+      const hourlyRate = parseFloat(document.getElementById("hourlyRate").value);
+      const deductions = parseFloat(document.getElementById("deductions").value);
+
+      const grossPay = hoursWorked * hourlyRate;
+      const netPay = grossPay - deductions;
+
+      resultsBox.innerHTML = `
+        <p><strong>Gross Pay:</strong> $${grossPay.toFixed(2)}</p>
+        <p><strong>Deductions:</strong> $${deductions.toFixed(2)}</p>
+        <p><strong>Net Pay:</strong> $${netPay.toFixed(2)}</p>
+      `;
+
+      const newId = "EMP" + String(payrollRecords.length + 1).padStart(3, "0");
+
+      payrollRecords.push({
+        id: newId,
+        name: employeeName,
+        hoursWorked,
+        hourlyRate,
+        deductions,
+        status: "Pending"
+      });
+
+      renderPayrollTable();
+      payrollForm.reset();
+    });
+
+    renderPayrollTable();
   </script>
 </body>
 </html>
-
