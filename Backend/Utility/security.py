@@ -3,12 +3,20 @@ from datetime import datetime, timedelta
 from jose import JWTError, jwt
 import os 
 from dotenv import load_dotenv
+from cryptography.fernet import Fernet
+from decouple import config   
+
+
+
 
 load_dotenv()
 
 SECRET_KEY = os.getenv("SECRET_KEY")
 ALGORITHM = os.getenv("ALGORITHM")
 ACCESS_TOKEN_EXPIRE_MINUTES = int(os.getenv("ACCESS_TOKEN_EXPIRE_MINUTES"))
+ENCRYPTION_KEY = config("ENCRYPTION_KEY").encode()
+fernet = Fernet(ENCRYPTION_KEY)
+
 
 pwd_context = CryptContext(schemes=["argon2"], deprecated="auto")
 
@@ -33,3 +41,12 @@ def decode_access_token(token: str) -> dict:
         return payload
     except JWTError:
         return None
+    
+
+
+
+def encrypt_ssn(ssn : str) -> str :
+    return fernet.encrypt(ssn.encode()).decode()
+
+def decrypt_ssn(encrypted_ssn : str) -> str :
+    return fernet.decrypt(encrypted_ssn.encode()).decode()

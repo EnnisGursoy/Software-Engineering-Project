@@ -1,7 +1,7 @@
 from fastapi import FastAPI
 from Backend.Database.connection import engine, Base
-from Backend.Models import Employee
-from Backend.Routes import Auth
+from Backend.Routes import Auth, Employee, department
+
 
 
 app = FastAPI(Title = "PAY CENTRAL API", version = "1.0.0", description = "API for managing employee data in Pay Central")
@@ -10,3 +10,5 @@ app = FastAPI(Title = "PAY CENTRAL API", version = "1.0.0", description = "API f
 Base.metadata.create_all(bind=engine)
 
 app.include_router(Auth.router, prefix = "/auth", tags=["Authentication"])
+app.include_router(Employee.router, prefix = "/employee", tags=["Employee"])
+app.include_router(department.router, prefix = "/department", tags = ["Department"])

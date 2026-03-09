@@ -1,5 +1,6 @@
 from sqlalchemy import Column, Integer, String, Date, Enum, TIMESTAMP
 from Backend.Database.connection import Base
+from datetime import datetime
 
 class Employee(Base):
     __tablename__ = "employees"
@@ -16,14 +17,14 @@ class Employee(Base):
     date_of_birth = Column(Date, nullable=True)
     hire_date = Column(Date, nullable=False)
     termination_date = Column(Date, nullable=True)
-    ssn = Column(String(11), nullable=True, unique=True)
+    ssn = Column(String(225), nullable=False, unique=True)
     employment_status = Column(
         Enum("active", "terminated", "on_leave", name="employment_status_enum"),
         nullable=True,
         default="active"
     )
-    created_at = Column(TIMESTAMP, nullable=True)
-    updated_at = Column(TIMESTAMP, nullable=True)
+    created_at = Column(Date, default=datetime.utcnow)
+    updated_at = Column(Date, default=datetime.utcnow, onupdate=datetime.utcnow)
 
     def __repr__(self):
         return f"<Employee(employee_id={self.employee_id}, email='{self.email}')>"

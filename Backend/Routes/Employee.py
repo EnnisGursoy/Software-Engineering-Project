@@ -1,46 +1,40 @@
 from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.orm import Session
-
-from Backend.Utility.dependencies import get_db
-from Backend.Models.Employee import Employee
-from Backend.Schemas.Employee import EmployeeCreate
+from Backend.Utility.dependencies import get_db, hr_only
+from Backend.Models.User import User
+from Backend.Schemas.Employee import EmployeeCreate, EmployeeOut, EmployeeUpdate
+from Backend.Services.employee_service import create_employee, update_employee, show_employee, show_all_employees, delete_employee
 
 router = APIRouter()
 
+@router.get('/all')
+async def get_all(user : User = Depends(hr_only), db : Session = Depends(get_db)):
+   all_employees = show_all_employees(db)
+   return all_employees
 
-@router.post("/create", status_code=201)
-async def register(employee: EmployeeCreate, db: Session = Depends(get_db)):
 
-    # Check if SSN already exists
-    existing_employee = db.query(Employee).filter(Employee.ssn == employee.ssn).first()
-    if existing_employee:
-        raise HTTPException(
-            status_code=400,
-            detail="Employee with this SSN already exists"
-        )
+@router.get('/{employee_id}')
+async def get_employee(employee_id : int, user : User = Depends(hr_only), db : Session = Depends(get_db)):
+   employee_details = show_employee(employee_id, db)
+   return employee_details
 
-    # Create new employee
-    new_employee = Employee(
-        first_name=employee.first_name,
-        last_name=employee.last_name,
-        email=employee.email,
-        phone=employee.phone,
-        address=employee.address,
-        city=employee.city,
-        state=employee.state,
-        zip_code=employee.zip_code,
-        date_of_birth=employee.date_of_birth,
-        hire_date=employee.hire_date,
-        termination_date=None,
-        ssn=employee.ssn,
-        employment_status=employee.employment_status
-    )
+@router.post('/sign_up', response_model = EmployeeOut)
+async def register(employee:EmployeeOut,  user : User = Depends(hr_only), db : Session = Depends(get_db)) :
+   new_employee =  create_employee(employee, db)
+   return new_employee
 
-    db.add(new_employee)
-    db.commit()
-    db.refresh(new_employee)
 
-    return {
-        "message": "Employee created successfully",
-        "employee_id": new_employee.employee_id
-    }
+@router.patch('/{employee_id}/update')
+async def update_info(employee_id : int , employee: EmployeeUpdate, user : User = Depends(hr_only), db : Session = Depends(get_db)):
+   employee_change = update_employee(employee_id, employee, db)
+   return employee_change
+
+
+
+#soft delete (change active to terminated)
+@router.delete('{employee_id}/delete')
+async def remove_employee(employee_id : int , user : User = Depends(hr_only), db : Session = Depends(get_db)):
+   employee = delete_employee(employee_id, db)
+   return employee
+
+#REMEMBER TO HARD DELETE. 

@@ -2,10 +2,13 @@ from Backend.Database.connection import SessionLocal
 from Backend.Utility.security import decode_access_token
 from fastapi import Depends, HTTPException, status
 from sqlalchemy.orm import Session
-from Backend.Models import Employee
 from fastapi.security import OAuth2PasswordBearer
+from Backend.Models.User import User   
 
-oauth2_scheme = OAuth2PasswordBearer(tokenUrl="token")
+oauth2_scheme = OAuth2PasswordBearer(
+    tokenUrl="auth/login",
+    auto_error=False   
+)
 
 def get_db():
     db = SessionLocal()
@@ -14,19 +17,63 @@ def get_db():
     finally:
         db.close()
 
-def get_current_user(token: str = Depends(oauth2_scheme), db: Session = Depends(get_db)):
-    credentials_exception = HTTPException(
-        status_code=status.HTTP_401_UNAUTHORIZED,
-        detail="Could not validate credentials",
-        headers={"WWW-Authenticate": "Bearer"},
-    )
+
+
+def get_current_user(
+    token: str | None = Depends(oauth2_scheme),
+    db: Session = Depends(get_db)
+):
+    if not token:
+        return None   # no login provided
+
     payload = decode_access_token(token)
     if payload is None:
-        raise credentials_exception
-    user_id: str = payload.get("sub")
-    if user_id is None:
-        raise credentials_exception
-    user = db.query(Employee).filter(Employee.id == user_id).first()
-    if user is None:
-        raise credentials_exception
+        raise HTTPException(status_code=401, detail="Invalid token")
+
+    user_id = payload.get("sub")
+    if not user_id:
+        raise HTTPException(status_code=401, detail="Invalid token payload")
+
+    user = db.query(User).filter(User.user_id == int(user_id)).first()
+    if not user:
+        raise HTTPException(status_code=401, detail="User not found")
+
     return user
+
+
+# ---------------------------------------------------------
+# Admin dependency with first-user bootstrap
+# ---------------------------------------------------------
+def admin_only(
+    db: Session = Depends(get_db),
+    current_user: User | None = Depends(get_current_user)
+):
+    total_users = db.query(User).count()
+
+    # Allow first user creation without login
+    if total_users == 0:
+        return None
+
+    # After first user exists → must be admin
+    if not current_user or current_user.role != "admin":
+        raise HTTPException(status_code=403, detail="Admin access required")
+
+    return current_user
+
+
+# ---------------------------------------------------------
+# HR dependency
+# ---------------------------------------------------------
+def hr_only(current_user: User = Depends(get_current_user)) -> User:
+    if not current_user or current_user.role not in ["hr", "admin"]:
+        raise HTTPException(status_code=403, detail="HR or Admin access required")
+    return current_user
+
+
+# ---------------------------------------------------------
+# Manager dependency
+# ---------------------------------------------------------
+def manager_only(current_user: User = Depends(get_current_user)) -> User:
+    if not current_user or current_user.role not in ["manager", "admin", "hr"]:
+        raise HTTPException(status_code=403, detail="Manager, Admin, or HR access required")
+    return current_user
