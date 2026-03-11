@@ -6,18 +6,21 @@
   <title>Payroll v1</title>
   <style>
     :root {
-      --bg: #eef3f9;
+      --bg: #f6f7f9;
       --text: #1f2937;
       --surface: #ffffff;
+      --surface-soft: #f8fbff;
       --border: #d4dde8;
       --accent: #0f766e;
-      --primary: #1d4ed8;
-      --primary-dark: #1e40af;
+      --accent-hover: #115e59;
+      --primary: #111827;
+      --primary-dark: #0b1220;
       --muted: #64748b;
       --table-bg: #ffffff;
       --table-border: #dbe5f0;
       --table-text: #1f2937;
       --table-muted: #374151;
+      --danger: #b91c1c;
     }
 
     * { box-sizing: border-box; }
@@ -25,10 +28,7 @@
     body {
       margin: 0;
       font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
-      background:
-        radial-gradient(circle at top left, #dbeafe 0%, transparent 35%),
-        radial-gradient(circle at top right, #e0f2fe 0%, transparent 30%),
-        var(--bg);
+      background: var(--bg);
       color: var(--text);
     }
 
@@ -36,16 +36,18 @@
       display: flex;
       justify-content: space-between;
       align-items: center;
-      padding: 14px 20px;
-      background: var(--primary);
-      border-bottom: 1px solid var(--primary-dark);
+      padding: 18px 20px 10px;
+      background: transparent;
+      border-bottom: 1px solid rgba(15, 23, 42, 0.08);
       position: relative;
     }
 
     h1 {
       margin: 0;
-      font-size: 1.3rem;
-      color: #ffffff;
+      font-size: 1.6rem;
+      color: #111827;
+      font-weight: 650;
+      letter-spacing: -0.2px;
     }
 
     .menu-wrap { position: relative; }
@@ -53,9 +55,9 @@
     .menu-btn {
       width: 42px;
       height: 42px;
-      border: 1px solid rgba(255, 255, 255, 0.45);
+      border: 1px solid rgba(15, 23, 42, 0.15);
       border-radius: 8px;
-      background: rgba(255, 255, 255, 0.12);
+      background: rgba(255, 255, 255, 0.75);
       cursor: pointer;
       display: flex;
       flex-direction: column;
@@ -68,7 +70,7 @@
     .menu-btn span {
       width: 20px;
       height: 2px;
-      background: #ffffff;
+      background: #111827;
       border-radius: 10px;
       display: block;
     }
@@ -104,10 +106,135 @@
     }
 
     main {
-      max-width: 1180px;
+      max-width: 1120px;
       margin: 0 auto;
-      padding: 24px 20px 40px;
+      padding: 0 20px 40px;
     }
+
+    .subnav {
+      display: flex;
+      gap: 18px;
+      flex-wrap: wrap;
+      align-items: center;
+      padding: 10px 0 6px;
+      border-bottom: 1px solid rgba(15, 23, 42, 0.08);
+    }
+
+    .subnav a {
+      position: relative;
+      text-decoration: none;
+      color: #334155;
+      font-size: 0.9rem;
+      padding: 8px 2px;
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .subnav a:hover { color: #111827; }
+
+    .subnav a.active {
+      color: #111827;
+      font-weight: 650;
+    }
+
+    .subnav a.active::after {
+      content: "";
+      position: absolute;
+      left: 0;
+      right: 0;
+      bottom: -7px;
+      height: 2px;
+      background: #111827;
+      border-radius: 999px;
+    }
+
+    .panel { display: none; }
+    .panel.active { display: block; }
+
+    .embed-frame {
+      width: 100%;
+      height: min(72vh, 820px);
+      border: 1px solid rgba(15, 23, 42, 0.10);
+      border-radius: 14px;
+      background: #ffffff;
+    }
+
+    .badge {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      min-width: 18px;
+      height: 18px;
+      padding: 0 6px;
+      border-radius: 999px;
+      background: #ef4444;
+      color: #ffffff;
+      font-size: 0.72rem;
+      line-height: 1;
+      font-weight: 700;
+    }
+
+    .section-head {
+      padding: 18px 0 14px;
+    }
+
+    .section-head h2 {
+      margin: 0 0 6px;
+      font-size: 1.35rem;
+      letter-spacing: -0.2px;
+      color: #111827;
+    }
+
+    .section-head p {
+      margin: 0;
+      color: #64748b;
+      font-size: 0.92rem;
+    }
+
+    .list-card {
+      background: #ffffff;
+      border: 1px solid rgba(15, 23, 42, 0.10);
+      border-radius: 14px;
+      overflow: hidden;
+      box-shadow: 0 1px 0 rgba(15, 23, 42, 0.02);
+    }
+
+    .list-row {
+      display: grid;
+      grid-template-columns: 1fr auto 18px;
+      align-items: center;
+      gap: 12px;
+      padding: 16px 16px;
+      text-decoration: none;
+      color: #111827;
+    }
+
+    .list-row + .list-row {
+      border-top: 1px solid rgba(15, 23, 42, 0.08);
+    }
+
+    .list-row:hover { background: #f8fafc; }
+
+    .list-row .row-title {
+      font-size: 0.92rem;
+      font-weight: 650;
+      color: #0f172a;
+    }
+
+    .list-row .row-meta {
+      font-size: 0.86rem;
+      color: #64748b;
+      white-space: nowrap;
+    }
+
+    .chev {
+      width: 18px;
+      height: 18px;
+      color: #94a3b8;
+    }
+
+    .legacy-payroll { display: none; }
 
     .filters {
       display: grid;
@@ -232,6 +359,344 @@
       margin-top: 4px;
     }
 
+    .page-title {
+      display: flex;
+      align-items: baseline;
+      justify-content: space-between;
+      gap: 12px;
+      margin: 18px 2px 10px;
+    }
+
+    .page-title h2 {
+      margin: 0;
+      font-size: 1.15rem;
+      color: #0f172a;
+    }
+
+    .hint {
+      margin: 0;
+      color: var(--muted);
+      font-size: 0.92rem;
+    }
+
+    .btn {
+      border: 1px solid transparent;
+      border-radius: 10px;
+      padding: 9px 12px;
+      font-size: 0.92rem;
+      cursor: pointer;
+      background: var(--surface-soft);
+      color: var(--text);
+    }
+
+    .btn:hover { filter: brightness(0.98); }
+    .btn:active { transform: translateY(1px); }
+
+    .btn.primary {
+      background: #dbeafe;
+      color: #1e3a8a;
+      border-color: #bfdbfe;
+    }
+
+    .btn.accent {
+      background: #ecfeff;
+      color: var(--accent);
+      border-color: #a5f3fc;
+    }
+
+    .btn.danger {
+      background: #fef2f2;
+      color: #991b1b;
+      border-color: #fecaca;
+    }
+
+    .btn.ghost {
+      background: transparent;
+      border-color: var(--border);
+    }
+
+    .btn.small {
+      padding: 7px 10px;
+      border-radius: 9px;
+      font-size: 0.86rem;
+    }
+
+    .btn-row {
+      display: flex;
+      gap: 10px;
+      flex-wrap: wrap;
+      align-items: center;
+      justify-content: flex-end;
+    }
+
+    .editor-shell {
+      background: var(--surface);
+      border: 1px solid var(--table-border);
+      border-radius: 12px;
+      padding: 14px;
+      box-shadow: 0 10px 20px rgba(15, 23, 42, 0.06);
+      margin-top: 16px;
+    }
+
+    .editor-grid {
+      display: grid;
+      grid-template-columns: 360px 1fr;
+      gap: 14px;
+      align-items: start;
+    }
+
+    .card {
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 14px;
+      background: #fbfdff;
+    }
+
+    .card h3 {
+      margin: 0 0 10px;
+      font-size: 1.02rem;
+      color: #0f172a;
+    }
+
+    .stack {
+      display: grid;
+      gap: 10px;
+    }
+
+    .field label {
+      display: block;
+      font-size: 0.86rem;
+      color: #475569;
+      margin-bottom: 6px;
+    }
+
+    .input, .select, .textarea {
+      width: 100%;
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 10px 10px;
+      font-size: 0.95rem;
+      font-family: inherit;
+      background: #ffffff;
+      color: var(--text);
+      outline: none;
+    }
+
+    .textarea { min-height: 90px; resize: vertical; }
+
+    .pill {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      border: 1px solid var(--border);
+      border-radius: 999px;
+      padding: 6px 10px;
+      font-size: 0.86rem;
+      color: #334155;
+      background: #f8fafc;
+    }
+
+    .pill strong { font-weight: 700; color: #0f172a; }
+
+    .summary-grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 10px;
+      margin-top: 10px;
+    }
+
+    .metric {
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 10px;
+      background: #ffffff;
+    }
+
+    .metric .label {
+      display: block;
+      font-size: 0.78rem;
+      color: var(--muted);
+      letter-spacing: 0.2px;
+      margin-bottom: 6px;
+    }
+
+    .metric .value {
+      font-weight: 800;
+      color: #0f172a;
+      font-size: 1.02rem;
+    }
+
+    .tabs {
+      display: grid;
+      gap: 12px;
+    }
+
+    .tab-head {
+      display: flex;
+      gap: 10px;
+      flex-wrap: wrap;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .tablist {
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+      align-items: center;
+    }
+
+    .tablist input {
+      position: absolute;
+      opacity: 0;
+      pointer-events: none;
+    }
+
+    .tablist label {
+      border: 1px solid var(--border);
+      background: #ffffff;
+      color: #334155;
+      padding: 9px 12px;
+      border-radius: 999px;
+      font-size: 0.92rem;
+      cursor: pointer;
+      user-select: none;
+    }
+
+    #tabIncome:checked ~ .tab-head .tablist label[for="tabIncome"],
+    #tabDeductions:checked ~ .tab-head .tablist label[for="tabDeductions"],
+    #tabBenefits:checked ~ .tab-head .tablist label[for="tabBenefits"],
+    #tabNetBenefits:checked ~ .tab-head .tablist label[for="tabNetBenefits"] {
+      background: #dbeafe;
+      border-color: #bfdbfe;
+      color: #1e3a8a;
+      font-weight: 700;
+    }
+
+    .panels > section {
+      display: none;
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      background: #ffffff;
+      overflow: hidden;
+    }
+
+    #tabIncome:checked ~ .panels #panelIncome,
+    #tabDeductions:checked ~ .panels #panelDeductions,
+    #tabBenefits:checked ~ .panels #panelBenefits,
+    #tabNetBenefits:checked ~ .panels #panelNetBenefits {
+      display: block;
+    }
+
+    .panel-header {
+      display: flex;
+      gap: 12px;
+      align-items: center;
+      justify-content: space-between;
+      padding: 12px 12px 10px;
+      background: #f8fafc;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .panel-header h4 {
+      margin: 0;
+      font-size: 1rem;
+      color: #0f172a;
+    }
+
+    .panel-body {
+      padding: 12px;
+    }
+
+    .mini {
+      margin: 0;
+      color: var(--muted);
+      font-size: 0.88rem;
+      line-height: 1.35;
+    }
+
+    .mini-table {
+      width: 100%;
+      min-width: 720px;
+      border-collapse: collapse;
+    }
+
+    .mini-table th, .mini-table td {
+      padding: 11px 12px;
+      border-bottom: 1px solid #e5e7eb;
+      text-align: left;
+      font-size: 0.92rem;
+      color: #334155;
+      vertical-align: top;
+    }
+
+    .mini-table th {
+      font-size: 0.78rem;
+      text-transform: uppercase;
+      letter-spacing: 0.35px;
+      color: #475569;
+      background: #fbfdff;
+    }
+
+    .mini-table tr:last-child td { border-bottom: none; }
+
+    .table-actions {
+      display: flex;
+      gap: 8px;
+      justify-content: flex-end;
+      flex-wrap: wrap;
+    }
+
+    dialog {
+      width: min(720px, calc(100vw - 40px));
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      padding: 0;
+      box-shadow: 0 18px 40px rgba(15, 23, 42, 0.18);
+    }
+
+    dialog::backdrop { background: rgba(15, 23, 42, 0.55); }
+
+    .dlg-head {
+      display: flex;
+      align-items: start;
+      justify-content: space-between;
+      gap: 12px;
+      padding: 14px 14px 10px;
+      background: #f8fafc;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .dlg-head h3 { margin: 0; font-size: 1.05rem; color: #0f172a; }
+
+    .dlg-body { padding: 14px; }
+
+    .form-grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 12px;
+    }
+
+    .form-grid .span-2 { grid-column: 1 / -1; }
+
+    .check {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      margin-top: 8px;
+      color: #334155;
+      font-size: 0.92rem;
+    }
+
+    .dlg-actions {
+      display: flex;
+      justify-content: flex-end;
+      gap: 10px;
+      padding: 12px 14px 14px;
+      border-top: 1px solid var(--border);
+      background: #ffffff;
+    }
+
     @media (max-width: 980px) {
       .filters {
         grid-template-columns: 1fr;
@@ -254,6 +719,14 @@
 
       .select-wrap::after {
         right: 11px;
+      }
+
+      .editor-grid {
+        grid-template-columns: 1fr;
+      }
+
+      .form-grid {
+        grid-template-columns: 1fr;
       }
     }
   </style>
@@ -283,6 +756,56 @@
   </header>
 
   <main>
+    <nav class="subnav" aria-label="Payroll sections">
+      <a class="active" href="#overview" data-panel="overview" aria-current="page">Overview</a>
+      <a href="#employees" data-panel="employees">Employees</a>
+      <a href="#benefits">Benefits</a>
+      <a href="#taxes" data-panel="taxes">Taxes</a>
+      <a href="#locations">Locations</a>
+      <a href="#business-settings">Business settings</a>
+    </nav>
+
+    <section id="panel-overview" class="panel active" data-panel="overview" aria-label="Overview">
+      <section class="section-head" aria-label="Year end documents">
+        <h2>Year End</h2>
+        <p>Manage your employees' year-end documents.</p>
+      </section>
+
+      <section class="list-card" aria-label="Year end document categories">
+        <a class="list-row" href="#" aria-label="Employees W2">
+          <span class="row-title">Employees (W2)</span>
+          <span class="row-meta">198 Employees</span>
+          <svg class="chev" viewBox="0 0 20 20" fill="none" aria-hidden="true">
+            <path d="M7.5 4.5L12.75 9.75L7.5 15" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
+          </svg>
+        </a>
+        <a class="list-row" href="#" aria-label="Contractors 1099">
+          <span class="row-title">Contractors (1099)</span>
+          <span class="row-meta">4 Contractors</span>
+          <svg class="chev" viewBox="0 0 20 20" fill="none" aria-hidden="true">
+            <path d="M7.5 4.5L12.75 9.75L7.5 15" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
+          </svg>
+        </a>
+      </section>
+    </section>
+
+    <section id="panel-employees" class="panel" data-panel="employees" aria-label="Employees">
+      <section class="section-head">
+        <h2>Employees</h2>
+        <p>Manage employee information and payroll-related details.</p>
+      </section>
+      <iframe class="embed-frame" title="Employees" src="employees.html" loading="lazy"></iframe>
+    </section>
+
+    <section id="panel-taxes" class="panel" data-panel="taxes" aria-label="Taxes">
+      <section class="section-head">
+        <h2>Taxes</h2>
+        <p>Review and manage payroll tax information.</p>
+      </section>
+      <iframe class="embed-frame" title="Taxes" src="taxes.html" loading="lazy"></iframe>
+    </section>
+
+    <div class="legacy-payroll" aria-hidden="true">
     <section class="filters" aria-label="Payroll filters">
       <input class="control" type="search" placeholder="Search" aria-label="Search employee">
       <span class="divider" aria-hidden="true">|</span>
@@ -348,7 +871,856 @@
         </table>
       </div>
     </section>
+
+    <section class="editor-shell" aria-label="Payroll components management">
+      <div class="page-title">
+        <div>
+          <h2>Payroll Components (UI Only)</h2>
+          <p class="hint">Add, modify, and delete gross income, deductions, and benefits for any employee.</p>
+        </div>
+        <span class="pill" aria-label="Selected employee">
+          Selected: <strong>User 1 (#104)</strong>
+        </span>
+      </div>
+
+      <div class="editor-grid">
+        <aside class="card" aria-label="Employee selector">
+          <h3>Employee</h3>
+          <div class="stack">
+            <div class="field">
+              <label for="employeeSearch">Search</label>
+              <input id="employeeSearch" class="input" type="search" placeholder="Search by name or ID" autocomplete="off">
+            </div>
+
+            <div class="field">
+              <label for="employeeSelect">Select employee</label>
+              <select id="employeeSelect" class="select" aria-label="Select employee">
+                <option selected>User 1 (#104)</option>
+                <option>User 2 (#102)</option>
+                <option>User 3 (#101)</option>
+              </select>
+            </div>
+
+            <div class="field">
+              <label for="payPeriodSelect">Pay period</label>
+              <select id="payPeriodSelect" class="select" aria-label="Select pay period">
+                <option selected>2026 Q1</option>
+                <option>2025 Q4</option>
+                <option>2025 Q3</option>
+              </select>
+            </div>
+
+            <div class="btn-row">
+              <button class="btn primary" type="button" data-open="dlgPreview">Preview Net Pay</button>
+              <button class="btn ghost" type="button" disabled title="UI only">Save Changes</button>
+            </div>
+          </div>
+
+          <div class="summary-grid" aria-label="Employee payroll summary">
+            <div class="metric">
+              <span class="label">Gross Income</span>
+              <div class="value">$0</div>
+            </div>
+            <div class="metric">
+              <span class="label">Taxes & Deductions</span>
+              <div class="value">$0</div>
+            </div>
+            <div class="metric">
+              <span class="label">Benefits</span>
+              <div class="value">$0</div>
+            </div>
+            <div class="metric">
+              <span class="label">Net Pay</span>
+              <div class="value">$0</div>
+            </div>
+          </div>
+        </aside>
+
+        <article class="tabs" aria-label="Payroll components tabs">
+          <input type="radio" name="componentTab" id="tabIncome" checked>
+          <input type="radio" name="componentTab" id="tabDeductions">
+          <input type="radio" name="componentTab" id="tabBenefits">
+          <input type="radio" name="componentTab" id="tabNetBenefits">
+
+          <div class="tab-head">
+            <div class="tablist" role="tablist" aria-label="Payroll components">
+              <label for="tabIncome" role="tab" aria-controls="panelIncome">Gross Income</label>
+              <label for="tabDeductions" role="tab" aria-controls="panelDeductions">Tax & Deductions</label>
+              <label for="tabBenefits" role="tab" aria-controls="panelBenefits">Benefits</label>
+              <label for="tabNetBenefits" role="tab" aria-controls="panelNetBenefits">Net Pay Benefits</label>
+            </div>
+            <p class="mini">Use the tables below to add, modify, and delete items for the selected employee.</p>
+          </div>
+
+          <div class="panels">
+            <section id="panelIncome" role="tabpanel" aria-label="Gross income items">
+              <div class="panel-header">
+                <h4>Gross Income Items</h4>
+                <div class="btn-row">
+                  <button class="btn accent" type="button" data-open="dlgIncomeAdd">Add Income</button>
+                </div>
+              </div>
+              <div class="panel-body">
+                <div class="table-card" style="border: 0; border-radius: 0;">
+                  <table class="mini-table" aria-label="Gross income items table">
+                    <thead>
+                      <tr>
+                        <th>Type</th>
+                        <th>Description</th>
+                        <th>Hours</th>
+                        <th>Rate</th>
+                        <th>Amount</th>
+                        <th>Taxable</th>
+                        <th style="text-align:right;">Actions</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      <tr>
+                        <td>Hourly</td>
+                        <td>Regular hours</td>
+                        <td>0</td>
+                        <td>$0</td>
+                        <td class="amount">$0</td>
+                        <td>Yes</td>
+                        <td>
+                          <div class="table-actions">
+                            <button class="btn small" type="button" data-open="dlgIncomeEdit">Edit</button>
+                            <button class="btn small danger" type="button" data-open="dlgDelete">Delete</button>
+                          </div>
+                        </td>
+                      </tr>
+                      <tr>
+                        <td>Bonus</td>
+                        <td>Performance</td>
+                        <td>&mdash;</td>
+                        <td>&mdash;</td>
+                        <td class="amount">$0</td>
+                        <td>Yes</td>
+                        <td>
+                          <div class="table-actions">
+                            <button class="btn small" type="button" data-open="dlgIncomeEdit">Edit</button>
+                            <button class="btn small danger" type="button" data-open="dlgDelete">Delete</button>
+                          </div>
+                        </td>
+                      </tr>
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+            </section>
+
+            <section id="panelDeductions" role="tabpanel" aria-label="Tax and deduction items">
+              <div class="panel-header">
+                <h4>Tax & Other Deductions</h4>
+                <div class="btn-row">
+                  <button class="btn accent" type="button" data-open="dlgDeductionAdd">Add Deduction</button>
+                </div>
+              </div>
+              <div class="panel-body">
+                <div class="table-card" style="border: 0; border-radius: 0;">
+                  <table class="mini-table" aria-label="Deductions table">
+                    <thead>
+                      <tr>
+                        <th>Category</th>
+                        <th>Name</th>
+                        <th>Method</th>
+                        <th>Pre/Post Tax</th>
+                        <th>Amount</th>
+                        <th>Frequency</th>
+                        <th style="text-align:right;">Actions</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      <tr>
+                        <td>Tax</td>
+                        <td>Federal withholding</td>
+                        <td>Flat</td>
+                        <td>Post-tax</td>
+                        <td class="amount">$0</td>
+                        <td>Per paycheck</td>
+                        <td>
+                          <div class="table-actions">
+                            <button class="btn small" type="button" data-open="dlgDeductionEdit">Edit</button>
+                            <button class="btn small danger" type="button" data-open="dlgDelete">Delete</button>
+                          </div>
+                        </td>
+                      </tr>
+                      <tr>
+                        <td>Other</td>
+                        <td>Wage garnishment</td>
+                        <td>Percent</td>
+                        <td>Post-tax</td>
+                        <td class="amount">0%</td>
+                        <td>Per paycheck</td>
+                        <td>
+                          <div class="table-actions">
+                            <button class="btn small" type="button" data-open="dlgDeductionEdit">Edit</button>
+                            <button class="btn small danger" type="button" data-open="dlgDelete">Delete</button>
+                          </div>
+                        </td>
+                      </tr>
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+            </section>
+
+            <section id="panelBenefits" role="tabpanel" aria-label="Employee benefits items">
+              <div class="panel-header">
+                <h4>Benefits Associated With Employee</h4>
+                <div class="btn-row">
+                  <button class="btn accent" type="button" data-open="dlgBenefitAdd">Add Benefit</button>
+                </div>
+              </div>
+              <div class="panel-body">
+                <div class="table-card" style="border: 0; border-radius: 0;">
+                  <table class="mini-table" aria-label="Benefits table">
+                    <thead>
+                      <tr>
+                        <th>Benefit</th>
+                        <th>Provider</th>
+                        <th>Employer Cost</th>
+                        <th>Employee Cost</th>
+                        <th>Taxable</th>
+                        <th>Effective</th>
+                        <th style="text-align:right;">Actions</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      <tr>
+                        <td>Health insurance</td>
+                        <td>Example Provider</td>
+                        <td class="amount">$0</td>
+                        <td class="amount">$0</td>
+                        <td>No</td>
+                        <td>Start: &mdash;</td>
+                        <td>
+                          <div class="table-actions">
+                            <button class="btn small" type="button" data-open="dlgBenefitEdit">Edit</button>
+                            <button class="btn small danger" type="button" data-open="dlgDelete">Delete</button>
+                          </div>
+                        </td>
+                      </tr>
+                      <tr>
+                        <td>401(k)</td>
+                        <td>Example Provider</td>
+                        <td class="amount">$0</td>
+                        <td class="amount">$0</td>
+                        <td>No</td>
+                        <td>Start: &mdash;</td>
+                        <td>
+                          <div class="table-actions">
+                            <button class="btn small" type="button" data-open="dlgBenefitEdit">Edit</button>
+                            <button class="btn small danger" type="button" data-open="dlgDelete">Delete</button>
+                          </div>
+                        </td>
+                      </tr>
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+            </section>
+
+            <section id="panelNetBenefits" role="tabpanel" aria-label="Benefits used in net pay computation">
+              <div class="panel-header">
+                <h4>Benefits Used For Net Pay Computation</h4>
+                <div class="btn-row">
+                  <button class="btn accent" type="button" data-open="dlgNetBenefitAdd">Add Net Pay Benefit</button>
+                </div>
+              </div>
+              <div class="panel-body">
+                <p class="mini">Track benefits that directly affect net pay (e.g., pre-tax benefit deductions or post-tax benefit contributions).</p>
+                <div class="table-card" style="border: 0; border-radius: 0; margin-top: 10px;">
+                  <table class="mini-table" aria-label="Net pay benefits table">
+                    <thead>
+                      <tr>
+                        <th>Benefit</th>
+                        <th>Pre/Post Tax</th>
+                        <th>Method</th>
+                        <th>Employee</th>
+                        <th>Employer</th>
+                        <th>Applies To</th>
+                        <th style="text-align:right;">Actions</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      <tr>
+                        <td>Health insurance (premium)</td>
+                        <td>Pre-tax</td>
+                        <td>Flat</td>
+                        <td class="amount">$0</td>
+                        <td class="amount">$0</td>
+                        <td>Per paycheck</td>
+                        <td>
+                          <div class="table-actions">
+                            <button class="btn small" type="button" data-open="dlgNetBenefitEdit">Edit</button>
+                            <button class="btn small danger" type="button" data-open="dlgDelete">Delete</button>
+                          </div>
+                        </td>
+                      </tr>
+                      <tr>
+                        <td>401(k) contribution</td>
+                        <td>Pre-tax</td>
+                        <td>Percent</td>
+                        <td class="amount">0%</td>
+                        <td class="amount">0%</td>
+                        <td>Per paycheck</td>
+                        <td>
+                          <div class="table-actions">
+                            <button class="btn small" type="button" data-open="dlgNetBenefitEdit">Edit</button>
+                            <button class="btn small danger" type="button" data-open="dlgDelete">Delete</button>
+                          </div>
+                        </td>
+                      </tr>
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+            </section>
+          </div>
+        </article>
+      </div>
+    </section>
+    </div>
   </main>
+
+  <!-- Dialogs (UI only) -->
+  <dialog id="dlgIncomeAdd" aria-label="Add gross income">
+    <form method="dialog">
+      <div class="dlg-head">
+        <div>
+          <h3>Add Gross Income</h3>
+          <p class="mini">Applies to the selected employee and pay period (UI only).</p>
+        </div>
+        <button class="btn small ghost" type="submit" value="cancel" aria-label="Close">Close</button>
+      </div>
+      <div class="dlg-body">
+        <div class="form-grid">
+          <div class="field">
+            <label for="incomeTypeAdd">Type</label>
+            <select id="incomeTypeAdd" class="select">
+              <option>Hourly</option>
+              <option>Salary</option>
+              <option>Overtime</option>
+              <option>Bonus</option>
+              <option>Commission</option>
+              <option>Other</option>
+            </select>
+          </div>
+          <div class="field">
+            <label for="incomeDescAdd">Description</label>
+            <input id="incomeDescAdd" class="input" type="text" placeholder="e.g., Regular hours">
+          </div>
+          <div class="field">
+            <label for="incomeHoursAdd">Hours</label>
+            <input id="incomeHoursAdd" class="input" type="number" step="0.01" placeholder="0">
+          </div>
+          <div class="field">
+            <label for="incomeRateAdd">Rate</label>
+            <input id="incomeRateAdd" class="input" type="text" placeholder="$0.00">
+          </div>
+          <div class="field">
+            <label for="incomeAmountAdd">Amount</label>
+            <input id="incomeAmountAdd" class="input" type="text" placeholder="$0.00">
+          </div>
+          <div class="field">
+            <label for="incomeAppliesAdd">Applies</label>
+            <select id="incomeAppliesAdd" class="select">
+              <option selected>Per paycheck</option>
+              <option>One-time</option>
+              <option>Monthly</option>
+            </select>
+          </div>
+          <div class="field span-2">
+            <label class="check">
+              <input type="checkbox" checked>
+              Taxable income
+            </label>
+          </div>
+          <div class="field span-2">
+            <label for="incomeNotesAdd">Notes</label>
+            <textarea id="incomeNotesAdd" class="textarea" placeholder="Optional notes"></textarea>
+          </div>
+        </div>
+      </div>
+      <div class="dlg-actions">
+        <button class="btn ghost" type="submit" value="cancel">Cancel</button>
+        <button class="btn primary" type="submit" value="ok">Add</button>
+      </div>
+    </form>
+  </dialog>
+
+  <dialog id="dlgIncomeEdit" aria-label="Edit gross income">
+    <form method="dialog">
+      <div class="dlg-head">
+        <div>
+          <h3>Edit Gross Income</h3>
+          <p class="mini">Update the selected income item (UI only).</p>
+        </div>
+        <button class="btn small ghost" type="submit" value="cancel" aria-label="Close">Close</button>
+      </div>
+      <div class="dlg-body">
+        <div class="form-grid">
+          <div class="field">
+            <label for="incomeTypeEdit">Type</label>
+            <select id="incomeTypeEdit" class="select">
+              <option>Hourly</option>
+              <option>Salary</option>
+              <option>Overtime</option>
+              <option>Bonus</option>
+              <option>Commission</option>
+              <option>Other</option>
+            </select>
+          </div>
+          <div class="field">
+            <label for="incomeDescEdit">Description</label>
+            <input id="incomeDescEdit" class="input" type="text" placeholder="e.g., Regular hours">
+          </div>
+          <div class="field">
+            <label for="incomeHoursEdit">Hours</label>
+            <input id="incomeHoursEdit" class="input" type="number" step="0.01" placeholder="0">
+          </div>
+          <div class="field">
+            <label for="incomeRateEdit">Rate</label>
+            <input id="incomeRateEdit" class="input" type="text" placeholder="$0.00">
+          </div>
+          <div class="field">
+            <label for="incomeAmountEdit">Amount</label>
+            <input id="incomeAmountEdit" class="input" type="text" placeholder="$0.00">
+          </div>
+          <div class="field">
+            <label for="incomeAppliesEdit">Applies</label>
+            <select id="incomeAppliesEdit" class="select">
+              <option selected>Per paycheck</option>
+              <option>One-time</option>
+              <option>Monthly</option>
+            </select>
+          </div>
+          <div class="field span-2">
+            <label class="check">
+              <input type="checkbox" checked>
+              Taxable income
+            </label>
+          </div>
+          <div class="field span-2">
+            <label for="incomeNotesEdit">Notes</label>
+            <textarea id="incomeNotesEdit" class="textarea" placeholder="Optional notes"></textarea>
+          </div>
+        </div>
+      </div>
+      <div class="dlg-actions">
+        <button class="btn ghost" type="submit" value="cancel">Cancel</button>
+        <button class="btn primary" type="submit" value="ok">Save</button>
+      </div>
+    </form>
+  </dialog>
+
+  <dialog id="dlgDeductionAdd" aria-label="Add deduction">
+    <form method="dialog">
+      <div class="dlg-head">
+        <div>
+          <h3>Add Tax / Deduction</h3>
+          <p class="mini">Add a tax withholding or other deduction (UI only).</p>
+        </div>
+        <button class="btn small ghost" type="submit" value="cancel" aria-label="Close">Close</button>
+      </div>
+      <div class="dlg-body">
+        <div class="form-grid">
+          <div class="field">
+            <label for="dedCatAdd">Category</label>
+            <select id="dedCatAdd" class="select">
+              <option>Tax</option>
+              <option>Retirement</option>
+              <option>Insurance</option>
+              <option>Garnishment</option>
+              <option>Other</option>
+            </select>
+          </div>
+          <div class="field">
+            <label for="dedNameAdd">Name</label>
+            <input id="dedNameAdd" class="input" type="text" placeholder="e.g., Federal withholding">
+          </div>
+          <div class="field">
+            <label for="dedMethodAdd">Method</label>
+            <select id="dedMethodAdd" class="select">
+              <option selected>Flat</option>
+              <option>Percent</option>
+            </select>
+          </div>
+          <div class="field">
+            <label for="dedAmountAdd">Amount / %</label>
+            <input id="dedAmountAdd" class="input" type="text" placeholder="$0.00 or 0%">
+          </div>
+          <div class="field">
+            <label for="dedTaxAdd">Pre/Post Tax</label>
+            <select id="dedTaxAdd" class="select">
+              <option>Pre-tax</option>
+              <option selected>Post-tax</option>
+            </select>
+          </div>
+          <div class="field">
+            <label for="dedFreqAdd">Frequency</label>
+            <select id="dedFreqAdd" class="select">
+              <option selected>Per paycheck</option>
+              <option>One-time</option>
+              <option>Monthly</option>
+            </select>
+          </div>
+          <div class="field span-2">
+            <label for="dedNotesAdd">Notes</label>
+            <textarea id="dedNotesAdd" class="textarea" placeholder="Optional notes"></textarea>
+          </div>
+        </div>
+      </div>
+      <div class="dlg-actions">
+        <button class="btn ghost" type="submit" value="cancel">Cancel</button>
+        <button class="btn primary" type="submit" value="ok">Add</button>
+      </div>
+    </form>
+  </dialog>
+
+  <dialog id="dlgDeductionEdit" aria-label="Edit deduction">
+    <form method="dialog">
+      <div class="dlg-head">
+        <div>
+          <h3>Edit Tax / Deduction</h3>
+          <p class="mini">Update the selected deduction item (UI only).</p>
+        </div>
+        <button class="btn small ghost" type="submit" value="cancel" aria-label="Close">Close</button>
+      </div>
+      <div class="dlg-body">
+        <div class="form-grid">
+          <div class="field">
+            <label for="dedCatEdit">Category</label>
+            <select id="dedCatEdit" class="select">
+              <option>Tax</option>
+              <option>Retirement</option>
+              <option>Insurance</option>
+              <option>Garnishment</option>
+              <option>Other</option>
+            </select>
+          </div>
+          <div class="field">
+            <label for="dedNameEdit">Name</label>
+            <input id="dedNameEdit" class="input" type="text" placeholder="e.g., Federal withholding">
+          </div>
+          <div class="field">
+            <label for="dedMethodEdit">Method</label>
+            <select id="dedMethodEdit" class="select">
+              <option selected>Flat</option>
+              <option>Percent</option>
+            </select>
+          </div>
+          <div class="field">
+            <label for="dedAmountEdit">Amount / %</label>
+            <input id="dedAmountEdit" class="input" type="text" placeholder="$0.00 or 0%">
+          </div>
+          <div class="field">
+            <label for="dedTaxEdit">Pre/Post Tax</label>
+            <select id="dedTaxEdit" class="select">
+              <option>Pre-tax</option>
+              <option selected>Post-tax</option>
+            </select>
+          </div>
+          <div class="field">
+            <label for="dedFreqEdit">Frequency</label>
+            <select id="dedFreqEdit" class="select">
+              <option selected>Per paycheck</option>
+              <option>One-time</option>
+              <option>Monthly</option>
+            </select>
+          </div>
+          <div class="field span-2">
+            <label for="dedNotesEdit">Notes</label>
+            <textarea id="dedNotesEdit" class="textarea" placeholder="Optional notes"></textarea>
+          </div>
+        </div>
+      </div>
+      <div class="dlg-actions">
+        <button class="btn ghost" type="submit" value="cancel">Cancel</button>
+        <button class="btn primary" type="submit" value="ok">Save</button>
+      </div>
+    </form>
+  </dialog>
+
+  <dialog id="dlgBenefitAdd" aria-label="Add benefit">
+    <form method="dialog">
+      <div class="dlg-head">
+        <div>
+          <h3>Add Benefit</h3>
+          <p class="mini">Associate a benefit with the selected employee (UI only).</p>
+        </div>
+        <button class="btn small ghost" type="submit" value="cancel" aria-label="Close">Close</button>
+      </div>
+      <div class="dlg-body">
+        <div class="form-grid">
+          <div class="field">
+            <label for="benNameAdd">Benefit</label>
+            <input id="benNameAdd" class="input" type="text" placeholder="e.g., Health insurance">
+          </div>
+          <div class="field">
+            <label for="benProviderAdd">Provider</label>
+            <input id="benProviderAdd" class="input" type="text" placeholder="Provider name">
+          </div>
+          <div class="field">
+            <label for="benEmployerAdd">Employer Cost</label>
+            <input id="benEmployerAdd" class="input" type="text" placeholder="$0.00">
+          </div>
+          <div class="field">
+            <label for="benEmployeeAdd">Employee Cost</label>
+            <input id="benEmployeeAdd" class="input" type="text" placeholder="$0.00">
+          </div>
+          <div class="field">
+            <label for="benStartAdd">Start date</label>
+            <input id="benStartAdd" class="input" type="date">
+          </div>
+          <div class="field">
+            <label for="benEndAdd">End date (optional)</label>
+            <input id="benEndAdd" class="input" type="date">
+          </div>
+          <div class="field span-2">
+            <label class="check">
+              <input type="checkbox">
+              Taxable benefit
+            </label>
+          </div>
+          <div class="field span-2">
+            <label for="benNotesAdd">Notes</label>
+            <textarea id="benNotesAdd" class="textarea" placeholder="Optional notes"></textarea>
+          </div>
+        </div>
+      </div>
+      <div class="dlg-actions">
+        <button class="btn ghost" type="submit" value="cancel">Cancel</button>
+        <button class="btn primary" type="submit" value="ok">Add</button>
+      </div>
+    </form>
+  </dialog>
+
+  <dialog id="dlgBenefitEdit" aria-label="Edit benefit">
+    <form method="dialog">
+      <div class="dlg-head">
+        <div>
+          <h3>Edit Benefit</h3>
+          <p class="mini">Update the selected benefit association (UI only).</p>
+        </div>
+        <button class="btn small ghost" type="submit" value="cancel" aria-label="Close">Close</button>
+      </div>
+      <div class="dlg-body">
+        <div class="form-grid">
+          <div class="field">
+            <label for="benNameEdit">Benefit</label>
+            <input id="benNameEdit" class="input" type="text" placeholder="e.g., Health insurance">
+          </div>
+          <div class="field">
+            <label for="benProviderEdit">Provider</label>
+            <input id="benProviderEdit" class="input" type="text" placeholder="Provider name">
+          </div>
+          <div class="field">
+            <label for="benEmployerEdit">Employer Cost</label>
+            <input id="benEmployerEdit" class="input" type="text" placeholder="$0.00">
+          </div>
+          <div class="field">
+            <label for="benEmployeeEdit">Employee Cost</label>
+            <input id="benEmployeeEdit" class="input" type="text" placeholder="$0.00">
+          </div>
+          <div class="field">
+            <label for="benStartEdit">Start date</label>
+            <input id="benStartEdit" class="input" type="date">
+          </div>
+          <div class="field">
+            <label for="benEndEdit">End date (optional)</label>
+            <input id="benEndEdit" class="input" type="date">
+          </div>
+          <div class="field span-2">
+            <label class="check">
+              <input type="checkbox">
+              Taxable benefit
+            </label>
+          </div>
+          <div class="field span-2">
+            <label for="benNotesEdit">Notes</label>
+            <textarea id="benNotesEdit" class="textarea" placeholder="Optional notes"></textarea>
+          </div>
+        </div>
+      </div>
+      <div class="dlg-actions">
+        <button class="btn ghost" type="submit" value="cancel">Cancel</button>
+        <button class="btn primary" type="submit" value="ok">Save</button>
+      </div>
+    </form>
+  </dialog>
+
+  <dialog id="dlgNetBenefitAdd" aria-label="Add net pay benefit">
+    <form method="dialog">
+      <div class="dlg-head">
+        <div>
+          <h3>Add Net Pay Benefit</h3>
+          <p class="mini">Add a benefit item used to compute net pay (UI only).</p>
+        </div>
+        <button class="btn small ghost" type="submit" value="cancel" aria-label="Close">Close</button>
+      </div>
+      <div class="dlg-body">
+        <div class="form-grid">
+          <div class="field">
+            <label for="npbNameAdd">Benefit</label>
+            <input id="npbNameAdd" class="input" type="text" placeholder="e.g., 401(k) contribution">
+          </div>
+          <div class="field">
+            <label for="npbTaxAdd">Pre/Post Tax</label>
+            <select id="npbTaxAdd" class="select">
+              <option selected>Pre-tax</option>
+              <option>Post-tax</option>
+            </select>
+          </div>
+          <div class="field">
+            <label for="npbMethodAdd">Method</label>
+            <select id="npbMethodAdd" class="select">
+              <option selected>Flat</option>
+              <option>Percent</option>
+            </select>
+          </div>
+          <div class="field">
+            <label for="npbEmployeeAdd">Employee (Amount / %)</label>
+            <input id="npbEmployeeAdd" class="input" type="text" placeholder="$0.00 or 0%">
+          </div>
+          <div class="field">
+            <label for="npbEmployerAdd">Employer (Amount / %)</label>
+            <input id="npbEmployerAdd" class="input" type="text" placeholder="$0.00 or 0%">
+          </div>
+          <div class="field">
+            <label for="npbAppliesAdd">Applies</label>
+            <select id="npbAppliesAdd" class="select">
+              <option selected>Per paycheck</option>
+              <option>One-time</option>
+              <option>Monthly</option>
+            </select>
+          </div>
+          <div class="field span-2">
+            <label for="npbNotesAdd">Notes</label>
+            <textarea id="npbNotesAdd" class="textarea" placeholder="Optional notes"></textarea>
+          </div>
+        </div>
+      </div>
+      <div class="dlg-actions">
+        <button class="btn ghost" type="submit" value="cancel">Cancel</button>
+        <button class="btn primary" type="submit" value="ok">Add</button>
+      </div>
+    </form>
+  </dialog>
+
+  <dialog id="dlgNetBenefitEdit" aria-label="Edit net pay benefit">
+    <form method="dialog">
+      <div class="dlg-head">
+        <div>
+          <h3>Edit Net Pay Benefit</h3>
+          <p class="mini">Update the selected net pay benefit item (UI only).</p>
+        </div>
+        <button class="btn small ghost" type="submit" value="cancel" aria-label="Close">Close</button>
+      </div>
+      <div class="dlg-body">
+        <div class="form-grid">
+          <div class="field">
+            <label for="npbNameEdit">Benefit</label>
+            <input id="npbNameEdit" class="input" type="text" placeholder="e.g., 401(k) contribution">
+          </div>
+          <div class="field">
+            <label for="npbTaxEdit">Pre/Post Tax</label>
+            <select id="npbTaxEdit" class="select">
+              <option selected>Pre-tax</option>
+              <option>Post-tax</option>
+            </select>
+          </div>
+          <div class="field">
+            <label for="npbMethodEdit">Method</label>
+            <select id="npbMethodEdit" class="select">
+              <option selected>Flat</option>
+              <option>Percent</option>
+            </select>
+          </div>
+          <div class="field">
+            <label for="npbEmployeeEdit">Employee (Amount / %)</label>
+            <input id="npbEmployeeEdit" class="input" type="text" placeholder="$0.00 or 0%">
+          </div>
+          <div class="field">
+            <label for="npbEmployerEdit">Employer (Amount / %)</label>
+            <input id="npbEmployerEdit" class="input" type="text" placeholder="$0.00 or 0%">
+          </div>
+          <div class="field">
+            <label for="npbAppliesEdit">Applies</label>
+            <select id="npbAppliesEdit" class="select">
+              <option selected>Per paycheck</option>
+              <option>One-time</option>
+              <option>Monthly</option>
+            </select>
+          </div>
+          <div class="field span-2">
+            <label for="npbNotesEdit">Notes</label>
+            <textarea id="npbNotesEdit" class="textarea" placeholder="Optional notes"></textarea>
+          </div>
+        </div>
+      </div>
+      <div class="dlg-actions">
+        <button class="btn ghost" type="submit" value="cancel">Cancel</button>
+        <button class="btn primary" type="submit" value="ok">Save</button>
+      </div>
+    </form>
+  </dialog>
+
+  <dialog id="dlgDelete" aria-label="Delete confirmation">
+    <form method="dialog">
+      <div class="dlg-head">
+        <div>
+          <h3>Delete Item</h3>
+          <p class="mini">This is a UI-only confirmation.</p>
+        </div>
+        <button class="btn small ghost" type="submit" value="cancel" aria-label="Close">Close</button>
+      </div>
+      <div class="dlg-body">
+        <p class="mini" style="margin: 0;">Are you sure you want to delete this item? This would remove it from payroll computation for the employee.</p>
+      </div>
+      <div class="dlg-actions">
+        <button class="btn ghost" type="submit" value="cancel">Cancel</button>
+        <button class="btn danger" type="submit" value="ok">Delete</button>
+      </div>
+    </form>
+  </dialog>
+
+  <dialog id="dlgPreview" aria-label="Net pay preview">
+    <form method="dialog">
+      <div class="dlg-head">
+        <div>
+          <h3>Net Pay Preview</h3>
+          <p class="mini">Preview how gross income, deductions, and benefits roll up for the selected employee (UI only).</p>
+        </div>
+        <button class="btn small ghost" type="submit" value="cancel" aria-label="Close">Close</button>
+      </div>
+      <div class="dlg-body">
+        <div class="summary-grid" style="margin-top: 0;">
+          <div class="metric">
+            <span class="label">Gross Income</span>
+            <div class="value">$0</div>
+          </div>
+          <div class="metric">
+            <span class="label">Taxes & Deductions</span>
+            <div class="value">$0</div>
+          </div>
+          <div class="metric">
+            <span class="label">Net Pay Benefits</span>
+            <div class="value">$0</div>
+          </div>
+          <div class="metric">
+            <span class="label">Estimated Net Pay</span>
+            <div class="value">$0</div>
+          </div>
+        </div>
+        <p class="mini" style="margin: 12px 0 0;">Hook these UI controls to your backend to compute real totals.</p>
+      </div>
+      <div class="dlg-actions">
+        <button class="btn primary" type="submit" value="ok">Done</button>
+      </div>
+    </form>
+  </dialog>
 
   <script>
     const menuBtn = document.getElementById('menuBtn');
@@ -367,6 +1739,58 @@
         hrMenu.setAttribute('aria-hidden', 'true');
       }
     });
+
+    // UI-only dialog helpers
+    document.querySelectorAll('[data-open]').forEach((btn) => {
+      btn.addEventListener('click', () => {
+        const dialogId = btn.getAttribute('data-open');
+        const dlg = document.getElementById(dialogId);
+        if (dlg && typeof dlg.showModal === 'function') {
+          dlg.showModal();
+        }
+      });
+    });
+
+    // Payroll subnav (in-page panels)
+    const subnavLinks = Array.from(document.querySelectorAll('.subnav a[data-panel]'));
+    const panels = Array.from(document.querySelectorAll('.panel[data-panel]'));
+
+    function setActivePanel(panelName, updateHash = true) {
+      const next = (panelName || 'overview').toLowerCase();
+
+      panels.forEach((panel) => {
+        const isActive = panel.getAttribute('data-panel') === next;
+        panel.classList.toggle('active', isActive);
+      });
+
+      subnavLinks.forEach((link) => {
+        const isActive = link.getAttribute('data-panel') === next;
+        link.classList.toggle('active', isActive);
+        if (isActive) {
+          link.setAttribute('aria-current', 'page');
+        } else {
+          link.removeAttribute('aria-current');
+        }
+      });
+
+      if (updateHash) {
+        history.replaceState(null, '', `#${next}`);
+      }
+    }
+
+    subnavLinks.forEach((link) => {
+      link.addEventListener('click', (event) => {
+        event.preventDefault();
+        setActivePanel(link.getAttribute('data-panel'));
+      });
+    });
+
+    window.addEventListener('hashchange', () => {
+      const hash = (location.hash || '').replace('#', '');
+      setActivePanel(hash, false);
+    });
+
+    setActivePanel((location.hash || '').replace('#', ''), false);
   </script>
 </body>
 </html>
