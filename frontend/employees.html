@@ -134,28 +134,230 @@
   </header>
 
   <main>
-    <section class="card">
-      <p>Employees page content goes here.</p>
-    </section>
+    <div id="errorBanner" style="background:#fee2e2;border:1px solid #fca5a5;color:#991b1b;padding:10px 14px;border-radius:8px;margin-bottom:14px;display:none;"></div>
+
+    <div style="display:flex;gap:10px;margin-bottom:16px;flex-wrap:wrap;">
+      <input type="text" id="searchInput" placeholder="Search by name or email..."
+             style="flex:1;min-width:200px;padding:8px 10px;border:1px solid var(--border);border-radius:6px;font-size:0.9rem;">
+      <button id="addBtn" style="padding:8px 16px;background:#1d4ed8;color:#fff;border:none;border-radius:6px;cursor:pointer;font-size:0.9rem;">+ Add Employee</button>
+    </div>
+
+    <table style="width:100%;border-collapse:collapse;background:var(--surface);border-radius:10px;overflow:hidden;border:1px solid var(--border);">
+      <thead>
+        <tr style="background:#f1f5f9;">
+          <th style="padding:10px 14px;text-align:left;font-size:0.9rem;">ID</th>
+          <th style="padding:10px 14px;text-align:left;font-size:0.9rem;">Name</th>
+          <th style="padding:10px 14px;text-align:left;font-size:0.9rem;">Email</th>
+          <th style="padding:10px 14px;text-align:left;font-size:0.9rem;">Phone</th>
+          <th style="padding:10px 14px;text-align:left;font-size:0.9rem;">City</th>
+          <th style="padding:10px 14px;text-align:left;font-size:0.9rem;">Status</th>
+          <th style="padding:10px 14px;text-align:left;font-size:0.9rem;">Actions</th>
+        </tr>
+      </thead>
+      <tbody id="employeeTable">
+        <tr><td colspan="7" style="text-align:center;padding:20px;">Loading...</td></tr>
+      </tbody>
+    </table>
   </main>
 
-  <script>
-    const menuBtn = document.getElementById('menuBtn');
-    const hrMenu = document.getElementById('hrMenu');
+  <!-- Add/Edit Modal -->
+  <div id="employeeModal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.45);z-index:100;justify-content:center;align-items:center;">
+    <div style="background:#fff;border-radius:12px;padding:28px;width:480px;max-width:96vw;max-height:90vh;overflow-y:auto;">
+      <h2 id="modalTitle" style="margin:0 0 18px;font-size:1.1rem;">Add Employee</h2>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;">
+        <label style="display:flex;flex-direction:column;gap:4px;font-size:0.85rem;">First Name*<input type="text" id="f_first_name" style="padding:7px 9px;border:1px solid #d1d5db;border-radius:6px;"></label>
+        <label style="display:flex;flex-direction:column;gap:4px;font-size:0.85rem;">Last Name*<input type="text" id="f_last_name" style="padding:7px 9px;border:1px solid #d1d5db;border-radius:6px;"></label>
+        <label style="display:flex;flex-direction:column;gap:4px;font-size:0.85rem;grid-column:1/-1;">Email*<input type="email" id="f_email" style="padding:7px 9px;border:1px solid #d1d5db;border-radius:6px;"></label>
+        <label style="display:flex;flex-direction:column;gap:4px;font-size:0.85rem;">Phone<input type="text" id="f_phone" style="padding:7px 9px;border:1px solid #d1d5db;border-radius:6px;"></label>
+        <label style="display:flex;flex-direction:column;gap:4px;font-size:0.85rem;">Address<input type="text" id="f_address" style="padding:7px 9px;border:1px solid #d1d5db;border-radius:6px;"></label>
+        <label style="display:flex;flex-direction:column;gap:4px;font-size:0.85rem;">City<input type="text" id="f_city" style="padding:7px 9px;border:1px solid #d1d5db;border-radius:6px;"></label>
+        <label style="display:flex;flex-direction:column;gap:4px;font-size:0.85rem;">State<input type="text" id="f_state" style="padding:7px 9px;border:1px solid #d1d5db;border-radius:6px;"></label>
+        <label style="display:flex;flex-direction:column;gap:4px;font-size:0.85rem;">Zip<input type="text" id="f_zip" style="padding:7px 9px;border:1px solid #d1d5db;border-radius:6px;"></label>
+        <label style="display:flex;flex-direction:column;gap:4px;font-size:0.85rem;">Hire Date*<input type="date" id="f_hire_date" style="padding:7px 9px;border:1px solid #d1d5db;border-radius:6px;"></label>
+        <label style="display:flex;flex-direction:column;gap:4px;font-size:0.85rem;">Date of Birth<input type="date" id="f_dob" style="padding:7px 9px;border:1px solid #d1d5db;border-radius:6px;"></label>
+        <label id="ssnLabel" style="display:flex;flex-direction:column;gap:4px;font-size:0.85rem;grid-column:1/-1;">SSN (new employees only)<input type="text" id="f_ssn" placeholder="XXX-XX-XXXX" style="padding:7px 9px;border:1px solid #d1d5db;border-radius:6px;"></label>
+      </div>
+      <div id="modalError" style="color:red;font-size:0.85rem;margin-top:10px;display:none;"></div>
+      <div style="margin-top:18px;display:flex;gap:10px;justify-content:flex-end;">
+        <button id="cancelBtn" style="padding:8px 16px;border:1px solid #d1d5db;border-radius:6px;background:#fff;cursor:pointer;">Cancel</button>
+        <button id="saveBtn" style="padding:8px 16px;background:#1d4ed8;color:#fff;border:none;border-radius:6px;cursor:pointer;">Save</button>
+      </div>
+    </div>
+  </div>
 
+  <script>
+    const API_BASE = 'http://localhost:8000';
+
+    function getToken() {
+      const t = localStorage.getItem('token');
+      if (!t) window.location.href = 'login.html';
+      return t;
+    }
+
+    function authHeaders() {
+      return { 'Authorization': `Bearer ${getToken()}`, 'Content-Type': 'application/json' };
+    }
+
+    function showError(msg) {
+      const b = document.getElementById('errorBanner');
+      b.textContent = msg;
+      b.style.display = 'block';
+    }
+
+    const menuBtn = document.getElementById('menuBtn');
+    const hrMenu  = document.getElementById('hrMenu');
     menuBtn.addEventListener('click', () => {
       const isOpen = hrMenu.classList.toggle('open');
       menuBtn.setAttribute('aria-expanded', String(isOpen));
       hrMenu.setAttribute('aria-hidden', String(!isOpen));
     });
-
-    document.addEventListener('click', (event) => {
-      if (!event.target.closest('.menu-wrap')) {
+    document.addEventListener('click', (e) => {
+      if (!e.target.closest('.menu-wrap')) {
         hrMenu.classList.remove('open');
         menuBtn.setAttribute('aria-expanded', 'false');
         hrMenu.setAttribute('aria-hidden', 'true');
       }
     });
+
+    let allEmployees = [];
+
+    async function loadEmployees() {
+      try {
+        const res = await fetch(`${API_BASE}/employee/all`, { headers: authHeaders() });
+        if (res.status === 401) { window.location.href = 'login.html'; return; }
+        if (!res.ok) throw new Error('Failed to load employees');
+        allEmployees = await res.json();
+        renderTable(allEmployees);
+      } catch (err) { showError(err.message); }
+    }
+
+    function renderTable(employees) {
+      const tbody = document.getElementById('employeeTable');
+      if (!employees.length) {
+        tbody.innerHTML = '<tr><td colspan="7" style="text-align:center;padding:20px;">No employees found.</td></tr>';
+        return;
+      }
+      tbody.innerHTML = employees.map(e => `
+        <tr>
+          <td style="padding:10px 14px;font-size:0.9rem;border-bottom:1px solid #d1d5db;">${e.employee_id}</td>
+          <td style="padding:10px 14px;font-size:0.9rem;border-bottom:1px solid #d1d5db;">${e.first_name} ${e.last_name}</td>
+          <td style="padding:10px 14px;font-size:0.9rem;border-bottom:1px solid #d1d5db;">${e.email}</td>
+          <td style="padding:10px 14px;font-size:0.9rem;border-bottom:1px solid #d1d5db;">${e.phone || '-'}</td>
+          <td style="padding:10px 14px;font-size:0.9rem;border-bottom:1px solid #d1d5db;">${e.city || '-'}</td>
+          <td style="padding:10px 14px;font-size:0.9rem;border-bottom:1px solid #d1d5db;color:${e.employment_status === 'active' ? '#16a34a' : '#dc2626'};font-weight:600;">${e.employment_status || '-'}</td>
+          <td style="padding:10px 14px;font-size:0.9rem;border-bottom:1px solid #d1d5db;">
+            <button onclick="openEdit(${e.employee_id})" style="padding:4px 10px;font-size:0.82rem;background:#1d4ed8;color:#fff;border:none;border-radius:4px;cursor:pointer;margin-right:4px;">Edit</button>
+            <button onclick="terminateEmployee(${e.employee_id},'${e.first_name} ${e.last_name}')" ${e.employment_status === 'terminated' ? 'disabled' : ''} style="padding:4px 10px;font-size:0.82rem;background:#dc2626;color:#fff;border:none;border-radius:4px;cursor:pointer;">Terminate</button>
+          </td>
+        </tr>
+      `).join('');
+    }
+
+    document.getElementById('searchInput').addEventListener('input', (e) => {
+      const q = e.target.value.toLowerCase();
+      renderTable(allEmployees.filter(emp =>
+        `${emp.first_name} ${emp.last_name}`.toLowerCase().includes(q) ||
+        (emp.email || '').toLowerCase().includes(q)
+      ));
+    });
+
+    let editingId = null;
+
+    function openAdd() {
+      editingId = null;
+      document.getElementById('modalTitle').textContent = 'Add Employee';
+      ['f_first_name','f_last_name','f_email','f_phone','f_address','f_city','f_state','f_zip','f_hire_date','f_dob','f_ssn'].forEach(id => {
+        document.getElementById(id).value = '';
+      });
+      document.getElementById('ssnLabel').style.display = '';
+      document.getElementById('modalError').style.display = 'none';
+      document.getElementById('employeeModal').style.display = 'flex';
+    }
+
+    function openEdit(id) {
+      const emp = allEmployees.find(e => e.employee_id === id);
+      if (!emp) return;
+      editingId = id;
+      document.getElementById('modalTitle').textContent = 'Edit Employee';
+      document.getElementById('f_first_name').value = emp.first_name || '';
+      document.getElementById('f_last_name').value  = emp.last_name  || '';
+      document.getElementById('f_email').value      = emp.email      || '';
+      document.getElementById('f_phone').value      = emp.phone      || '';
+      document.getElementById('f_address').value    = emp.address    || '';
+      document.getElementById('f_city').value       = emp.city       || '';
+      document.getElementById('f_state').value      = emp.state      || '';
+      document.getElementById('f_zip').value        = emp.zip_code   || '';
+      document.getElementById('f_hire_date').value  = emp.hire_date  || '';
+      document.getElementById('f_dob').value        = emp.date_of_birth || '';
+      document.getElementById('ssnLabel').style.display = 'none';
+      document.getElementById('modalError').style.display = 'none';
+      document.getElementById('employeeModal').style.display = 'flex';
+    }
+
+    function closeModal() {
+      document.getElementById('employeeModal').style.display = 'none';
+    }
+
+    document.getElementById('addBtn').addEventListener('click', openAdd);
+    document.getElementById('cancelBtn').addEventListener('click', closeModal);
+
+    document.getElementById('saveBtn').addEventListener('click', async () => {
+      const modalError = document.getElementById('modalError');
+      modalError.style.display = 'none';
+      const body = {
+        first_name: document.getElementById('f_first_name').value.trim(),
+        last_name:  document.getElementById('f_last_name').value.trim(),
+        email:      document.getElementById('f_email').value.trim(),
+        phone:      document.getElementById('f_phone').value.trim() || null,
+        address:    document.getElementById('f_address').value.trim() || null,
+        city:       document.getElementById('f_city').value.trim() || null,
+        state:      document.getElementById('f_state').value.trim() || null,
+        zip_code:   document.getElementById('f_zip').value.trim() || null,
+        hire_date:  document.getElementById('f_hire_date').value || null,
+        date_of_birth: document.getElementById('f_dob').value || null,
+      };
+      try {
+        let res;
+        if (editingId) {
+          res = await fetch(`${API_BASE}/employee/${editingId}/update`, {
+            method: 'PATCH', headers: authHeaders(), body: JSON.stringify(body),
+          });
+        } else {
+          body.ssn = document.getElementById('f_ssn').value.trim();
+          res = await fetch(`${API_BASE}/employee/sign_up`, {
+            method: 'POST', headers: authHeaders(), body: JSON.stringify(body),
+          });
+        }
+        if (!res.ok) {
+          const err = await res.json();
+          modalError.textContent = err.detail || 'Save failed';
+          modalError.style.display = 'block';
+          return;
+        }
+        closeModal();
+        await loadEmployees();
+      } catch (err) {
+        modalError.textContent = 'Server error';
+        modalError.style.display = 'block';
+      }
+    });
+
+    async function terminateEmployee(id, name) {
+      if (!confirm(`Terminate ${name}?`)) return;
+      try {
+        const res = await fetch(`${API_BASE}/employee/${id}/delete`, {
+          method: 'DELETE', headers: authHeaders(),
+        });
+        if (!res.ok) {
+          const err = await res.json();
+          showError(err.detail || 'Failed to terminate');
+          return;
+        }
+        await loadEmployees();
+      } catch (err) { showError('Server error'); }
+    }
+
+    loadEmployees();
   </script>
 </body>
 </html>

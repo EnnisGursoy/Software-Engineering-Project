@@ -1791,6 +1791,144 @@
     });
 
     setActivePanel((location.hash || '').replace('#', ''), false);
+
+    // ── API Integration ──────────────────────────────────────────────────
+    const API_BASE = 'http://localhost:8000';
+
+    function getToken() {
+      const t = localStorage.getItem('token');
+      if (!t) window.location.href = 'login.html';
+      return t;
+    }
+
+    function authHeaders() {
+      return { 'Authorization': `Bearer ${getToken()}`, 'Content-Type': 'application/json' };
+    }
+
+    // Populate pay period select
+    async function loadPayPeriods() {
+      try {
+        const res = await fetch(`${API_BASE}/payroll/periods`, { headers: authHeaders() });
+        if (res.status === 401) { window.location.href = 'login.html'; return; }
+        if (!res.ok) return;
+        const periods = await res.json();
+        const sel = document.getElementById('payPeriodSelect');
+        if (sel) {
+          sel.innerHTML = periods.map(p =>
+            `<option value="${p.pay_period_id}">${p.period_start_date} → ${p.period_end_date} (${p.status})</option>`
+          ).join('');
+        }
+      } catch (_) {}
+    }
+
+    // Populate employee select
+    async function loadEmployeesSelect() {
+      try {
+        const res = await fetch(`${API_BASE}/employee/all`, { headers: authHeaders() });
+        if (!res.ok) return;
+        const employees = await res.json();
+        const sel = document.getElementById('employeeSelect');
+        if (sel) {
+          sel.innerHTML = employees.map(e =>
+            `<option value="${e.employee_id}">${e.first_name} ${e.last_name} (#${e.employee_id})</option>`
+          ).join('');
+        }
+      } catch (_) {}
+    }
+
+    // Load paychecks for selected period into payroll table
+    async function loadPaychecksForPeriod(periodId) {
+      try {
+        const res = await fetch(`${API_BASE}/payroll/period/${periodId}`, { headers: authHeaders() });
+        if (!res.ok) return;
+        const paychecks = await res.json();
+        const tbody = document.querySelector('.table-card table tbody');
+        if (!tbody) return;
+        if (!paychecks.length) {
+          tbody.innerHTML = '<tr><td colspan="7" style="text-align:center;padding:16px;">No paychecks for this period. Use Run Payroll to generate them.</td></tr>';
+          return;
+        }
+        tbody.innerHTML = paychecks.map(p => `
+          <tr>
+            <td><span class="name">Emp #${p.employee_id}</span></td>
+            <td>${p.payment_date || '-'}</td>
+            <td class="amount">$${p.gross_pay.toFixed(2)}</td>
+            <td>$${(p.federal_tax || 0).toFixed(2)}</td>
+            <td>$${(p.state_tax || 0).toFixed(2)}</td>
+            <td>$${((p.social_security || 0) + (p.medicare || 0)).toFixed(2)}</td>
+            <td class="amount">$${p.net_pay.toFixed(2)}</td>
+          </tr>
+        `).join('');
+      } catch (_) {}
+    }
+
+    // Wire up period change
+    const payPeriodSel = document.getElementById('payPeriodSelect');
+    if (payPeriodSel) {
+      payPeriodSel.addEventListener('change', () => {
+        if (payPeriodSel.value) loadPaychecksForPeriod(payPeriodSel.value);
+      });
+    }
+
+    // Add Run Payroll button to the editor shell
+    const editorShell = document.querySelector('.editor-shell .page-title');
+    if (editorShell) {
+      const runBtn = document.createElement('button');
+      runBtn.textContent = 'Run Payroll';
+      runBtn.style.cssText = 'padding:9px 18px;background:#16a34a;color:#fff;border:none;border-radius:8px;cursor:pointer;font-size:0.9rem;font-weight:600;';
+      runBtn.addEventListener('click', async () => {
+        const periodId = payPeriodSel && payPeriodSel.value;
+        if (!periodId) { alert('Select a pay period first'); return; }
+        if (!confirm('Run payroll for all active employees for this period?')) return;
+        runBtn.disabled = true;
+        runBtn.textContent = 'Running...';
+        try {
+          const res = await fetch(`${API_BASE}/payroll/run/${periodId}`, {
+            method: 'POST', headers: authHeaders(),
+          });
+          const data = await res.json();
+          if (!res.ok) {
+            alert(data.detail || 'Failed to run payroll');
+          } else {
+            alert(`Payroll complete: ${data.paychecks_created} paycheck(s) created.`);
+            loadPaychecksForPeriod(periodId);
+          }
+        } catch (_) { alert('Server error'); }
+        runBtn.disabled = false;
+        runBtn.textContent = 'Run Payroll';
+      });
+      editorShell.appendChild(runBtn);
+    }
+
+    // Preview paycheck for selected employee + period
+    const previewBtn = document.querySelector('[data-open="dlgSummary"]');
+    if (previewBtn) {
+      previewBtn.addEventListener('click', async () => {
+        const empId = payPeriodSel && document.getElementById('employeeSelect') && document.getElementById('employeeSelect').value;
+        const periodId = payPeriodSel && payPeriodSel.value;
+        if (!empId || !periodId) return;
+        try {
+          const res = await fetch(`${API_BASE}/payroll/calculate/${empId}/${periodId}`, { headers: authHeaders() });
+          if (!res.ok) return;
+          const data = await res.json();
+          const metrics = document.querySelectorAll('#dlgSummary .metric .value');
+          if (metrics.length >= 4) {
+            const deductions = (data.federal_tax || 0) + (data.state_tax || 0) + (data.social_security || 0) + (data.medicare || 0);
+            metrics[0].textContent = `$${data.gross_pay.toFixed(2)}`;
+            metrics[1].textContent = `$${deductions.toFixed(2)}`;
+            metrics[2].textContent = '$0.00';
+            metrics[3].textContent = `$${data.net_pay.toFixed(2)}`;
+          }
+        } catch (_) {}
+      });
+    }
+
+    // Bootstrap
+    getToken();
+    loadPayPeriods().then(() => {
+      if (payPeriodSel && payPeriodSel.value) loadPaychecksForPeriod(payPeriodSel.value);
+    });
+    loadEmployeesSelect();
   </script>
 </body>
 </html>

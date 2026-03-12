@@ -32,7 +32,7 @@ async def update_info(employee_id : int , employee: EmployeeUpdate, user : User 
 
 
 #soft delete (change active to terminated)
-@router.delete('{employee_id}/delete')
+@router.delete('/{employee_id}/delete')
 async def remove_employee(employee_id : int , user : User = Depends(hr_only), db : Session = Depends(get_db)):
    employee = delete_employee(employee_id, db)
    return employee
