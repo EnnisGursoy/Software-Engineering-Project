@@ -4,11 +4,16 @@ from Backend.Utility.dependencies import get_db, admin_only, hr_only, manager_on
 from Backend.Models.User import User
 from Backend.Models.Department import Department
 from Backend.Schemas.department import DepartmentCreate, Departmentout, DepartmentUpdate
-from Backend.Services.Department_service import show_department, get_department_by_manager_id, assign_manager
+from Backend.Services.Department_service import show_department, get_department_by_manager_id, assign_manager, create_department
 
 
 
 router  = APIRouter()
+
+
+@router.post('/create', response_model=Departmentout)
+async def create_dept(data: DepartmentCreate, user: User = Depends(hr_only), db: Session = Depends(get_db)):
+    return create_department(data, db)
 
 
 @router.get('/')
