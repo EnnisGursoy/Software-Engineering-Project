@@ -13,47 +13,14 @@
 			<h1>Payroll System Login</h1>
 		</header>
 		<main style="width:100%; display:flex; flex-direction:column; align-items:center;">
-			<form id="loginForm" style="display:flex; flex-direction:column; align-items:center; gap:10px; min-width:220px;">
+			<form action="/login" method="post" style="display:flex; flex-direction:column; align-items:center; gap:10px; min-width:220px;">
 				<label for="username">Username:</label>
 				<input type="text" id="username" name="username" required>
 				<label for="password">Password:</label>
 				<input type="password" id="password" name="password" required>
 				<button type="submit">Login</button>
-				<p id="errorMsg" style="color:red; font-size:0.8rem; margin:0; display:none;"></p>
 			</form>
 		</main>
 	</div>
-	<script>
-		const API_BASE = 'http://localhost:8000';
-
-		document.getElementById('loginForm').addEventListener('submit', async (e) => {
-			e.preventDefault();
-			const username = document.getElementById('username').value;
-			const password = document.getElementById('password').value;
-			const errorMsg = document.getElementById('errorMsg');
-			errorMsg.style.display = 'none';
-
-			const body = new URLSearchParams({ username, password });
-			try {
-				const res = await fetch(`${API_BASE}/auth/login`, {
-					method: 'POST',
-					headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-					body: body.toString(),
-				});
-				if (!res.ok) {
-					const data = await res.json();
-					errorMsg.textContent = data.detail || 'Login failed';
-					errorMsg.style.display = 'block';
-					return;
-				}
-				const data = await res.json();
-				localStorage.setItem('token', data.access_token);
-				window.location.href = 'employees.html';
-			} catch (err) {
-				errorMsg.textContent = 'Could not reach server';
-				errorMsg.style.display = 'block';
-			}
-		});
-	</script>
 </body>
 </html>
