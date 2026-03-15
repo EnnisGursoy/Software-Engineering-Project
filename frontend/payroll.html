@@ -1,24 +1,16 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Payroll</title>
   <style>
     :root {
       --bg: #f6f9fc;
       --text: #1f2937;
-      --muted: #6b7280;
       --surface: #ffffff;
       --border: #d1d5db;
       --accent: #0f766e;
-      --primary: #1d4ed8;
-      --primary-dark: #1e40af;
-      --success-bg: #dcfce7;
-      --success-text: #166534;
-      --warning-bg: #fef3c7;
-      --warning-text: #92400e;
-      --shadow: 0 10px 25px rgba(0, 0, 0, 0.08);
     }
 
     body.dark {
@@ -34,9 +26,7 @@
       --table-muted: #d1d5db;
     }
 
-    * {
-      box-sizing: border-box;
-    }
+    * { box-sizing: border-box; }
 
     body {
       margin: 0;
@@ -53,19 +43,23 @@
       justify-content: space-between;
       align-items: center;
       padding: 14px 20px;
-      background: var(--primary);
-      border-bottom: 1px solid var(--primary-dark);
-      position: sticky;
-      top: 0;
-      z-index: 100;
+      background: #1d4ed8;
+      border-bottom: 1px solid #1e40af;
+      position: relative;
     }
 
     h1 { margin: 0; font-size: 1.3rem; color: #ffffff; }
 
     main {
-      padding: 24px 20px 40px;
-      max-width: 1200px;
-      margin: 0 auto;
+      padding: 24px 20px;
+    }
+
+    .card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 20px;
+      max-width: 780px;
     }
 
     .menu-wrap {
@@ -86,17 +80,11 @@
     .menu-btn span { width: 20px; height: 2px; background: #fff; border-radius: 10px; display: block; }
 
     .menu {
-      position: absolute;
-      right: 0;
-      top: 50px;
-      min-width: 210px;
-      background: var(--surface);
-      border: 1px solid var(--border);
-      border-radius: 10px;
-      box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
-      padding: 8px;
-      display: none;
-      z-index: 20;
+      position: absolute; right: 0; top: 50px;
+      min-width: 210px; background: var(--surface);
+      border: 1px solid var(--border); border-radius: 10px;
+      box-shadow: 0 10px 25px rgba(0,0,0,0.1);
+      padding: 8px; display: none; z-index: 20;
     }
 
     .menu.open {
@@ -264,204 +252,6 @@
       .filters { grid-template-columns: 1fr; gap: 8px; }
       .divider { display: none; }
     }
-
-    .page-header {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      gap: 16px;
-      flex-wrap: wrap;
-      margin-bottom: 20px;
-    }
-
-    .page-header p {
-      margin: 6px 0 0;
-      color: var(--muted);
-    }
-
-    .btn {
-      border: none;
-      border-radius: 10px;
-      padding: 11px 16px;
-      font-size: 0.95rem;
-      cursor: pointer;
-      font-weight: 600;
-    }
-
-    .btn-primary {
-      background: var(--primary);
-      color: white;
-    }
-
-    .btn-primary:hover {
-      background: var(--primary-dark);
-    }
-
-    .card {
-      background: var(--surface);
-      border: 1px solid var(--border);
-      border-radius: 14px;
-      padding: 20px;
-      box-shadow: var(--shadow);
-    }
-
-    .stats-grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(210px, 1fr));
-      gap: 16px;
-      margin-bottom: 24px;
-    }
-
-    .stat-card h3 {
-      margin: 0;
-      font-size: 0.95rem;
-      color: var(--muted);
-      font-weight: 600;
-    }
-
-    .stat-card p {
-      margin: 10px 0 0;
-      font-size: 1.7rem;
-      font-weight: 700;
-    }
-
-    .layout-grid {
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 20px;
-      margin-bottom: 24px;
-    }
-
-    .section-title {
-      margin: 0 0 16px;
-      font-size: 1.1rem;
-    }
-
-    .form-grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
-      gap: 14px;
-    }
-
-    input,
-    select {
-      width: 100%;
-      padding: 12px 14px;
-      border: 1px solid var(--border);
-      border-radius: 10px;
-      font-size: 0.95rem;
-      background: #fff;
-    }
-
-    input:focus,
-    select:focus {
-      outline: 2px solid rgba(29, 78, 216, 0.15);
-      border-color: var(--primary);
-    }
-
-    .form-actions {
-      margin-top: 16px;
-      display: flex;
-      gap: 10px;
-      flex-wrap: wrap;
-    }
-
-    .pay-period-box p {
-      margin: 8px 0;
-      color: var(--text);
-    }
-
-    .highlight {
-      display: inline-block;
-      padding: 6px 10px;
-      border-radius: 999px;
-      font-size: 0.82rem;
-      font-weight: 700;
-      background: var(--success-bg);
-      color: var(--success-text);
-    }
-
-    .results-box {
-      margin-top: 16px;
-      padding: 16px;
-      border-radius: 12px;
-      background: #f9fafb;
-      border: 1px solid #e5e7eb;
-    }
-
-    .results-box p {
-      margin: 8px 0;
-    }
-
-    .table-card {
-      margin-top: 4px;
-    }
-
-    .table-wrap {
-      overflow-x: auto;
-    }
-
-    table {
-      width: 100%;
-      border-collapse: collapse;
-      min-width: 950px;
-    }
-
-    thead {
-      background: #eff6ff;
-    }
-
-    th,
-    td {
-      text-align: left;
-      padding: 14px 12px;
-      border-bottom: 1px solid #e5e7eb;
-      font-size: 0.95rem;
-      vertical-align: middle;
-    }
-
-    th {
-      color: #374151;
-      font-weight: 700;
-    }
-
-    tbody tr:hover {
-      background: #f9fafb;
-    }
-
-    .status {
-      display: inline-block;
-      padding: 6px 10px;
-      border-radius: 999px;
-      font-size: 0.82rem;
-      font-weight: 700;
-    }
-
-    .status.processed {
-      background: var(--success-bg);
-      color: var(--success-text);
-    }
-
-    .status.pending {
-      background: var(--warning-bg);
-      color: var(--warning-text);
-    }
-
-    @media (max-width: 900px) {
-      .layout-grid {
-        grid-template-columns: 1fr;
-      }
-    }
-
-    @media (max-width: 768px) {
-      main {
-        padding: 18px 14px 30px;
-      }
-
-      .page-header {
-        align-items: flex-start;
-      }
-    }
   </style>
 </head>
 <body>
@@ -471,14 +261,15 @@
       <button class="menu-btn" id="menuBtn" aria-label="Open menu" aria-expanded="false" aria-controls="hrMenu">
         <span></span><span></span><span></span>
       </button>
-      <nav class="menu" id="hrMenu" aria-hidden="true">
-        <a href="template_main_page.html">Home</a>
+                  <nav class="menu" id="hrMenu" aria-hidden="true">
+        <a href="homepage.html">Home</a>
         <a href="profile.html">Profile</a>
         <a href="employees.html">Employees</a>
         <a href="shifts.html">Shifts</a>
         <a href="payroll.html">Payroll</a>
         <a href="benefits.html">Benefits</a>
-        <a href="taxes_and_reports.html">Taxes &amp; Reports</a>
+        <a href="taxes.html">Taxes</a>
+        <a href="reports.html">Reports</a>
         <a href="settings.html">Settings</a>
         <a href="logout.html" style="color:#ef4444;">Sign Out</a>
       </nav>
@@ -486,8 +277,61 @@
   </header>
 
   <main>
-    <section class="card">
-      <p>Payroll page content goes here.</p>
+    <div id="statusBar" class="status-bar"></div>
+
+    <!-- Toolbar -->
+    <div class="toolbar">
+      <div class="toolbar-left">
+        <button class="btn btn-primary" onclick="openModal('periodModal')">+ New Pay Period</button>
+        <select id="periodSelect" style="padding:9px 11px;border:1px solid var(--border);border-radius:8px;font-size:0.9rem;font-family:inherit;background:var(--surface);color:var(--text);min-width:220px;">
+          <option value="">Select pay period to run…</option>
+        </select>
+        <button class="btn btn-green" id="runBtn" onclick="runPayroll()">▶ Run Payroll</button>
+      </div>
+    </div>
+
+    <!-- Filters -->
+    <section class="filters" aria-label="Payroll filters">
+      <input class="control" id="searchInput" type="search" placeholder="Search by employee ID" aria-label="Search employee">
+      <span class="divider" aria-hidden="true">|</span>
+      <div class="select-wrap">
+        <select class="control" id="periodFilter" aria-label="Filter by pay period">
+          <option value="">All Pay Periods</option>
+        </select>
+      </div>
+      <span class="divider" aria-hidden="true">|</span>
+      <div class="select-wrap">
+        <select class="control" id="statusFilter" aria-label="Payment status">
+          <option value="">All Statuses</option>
+          <option value="paid">Paid</option>
+          <option value="pending">Pending</option>
+          <option value="processed">Processed</option>
+          <option value="void">Void</option>
+        </select>
+      </div>
+    </section>
+
+    <!-- Table -->
+    <section class="table-shell">
+      <div class="table-card">
+        <table>
+          <thead>
+            <tr>
+              <th>Employee</th>
+              <th>Pay Period</th>
+              <th>Gross Pay</th>
+              <th>Fed Tax</th>
+              <th>State Tax</th>
+              <th>FICA</th>
+              <th>Net Pay</th>
+              <th>Status</th>
+            </tr>
+          </thead>
+          <tbody id="payrollBody">
+            <tr><td colspan="8" style="text-align:center;padding:24px;color:#64748b;">Loading…</td></tr>
+          </tbody>
+        </table>
+      </div>
     </section>
   </main>
 
@@ -526,22 +370,198 @@
   </div>
 
   <script>
+    // ── Menu ──────────────────────────────────────────────────────
     const menuBtn = document.getElementById('menuBtn');
-    const hrMenu = document.getElementById('hrMenu');
+    const hrMenu  = document.getElementById('hrMenu');
 
-    menuBtn.addEventListener("click", () => {
-      const isOpen = hrMenu.classList.toggle("open");
-      menuBtn.setAttribute("aria-expanded", String(isOpen));
-      hrMenu.setAttribute("aria-hidden", String(!isOpen));
+    menuBtn.addEventListener('click', () => {
+      const isOpen = hrMenu.classList.toggle('open');
+      menuBtn.setAttribute('aria-expanded', String(isOpen));
+      hrMenu.setAttribute('aria-hidden', String(!isOpen));
     });
 
-    document.addEventListener('click', (event) => {
-      if (!event.target.closest('.menu-wrap')) {
+    document.addEventListener('click', e => {
+      if (!e.target.closest('.menu-wrap')) {
         hrMenu.classList.remove('open');
         menuBtn.setAttribute('aria-expanded', 'false');
         hrMenu.setAttribute('aria-hidden', 'true');
       }
     });
+
+    // ── Dark mode ─────────────────────────────────────────────────
+    if (localStorage.getItem('payroll_dark_mode') === 'enabled') {
+      document.body.classList.add('dark');
+    }
+
+    // ── Config ────────────────────────────────────────────────────
+    const API   = 'http://localhost:8000';
+    const token = localStorage.getItem('access_token');
+    const hdrs  = { 'Authorization': `Bearer ${token}`, 'Content-Type': 'application/json' };
+
+    const fmt = n => n != null ? '$' + Number(n).toFixed(2) : '—';
+
+    let allPaychecks = [];
+    let periodLabels = {};   // id → "start – end"
+
+    // ── Status bar ────────────────────────────────────────────────
+    function showStatus(msg, type = 'info') {
+      const bar = document.getElementById('statusBar');
+      bar.textContent = msg;
+      bar.className = `status-bar ${type}`;
+      if (type !== 'error') setTimeout(() => bar.className = 'status-bar', 4000);
+    }
+
+    // ── Modal helpers ─────────────────────────────────────────────
+    function openModal(id)  { document.getElementById(id).classList.add('open'); }
+    function closeModal(id) { document.getElementById(id).classList.remove('open'); }
+
+    // ── Load pay periods → populate selects ───────────────────────
+    async function loadPeriods() {
+      try {
+        const res = await fetch(`${API}/pay-periods/all`, { headers: hdrs });
+        if (!res.ok) return;
+        const periods = await res.json();
+
+        const runSel    = document.getElementById('periodSelect');
+        const filterSel = document.getElementById('periodFilter');
+
+        // keep only open/processing in the run dropdown
+        periods.forEach(p => {
+          periodLabels[p.pay_period_id] = `${p.period_start_date} – ${p.period_end_date}`;
+
+          const label = `${p.period_start_date} – ${p.period_end_date} (${p.status})`;
+
+          if (p.status === 'open' || p.status === 'processing') {
+            const opt = new Option(label, p.pay_period_id);
+            runSel.appendChild(opt);
+          }
+
+          const fopt = new Option(label, p.pay_period_id);
+          filterSel.appendChild(fopt);
+        });
+      } catch (_) {}
+    }
+
+    // ── Load paychecks ────────────────────────────────────────────
+    async function loadPayroll() {
+      const tbody     = document.getElementById('payrollBody');
+      const searchVal = document.getElementById('searchInput').value.toLowerCase();
+      const statusVal = document.getElementById('statusFilter').value;
+      const periodVal = document.getElementById('periodFilter').value;
+
+      try {
+        const res = await fetch(`${API}/payroll/all`, { headers: hdrs });
+
+        if (res.status === 401) {
+          tbody.innerHTML = `<tr><td colspan="8" style="text-align:center;padding:24px;color:#ef4444;">Session expired — please log in again.</td></tr>`;
+          return;
+        }
+
+        allPaychecks = await res.json();
+
+        const rows = allPaychecks.filter(p => {
+          const matchSearch = String(p.employee_id).includes(searchVal) || searchVal === '';
+          const matchStatus = !statusVal || p.payment_status === statusVal;
+          const matchPeriod = !periodVal || String(p.pay_period_id) === periodVal;
+          return matchSearch && matchStatus && matchPeriod;
+        });
+
+        if (rows.length === 0) {
+          tbody.innerHTML = `<tr><td colspan="8" style="text-align:center;padding:24px;color:#64748b;">No records found.</td></tr>`;
+          return;
+        }
+
+        const badgeClass = s => ({
+          processed: 'badge-processed', pending: 'badge-pending',
+          paid: 'badge-paid', void: 'badge-void'
+        }[s] ?? '');
+
+        const fica = p => ((p.social_security ?? 0) + (p.medicare ?? 0)).toFixed(2);
+
+        tbody.innerHTML = rows.map(p => `
+          <tr>
+            <td><span class="name">Employee #${p.employee_id}</span>
+                <span class="small">Check #${p.check_number ?? p.paycheck_id}</span></td>
+            <td>${periodLabels[p.pay_period_id] ?? `Period #${p.pay_period_id}`}</td>
+            <td class="amount">${fmt(p.gross_pay)}</td>
+            <td>${fmt(p.federal_tax)}</td>
+            <td>${fmt(p.state_tax)}</td>
+            <td>$${fica(p)}</td>
+            <td class="amount">${fmt(p.net_pay)}</td>
+            <td><span class="badge ${badgeClass(p.payment_status)}">${p.payment_status ?? '—'}</span></td>
+          </tr>`).join('');
+      } catch {
+        tbody.innerHTML = `<tr><td colspan="8" style="text-align:center;padding:24px;color:#ef4444;">Failed to load payroll data.</td></tr>`;
+      }
+    }
+
+    // ── Create pay period ─────────────────────────────────────────
+    async function submitPeriod(e) {
+      e.preventDefault();
+      try {
+        const res = await fetch(`${API}/pay-periods/`, {
+          method: 'POST',
+          headers: hdrs,
+          body: JSON.stringify({
+            period_type:       document.getElementById('pp_type').value,
+            period_start_date: document.getElementById('pp_start').value,
+            period_end_date:   document.getElementById('pp_end').value,
+            pay_date:          document.getElementById('pp_pay').value,
+          })
+        });
+        const data = await res.json();
+        if (!res.ok) { showStatus(data.detail ?? 'Failed to create pay period.', 'error'); return; }
+
+        closeModal('periodModal');
+        document.getElementById('periodForm').reset();
+        showStatus(`Pay period created: ${data.period_start_date} – ${data.period_end_date}`, 'success');
+
+        // Refresh selects and table
+        document.getElementById('periodSelect').innerHTML = '<option value="">Select pay period to run…</option>';
+        document.getElementById('periodFilter').innerHTML = '<option value="">All Pay Periods</option>';
+        periodLabels = {};
+        await loadPeriods();
+        await loadPayroll();
+      } catch {
+        showStatus('Could not reach the server.', 'error');
+      }
+    }
+
+    // ── Run payroll ───────────────────────────────────────────────
+    async function runPayroll() {
+      const periodId = document.getElementById('periodSelect').value;
+      if (!periodId) { showStatus('Select a pay period first.', 'error'); return; }
+
+      const btn = document.getElementById('runBtn');
+      btn.disabled = true;
+      btn.textContent = 'Running…';
+      showStatus('Running payroll…', 'info');
+
+      try {
+        const res = await fetch(`${API}/payroll/run/${periodId}`, {
+          method: 'POST',
+          headers: hdrs
+        });
+        const data = await res.json();
+        if (!res.ok) { showStatus(data.detail ?? 'Payroll run failed.', 'error'); return; }
+
+        showStatus(`Payroll complete — ${data.paychecks_created} paycheck(s) generated.`, 'success');
+        await loadPayroll();
+      } catch {
+        showStatus('Could not reach the server.', 'error');
+      } finally {
+        btn.disabled = false;
+        btn.textContent = '▶ Run Payroll';
+      }
+    }
+
+    // ── Filters ───────────────────────────────────────────────────
+    document.getElementById('searchInput').addEventListener('input', loadPayroll);
+    document.getElementById('statusFilter').addEventListener('change', loadPayroll);
+    document.getElementById('periodFilter').addEventListener('change', loadPayroll);
+
+    // ── Init ──────────────────────────────────────────────────────
+    (async () => { await loadPeriods(); await loadPayroll(); })();
   </script>
 </body>
 </html>
