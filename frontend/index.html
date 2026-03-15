@@ -508,159 +508,18 @@
   </style>
 </head>
 <body>
-
-  <!-- NAVBAR -->
-  <nav>
-    <a class="nav-logo" href="index.html">
-      <img src="PAY CENTRAL LOGO.png" alt="Pay Central Logo">
-    </a>
-    <div class="nav-links">
-      <a href="#features">Features</a>
-      <a href="login.html" class="btn-login">Login</a>
-    </div>
-    <button class="hamburger" id="hamburger" aria-label="Toggle menu" aria-expanded="false">
-      <span></span>
-      <span></span>
-      <span></span>
-    </button>
-  </nav>
-
-  <!-- MOBILE MENU -->
-  <div class="mobile-menu" id="mobileMenu" aria-hidden="true">
-    <a href="#features">Features</a>
-    <a href="login.html" class="btn-login">Login</a>
-  </div>
-
-  <!-- HERO -->
-  <section class="hero">
-    <div class="hero-badge"><strong style="color:#1d4ed8;">PAYCENTRAL</strong></div>
-    <img class="hero-logo" src="PAY CENTRAL LOGO.png" alt="Pay Central">
-    <h1 style="color:#1d4ed8; font-weight:800;">PAYCENTRAL</h1>
-    <p>Manage employee records, process payroll, track shifts, and stay tax-compliant — all from one secure platform.</p>
-    <div class="hero-actions">
-      <a class="cta-primary" href="login.html">
-        <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M15 3h4a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-4"/><polyline points="10 17 15 12 10 7"/><line x1="15" y1="12" x2="3" y2="12"/></svg>
-        Login to Dashboard
-      </a>
-      <a class="cta-secondary" href="#features">
-        <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
-        Explore Features
-      </a>
-    </div>
-  </section>
-
-  <!-- STATS STRIP -->
-  <div class="stats-strip">
-    <div class="stat-item">
-      <div class="stat-value">100%</div>
-      <div class="stat-label">Secure JWT Auth</div>
-    </div>
-    <div class="stat-item">
-      <div class="stat-value">4</div>
-      <div class="stat-label">Role-Based Access Levels</div>
-    </div>
-    <div class="stat-item">
-      <div class="stat-value">Real-Time</div>
-      <div class="stat-label">Payroll Processing</div>
-    </div>
-    <div class="stat-item">
-      <div class="stat-value">Multi</div>
-      <div class="stat-label">Department Support</div>
-    </div>
-  </div>
-
-  <!-- FEATURES -->
-  <section class="features" id="features">
-    <div class="section-header">
-      <div class="section-tag">Platform Features</div>
-      <h2>Everything you need to run payroll</h2>
-      <p>A complete suite of tools built for HR teams, managers, and employees.</p>
-    </div>
-
-    <div class="features-grid">
-      <a class="feature-card" href="login.html">
-        <div class="feature-icon icon-blue">&#128188;</div>
-        <h3>Employee Management</h3>
-        <p>Add, update, and manage employee records with full department and position history tracking.</p>
-      </a>
-
-      <a class="feature-card" href="login.html">
-        <div class="feature-icon icon-teal">&#128176;</div>
-        <h3>Payroll Processing</h3>
-        <p>Automate paycheck generation with support for hourly and salaried workers across pay periods.</p>
-      </a>
-
-      <a class="feature-card" href="login.html">
-        <div class="feature-icon icon-purple">&#128202;</div>
-        <h3>Reports &amp; Analytics</h3>
-        <p>Generate payroll summaries, department reports, and compliance exports with a single click.</p>
-      </a>
-
-      <a class="feature-card" href="login.html">
-        <div class="feature-icon icon-orange">&#9200;</div>
-        <h3>Shift &amp; Time Tracking</h3>
-        <p>Log and review employee time entries and shift schedules to ensure accurate hour-based pay.</p>
-      </a>
-
-      <a class="feature-card" href="login.html">
-        <div class="feature-icon icon-green">&#129534;</div>
-        <h3>Tax Management</h3>
-        <p>Store and manage employee tax information, filing statuses, and withholding configurations.</p>
-      </a>
-
-      <a class="feature-card" href="login.html">
-        <div class="feature-icon icon-pink">&#128274;</div>
-        <h3>Role-Based Security</h3>
-        <p>Granular access control for Admin, HR, Manager, and Employee roles backed by JWT tokens.</p>
-      </a>
-    </div>
-  </section>
-
-  <!-- CTA BANNER -->
-  <div style="padding: 0 32px; margin-bottom: 72px; max-width: 1160px; margin-left: auto; margin-right: auto;">
-    <div class="cta-banner">
-      <h2>Ready to get started?</h2>
-      <p>Log in to your Pay Central account and take control of your organization's payroll today.</p>
-      <a class="cta-white" href="login.html">
-        <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path d="M15 3h4a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-4"/><polyline points="10 17 15 12 10 7"/><line x1="15" y1="12" x2="3" y2="12"/></svg>
-        Login Now
-      </a>
-    </div>
-  </div>
-
-  <!-- FOOTER -->
-  <footer>
-    <p>&#169; 2026 Pay Central. All rights reserved. &nbsp;|&nbsp; <a href="login.html">Login</a></p>
-  </footer>
-
-  <script>
-    const hamburger = document.getElementById('hamburger');
-    const mobileMenu = document.getElementById('mobileMenu');
-
-    hamburger.addEventListener('click', () => {
-      const isOpen = mobileMenu.classList.toggle('open');
-      hamburger.setAttribute('aria-expanded', String(isOpen));
-      mobileMenu.setAttribute('aria-hidden', String(!isOpen));
-    });
-
-    document.addEventListener('click', (e) => {
-      if (!e.target.closest('nav') && !e.target.closest('.mobile-menu')) {
-        mobileMenu.classList.remove('open');
-        hamburger.setAttribute('aria-expanded', 'false');
-        mobileMenu.setAttribute('aria-hidden', 'true');
-      }
-    });
-
-    // Smooth scroll for anchor links
-    document.querySelectorAll('a[href^="#"]').forEach(a => {
-      a.addEventListener('click', e => {
-        const target = document.querySelector(a.getAttribute('href'));
-        if (target) {
-          e.preventDefault();
-          target.scrollIntoView({ behavior: 'smooth', block: 'start' });
-        }
-      });
-    });
-  </script>
+	<header>
+		<h1>Welcome to the Payroll System</h1>
+		<nav>
+			<ul>
+				<li><a href="index.html">Home</a></li>
+				<li><a href="login.html">Login</a></li>
+			</ul>
+		</nav>
+	</header>
+	<main>
+		</section>
+	</main>
+	</footer>
 </body>
 </html>
