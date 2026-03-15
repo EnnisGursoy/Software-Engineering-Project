@@ -12,11 +12,6 @@
       --surface: #ffffff;
       --border: #d1d5db;
       --accent: #0f766e;
-      --primary: #1d4ed8;
-      --primary-dark: #1e40af;
-      --success-bg: #dcfce7;
-      --success-text: #166534;
-      --shadow: 0 10px 25px rgba(0, 0, 0, 0.08);
     }
 
     * {
@@ -28,6 +23,7 @@
       font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
       background: var(--bg);
       color: var(--text);
+      transition: background 0.2s ease, color 0.2s ease;
     }
 
     header {
@@ -49,14 +45,130 @@
     }
 
     main {
-      padding: 24px 20px 40px;
-      max-width: 1200px;
-      margin: 0 auto;
+      padding: 24px 20px;
     }
 
-    .menu-wrap {
-      position: relative;
+    .card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 20px;
+      max-width: 780px;
     }
+
+    .profile-card h2 {
+      margin: 0 0 4px;
+      font-size: 1.3rem;
+    }
+
+    .role-badge {
+      display: inline-block;
+      padding: 3px 10px;
+      border-radius: 999px;
+      font-size: 0.78rem;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+      margin-bottom: 20px;
+    }
+
+    .role-badge.admin   { background: #fef3c7; color: #92400e; }
+    .role-badge.manager { background: #dbeafe; color: #1e40af; }
+    .role-badge.hr      { background: #d1fae5; color: #065f46; }
+
+    .info-grid {
+      display: grid;
+      grid-template-columns: 140px 1fr;
+      gap: 12px 0;
+      border-top: 1px solid var(--border);
+      padding-top: 20px;
+    }
+
+    .info-grid dt {
+      font-size: 0.85rem;
+      color: var(--muted);
+      font-weight: 600;
+      padding: 2px 0;
+    }
+
+    .info-grid dd {
+      margin: 0;
+      font-size: 0.95rem;
+      padding: 2px 0;
+    }
+
+    .status-dot {
+      display: inline-block;
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background: #22c55e;
+      margin-right: 6px;
+    }
+
+    .divider {
+      border: none;
+      border-top: 1px solid var(--border);
+      margin: 24px 0;
+    }
+
+    .section-title {
+      font-size: 0.95rem;
+      font-weight: 700;
+      margin: 0 0 14px;
+    }
+
+    .form-group {
+      margin-bottom: 14px;
+    }
+
+    .form-group label {
+      display: block;
+      font-size: 0.85rem;
+      font-weight: 600;
+      margin-bottom: 5px;
+      color: var(--muted);
+    }
+
+    .form-group input {
+      width: 100%;
+      padding: 9px 12px;
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      font-size: 0.95rem;
+      color: var(--text);
+      background: var(--bg);
+    }
+
+    .form-group input:focus {
+      outline: none;
+      border-color: var(--accent);
+      box-shadow: 0 0 0 3px rgba(15, 118, 110, 0.12);
+    }
+
+    .btn {
+      padding: 9px 20px;
+      border: none;
+      border-radius: 8px;
+      font-size: 0.9rem;
+      font-weight: 600;
+      cursor: pointer;
+      background: var(--accent);
+      color: #fff;
+    }
+
+    .btn:hover { opacity: 0.9; }
+
+    .msg {
+      font-size: 0.85rem;
+      margin-top: 10px;
+      min-height: 1.2em;
+    }
+
+    .msg.success { color: #16a34a; }
+    .msg.error   { color: #dc2626; }
+
+    .menu-wrap { position: relative; }
 
     .menu-btn {
       width: 42px;
@@ -95,9 +207,7 @@
       z-index: 20;
     }
 
-    .menu.open {
-      display: block;
-    }
+    .menu.open { display: block; }
 
     .menu a {
       display: block;
@@ -340,126 +450,46 @@
       </button>
 
       <nav class="menu" id="hrMenu" aria-hidden="true">
+        <a href="template_main_page.html">Home</a>
         <a href="profile.html">Profile</a>
         <a href="employees.html">Employees</a>
         <a href="shifts.html">Shifts</a>
         <a href="payroll.html">Payroll</a>
-        <a href="taxes.html">Taxes</a>
-        <a href="reports.html">Reports</a>
+        <a href="benefits.html">Benefits</a>
+        <a href="taxes_and_reports.html">Taxes &amp; Reports</a>
         <a href="settings.html">Settings</a>
+        <a href="logout.html" style="color:#ef4444;">Sign Out</a>
       </nav>
     </div>
   </header>
 
   <main>
-    <section class="page-header">
-      <h2>Account Profile</h2>
-      <p>Manage your payroll system account details, company info, and administrator settings.</p>
-    </section>
-
-    <section class="layout-grid">
-      <aside class="card profile-card">
-        <div class="avatar">AD</div>
-        <h3>Admin User</h3>
-        <p>System Administrator</p>
-        <p>admin@payrollsystem.com</p>
-        <span class="badge">Active Account</span>
-
-        <div class="mini-stats">
-          <div class="mini-stat">
-            <span>Total Employees</span>
-            <strong>24</strong>
-          </div>
-          <div class="mini-stat">
-            <span>Payroll Runs</span>
-            <strong>12</strong>
-          </div>
-          <div class="mini-stat">
-            <span>Department Access</span>
-            <strong>Full Access</strong>
-          </div>
-        </div>
-      </aside>
-
-      <section class="card">
-        <h3 class="section-title">Profile Overview</h3>
-
-        <div class="info-grid">
-          <div class="info-box">
-            <span>Full Name</span>
-            <strong>Admin User</strong>
-          </div>
-          <div class="info-box">
-            <span>Role</span>
-            <strong>System Administrator</strong>
-          </div>
-          <div class="info-box">
-            <span>Company</span>
-            <strong>Pay Central</strong>
-          </div>
-          <div class="info-box">
-            <span>Work Email</span>
-            <strong>admin@payrollsystem.com</strong>
-          </div>
-        </div>
-
-        <h3 class="section-title">Edit Profile</h3>
-
-        <form id="profileForm">
-          <div class="form-grid">
-            <div class="form-group">
-              <label for="fullName">Full Name</label>
-              <input type="text" id="fullName" value="Admin User" />
-            </div>
-
-            <div class="form-group">
-              <label for="jobTitle">Job Title</label>
-              <input type="text" id="jobTitle" value="System Administrator" />
-            </div>
-
-            <div class="form-group">
-              <label for="email">Email Address</label>
-              <input type="email" id="email" value="admin@payrollsystem.com" />
-            </div>
-
-            <div class="form-group">
-              <label for="company">Company Name</label>
-              <input type="text" id="company" value="Pay Central" />
-            </div>
-
-            <div class="form-group">
-              <label for="phone">Phone Number</label>
-              <input type="tel" id="phone" value="(555) 123-4567" />
-            </div>
-
-            <div class="form-group">
-              <label for="department">Department</label>
-              <select id="department">
-                <option selected>Administration</option>
-                <option>Human Resources</option>
-                <option>Finance</option>
-                <option>Operations</option>
-              </select>
-            </div>
-
-            <div class="form-group full">
-              <label for="bio">Profile Notes</label>
-              <textarea id="bio">Responsible for employee records, payroll processing, reporting, and administrative oversight.</textarea>
-            </div>
-          </div>
-
-          <div class="form-actions">
-            <button type="submit" class="btn btn-primary">Save Changes</button>
-            <button type="reset" class="btn btn-secondary">Reset</button>
-          </div>
-        </form>
-      </section>
+    <section class="card">
+      <p>Profile page content goes here.</p>
     </section>
   </main>
 
   <script>
+    if (localStorage.getItem('payroll_dark_mode') === 'enabled') {
+      document.body.classList.add('dark');
+    }
+
+    const API = 'http://127.0.0.1:8000';
+
+    // --- Redirect to login on 401 ---
+    function handleUnauthorized(res) {
+      if (res.status === 401) {
+        localStorage.removeItem('access_token');
+        localStorage.removeItem('user_role');
+        window.location.href = 'login.html';
+        return true;
+      }
+      return false;
+    }
+
+    // --- Nav menu ---
     const menuBtn = document.getElementById('menuBtn');
-    const hrMenu = document.getElementById('hrMenu');
+    const hrMenu  = document.getElementById('hrMenu');
 
     menuBtn.addEventListener('click', () => {
       const isOpen = hrMenu.classList.toggle('open');
@@ -467,19 +497,12 @@
       hrMenu.setAttribute('aria-hidden', String(!isOpen));
     });
 
-    document.addEventListener('click', (event) => {
-      if (!event.target.closest('.menu-wrap')) {
+    document.addEventListener('click', (e) => {
+      if (!e.target.closest('.menu-wrap')) {
         hrMenu.classList.remove('open');
         menuBtn.setAttribute('aria-expanded', 'false');
         hrMenu.setAttribute('aria-hidden', 'true');
       }
-    });
-
-    const profileForm = document.getElementById('profileForm');
-
-    profileForm.addEventListener('submit', (e) => {
-      e.preventDefault();
-      alert('Profile changes saved successfully.');
     });
   </script>
 </body>

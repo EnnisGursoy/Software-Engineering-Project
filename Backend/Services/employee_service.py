@@ -1,6 +1,11 @@
 from sqlalchemy.orm import Session
 from fastapi import HTTPException
 from Backend.Models.Employee import Employee
+from Backend.Models.Paychecks import Paychecks
+from Backend.Models.Time_entries import TimeEntries
+from Backend.Models.Tax_information import TaxInformation
+from Backend.Models.employee_position import EmployeePosition
+from Backend.Models.Department import Department
 from Backend.Utility.security import encrypt_ssn
 from Backend.Schemas.Employee import EmployeeCreate, EmployeeUpdate
 from datetime import date
@@ -47,6 +52,18 @@ def create_employee(data: EmployeeCreate, db: Session):
 
     encrypted = encrypt_ssn(data.ssn)
 
+    department_id = None
+    if data.department_name:
+        dept = db.query(Department).filter(
+            Department.department_name == data.department_name
+        ).first()
+        if not dept:
+            raise HTTPException(
+                status_code=404,
+                detail=f"Department '{data.department_name}' not found"
+            )
+        department_id = dept.department_id
+
     employee = Employee(
         first_name=data.first_name,
         last_name=data.last_name,
@@ -57,9 +74,10 @@ def create_employee(data: EmployeeCreate, db: Session):
         city=data.city,
         state=data.state,
         zip_code=data.zip_code,
-        date_of_birth=data.date_of_birth,   # already a date object
-        hire_date=data.hire_date,           # already a date object
-        employment_status=data.employment_status
+        date_of_birth=data.date_of_birth,
+        hire_date=data.hire_date,
+        employment_status=data.employment_status,
+        department_id=department_id
     )
 
     db.add(employee)
@@ -88,7 +106,7 @@ def update_employee(id: int, data: EmployeeUpdate, db: Session):
     if not employee:
         raise HTTPException(status_code=400, detail='User does not exist in database')
 
-    update_data = data.dict(exclude_unset=True)
+    update_data = data.model_dump(exclude_unset=True)
 
     for key, value in update_data.items():
         setattr(employee, key, value)
@@ -97,6 +115,36 @@ def update_employee(id: int, data: EmployeeUpdate, db: Session):
     db.refresh(employee)
     return employee
 
+
+
+def get_employees_by_department(department_id: int, db: Session):
+    return (
+        db.query(Employee)
+        .filter(Employee.department_id == department_id)
+        .all()
+    )
+
+
+def hard_delete_employee(id: int, db: Session):
+    employee = db.query(Employee).filter(Employee.employee_id == id).first()
+
+    if not employee:
+        raise HTTPException(
+            status_code=404,
+            detail="Employee does not exist in the database"
+        )
+
+    # Remove all child records before deleting the employee to avoid FK constraint errors
+    db.query(TimeEntries).filter(TimeEntries.employee_id == id).delete()
+    db.query(TimeEntries).filter(TimeEntries.approved_by == id).update({"approved_by": None})
+    db.query(Paychecks).filter(Paychecks.employee_id == id).delete()
+    db.query(TaxInformation).filter(TaxInformation.employee_id == id).delete()
+    db.query(EmployeePosition).filter(EmployeePosition.employee_id == id).delete()
+    db.query(Department).filter(Department.manager_id == id).update({"manager_id": None})
+
+    db.delete(employee)
+    db.commit()
+    return {"message": "Employee permanently deleted"}
 
 
 def delete_employee(id: int, db: Session):

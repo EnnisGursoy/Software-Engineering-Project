@@ -21,6 +21,19 @@
       --shadow: 0 10px 25px rgba(0, 0, 0, 0.08);
     }
 
+    body.dark {
+      --bg: #0b1220;
+      --surface: #111827;
+      --text: #f3f4f6;
+      --muted: #9ca3af;
+      --border: #374151;
+      --accent: #14b8a6;
+      --table-bg: #111827;
+      --table-border: #374151;
+      --table-text: #f3f4f6;
+      --table-muted: #d1d5db;
+    }
+
     * {
       box-sizing: border-box;
     }
@@ -28,8 +41,11 @@
     body {
       margin: 0;
       font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
-      background: var(--bg);
+      background: radial-gradient(circle at top left, #dbeafe 0%, transparent 35%),
+                  radial-gradient(circle at top right, #e0f2fe 0%, transparent 30%),
+                  var(--bg);
       color: var(--text);
+      transition: background 0.2s, color 0.2s;
     }
 
     header {
@@ -44,11 +60,7 @@
       z-index: 100;
     }
 
-    h1 {
-      margin: 0;
-      font-size: 1.3rem;
-      color: #ffffff;
-    }
+    h1 { margin: 0; font-size: 1.3rem; color: #ffffff; }
 
     main {
       padding: 24px 20px 40px;
@@ -61,27 +73,17 @@
     }
 
     .menu-btn {
-      width: 42px;
-      height: 42px;
-      border: 1px solid rgba(255, 255, 255, 0.45);
+      width: 42px; height: 42px;
+      border: 1px solid rgba(255,255,255,0.45);
       border-radius: 8px;
-      background: rgba(255, 255, 255, 0.12);
+      background: rgba(255,255,255,0.12);
       cursor: pointer;
-      display: flex;
-      flex-direction: column;
-      justify-content: center;
-      align-items: center;
-      gap: 5px;
-      padding: 0;
+      display: flex; flex-direction: column;
+      justify-content: center; align-items: center;
+      gap: 5px; padding: 0;
     }
 
-    .menu-btn span {
-      width: 20px;
-      height: 2px;
-      background: #ffffff;
-      border-radius: 10px;
-      display: block;
-    }
+    .menu-btn span { width: 20px; height: 2px; background: #fff; border-radius: 10px; display: block; }
 
     .menu {
       position: absolute;
@@ -91,7 +93,7 @@
       background: var(--surface);
       border: 1px solid var(--border);
       border-radius: 10px;
-      box-shadow: var(--shadow);
+      box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
       padding: 8px;
       display: none;
       z-index: 20;
@@ -102,17 +104,165 @@
     }
 
     .menu a {
-      display: block;
-      text-decoration: none;
-      color: var(--text);
-      padding: 10px 12px;
-      border-radius: 8px;
-      font-size: 0.95rem;
+      display: block; text-decoration: none; color: var(--text);
+      padding: 10px 12px; border-radius: 8px; font-size: 0.95rem;
     }
 
-    .menu a:hover {
-      background: #ecfeff;
-      color: var(--accent);
+    .menu a:hover { background: #ecfeff; color: var(--accent); }
+
+    main { max-width: 1180px; margin: 0 auto; padding: 24px 20px 40px; }
+
+    /* ── Toolbar ── */
+    .toolbar {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      flex-wrap: wrap;
+      margin-bottom: 16px;
+    }
+
+    .toolbar-left { display: flex; gap: 10px; flex: 1; flex-wrap: wrap; align-items: center; }
+
+    .btn {
+      padding: 9px 16px;
+      border: none; border-radius: 8px;
+      font-size: 0.9rem; font-weight: 600;
+      font-family: inherit; cursor: pointer;
+    }
+
+    .btn-primary   { background: var(--primary); color: #fff; }
+    .btn-primary:hover { background: var(--primary-dark); }
+    .btn-green     { background: #15803d; color: #fff; }
+    .btn-green:hover { background: #166534; }
+    .btn-secondary { background: var(--border); color: var(--text); }
+    .btn-secondary:hover { background: #cbd5e1; }
+    .btn:disabled  { opacity: 0.5; cursor: not-allowed; }
+
+    /* ── Filters ── */
+    .filters {
+      display: grid;
+      grid-template-columns: 1.2fr auto 1.2fr auto 1fr;
+      align-items: center;
+      gap: 14px;
+      background: var(--surface);
+      border: 3px solid #0f172a;
+      padding: 14px 18px;
+      margin-bottom: 16px;
+    }
+
+    .divider { color: #475569; font-size: 1.35rem; line-height: 1; user-select: none; }
+
+    .control {
+      width: 100%; border: 0; outline: 0;
+      background: transparent; color: var(--text);
+      font-size: 1rem; font-family: inherit; padding: 4px 0;
+    }
+
+    .control::placeholder { color: var(--muted); }
+
+    .select-wrap { position: relative; width: 100%; }
+
+    select.control { appearance: none; cursor: pointer; padding-right: 18px; }
+
+    .select-wrap::after {
+      content: ""; position: absolute; right: 2px; top: 50%;
+      width: 8px; height: 8px;
+      border-right: 2px solid #475569; border-bottom: 2px solid #475569;
+      transform: translateY(-70%) rotate(45deg); pointer-events: none;
+    }
+
+    /* ── Table ── */
+    .table-shell {
+      background: var(--surface);
+      border: 1px solid var(--table-border);
+      border-radius: 12px; padding: 12px;
+      box-shadow: 0 10px 20px rgba(15,23,42,0.06);
+    }
+
+    .table-card {
+      background: var(--table-bg);
+      border: 1px solid var(--table-border);
+      border-radius: 10px; overflow-x: auto;
+    }
+
+    table { width: 100%; min-width: 860px; border-collapse: collapse; color: var(--table-text); }
+
+    thead th {
+      font-size: 0.95rem; font-weight: 600; text-align: left;
+      color: #334155; background: #f8fbff;
+      border-bottom: 1px solid var(--table-border);
+      padding: 13px 16px 10px;
+    }
+
+    tbody td { padding: 12px 16px; color: var(--table-muted); font-size: 0.97rem; }
+
+    .name  { font-weight: 700; color: var(--text); line-height: 1.25; }
+    .amount { font-weight: 700; color: var(--text); }
+    .small { font-size: 0.85rem; color: #9ca3af; display: block; margin-top: 3px; }
+    tbody tr + tr td { border-top: 1px solid var(--table-border); }
+    tbody tr:nth-child(even) td { background: #fcfdff; }
+
+    /* ── Status badge ── */
+    .badge {
+      display: inline-block; font-size: 0.78rem; font-weight: 600;
+      padding: 2px 8px; border-radius: 99px;
+    }
+    .badge-processed { background: #d1fae5; color: #065f46; }
+    .badge-pending   { background: #fef3c7; color: #92400e; }
+    .badge-paid      { background: #dbeafe; color: #1e40af; }
+    .badge-void      { background: #fee2e2; color: #991b1b; }
+
+    /* ── Modal ── */
+    .modal-backdrop {
+      display: none; position: fixed; inset: 0;
+      background: rgba(0,0,0,0.45); z-index: 100;
+      align-items: center; justify-content: center;
+    }
+    .modal-backdrop.open { display: flex; }
+
+    .modal {
+      background: var(--surface); border-radius: 14px;
+      padding: 28px 30px; width: 100%; max-width: 440px;
+      box-shadow: 0 20px 50px rgba(0,0,0,0.2);
+    }
+
+    .modal h3 { margin: 0 0 18px; font-size: 1.1rem; color: var(--text); }
+
+    .form-group { margin-bottom: 14px; }
+
+    .form-group label {
+      display: block; font-size: 0.8rem; font-weight: 600;
+      color: var(--muted); margin-bottom: 4px;
+      text-transform: uppercase; letter-spacing: 0.3px;
+    }
+
+    .form-group input,
+    .form-group select {
+      width: 100%; padding: 9px 11px;
+      border: 1px solid var(--border); border-radius: 8px;
+      font-size: 0.93rem; font-family: inherit;
+      color: var(--text); background: var(--surface); outline: none;
+    }
+
+    .form-group input:focus,
+    .form-group select:focus {
+      border-color: var(--primary);
+      box-shadow: 0 0 0 3px rgba(29,78,216,0.12);
+    }
+
+    .modal-actions { display: flex; justify-content: flex-end; gap: 10px; margin-top: 20px; }
+
+    .status-bar {
+      padding: 10px 14px; border-radius: 8px;
+      font-size: 0.88rem; font-weight: 500; margin-bottom: 14px; display: none;
+    }
+    .status-bar.success { background: #d1fae5; color: #065f46; display: block; }
+    .status-bar.error   { background: #fee2e2; color: #991b1b; display: block; }
+    .status-bar.info    { background: #dbeafe; color: #1e40af; display: block; }
+
+    @media (max-width: 900px) {
+      .filters { grid-template-columns: 1fr; gap: 8px; }
+      .divider { display: none; }
     }
 
     .page-header {
@@ -317,112 +467,67 @@
 <body>
   <header>
     <h1>Payroll</h1>
-
     <div class="menu-wrap">
       <button class="menu-btn" id="menuBtn" aria-label="Open menu" aria-expanded="false" aria-controls="hrMenu">
-        <span></span>
-        <span></span>
-        <span></span>
+        <span></span><span></span><span></span>
       </button>
-
       <nav class="menu" id="hrMenu" aria-hidden="true">
+        <a href="template_main_page.html">Home</a>
         <a href="profile.html">Profile</a>
         <a href="employees.html">Employees</a>
         <a href="shifts.html">Shifts</a>
         <a href="payroll.html">Payroll</a>
-        <a href="taxes.html">Taxes</a>
-        <a href="reports.html">Reports</a>
+        <a href="benefits.html">Benefits</a>
+        <a href="taxes_and_reports.html">Taxes &amp; Reports</a>
         <a href="settings.html">Settings</a>
+        <a href="logout.html" style="color:#ef4444;">Sign Out</a>
       </nav>
     </div>
   </header>
 
   <main>
-    <section class="page-header">
-      <div>
-        <h2 style="margin: 0;">Payroll Management</h2>
-        <p>Track pay periods, calculate wages, deductions, and employee net pay.</p>
-      </div>
-      <button class="btn btn-primary">Run Payroll</button>
-    </section>
-
-    <section class="stats-grid">
-      <div class="card stat-card">
-        <h3>Total Payroll</h3>
-        <p id="totalPayroll">$0.00</p>
-      </div>
-      <div class="card stat-card">
-        <h3>Total Employees Paid</h3>
-        <p id="employeesPaid">0</p>
-      </div>
-      <div class="card stat-card">
-        <h3>Total Deductions</h3>
-        <p id="totalDeductions">$0.00</p>
-      </div>
-      <div class="card stat-card">
-        <h3>Current Pay Period</h3>
-        <p id="payPeriodLabel">Bi-Weekly</p>
-      </div>
-    </section>
-
-    <section class="layout-grid">
-      <div class="card pay-period-box">
-        <h3 class="section-title">Current Pay Period</h3>
-        <p><strong>Pay Schedule:</strong> <span class="highlight">Bi-Weekly</span></p>
-        <p><strong>Period Start:</strong> March 1, 2026</p>
-        <p><strong>Period End:</strong> March 14, 2026</p>
-        <p><strong>Pay Date:</strong> March 18, 2026</p>
-        <p><strong>Status:</strong> Open for processing</p>
-      </div>
-
-      <div class="card">
-        <h3 class="section-title">Payroll Calculator</h3>
-        <form id="payrollForm">
-          <div class="form-grid">
-            <input type="text" id="employeeName" placeholder="Employee Name" required />
-            <input type="number" id="hoursWorked" placeholder="Hours Worked" min="0" step="0.01" required />
-            <input type="number" id="hourlyRate" placeholder="Hourly Rate" min="0" step="0.01" required />
-            <input type="number" id="deductions" placeholder="Deductions" min="0" step="0.01" required />
-          </div>
-
-          <div class="form-actions">
-            <button type="submit" class="btn btn-primary">Calculate Pay</button>
-          </div>
-        </form>
-
-        <div class="results-box" id="resultsBox">
-          <p><strong>Gross Pay:</strong> $0.00</p>
-          <p><strong>Deductions:</strong> $0.00</p>
-          <p><strong>Net Pay:</strong> $0.00</p>
-        </div>
-      </div>
-    </section>
-
-    <section class="card table-card">
-      <h3 class="section-title">Payroll Records</h3>
-      <div class="table-wrap">
-        <table>
-          <thead>
-            <tr>
-              <th>Employee ID</th>
-              <th>Name</th>
-              <th>Hours Worked</th>
-              <th>Hourly Rate</th>
-              <th>Gross Pay</th>
-              <th>Deductions</th>
-              <th>Net Pay</th>
-              <th>Status</th>
-            </tr>
-          </thead>
-          <tbody id="payrollTableBody"></tbody>
-        </table>
-      </div>
+    <section class="card">
+      <p>Payroll page content goes here.</p>
     </section>
   </main>
 
+  <!-- New Pay Period Modal -->
+  <div class="modal-backdrop" id="periodModal">
+    <div class="modal">
+      <h3>New Pay Period</h3>
+      <form id="periodForm" onsubmit="submitPeriod(event)">
+        <div class="form-group">
+          <label>Period Type</label>
+          <select id="pp_type" required>
+            <option value="weekly">Weekly</option>
+            <option value="bi_weekly" selected>Bi-Weekly</option>
+            <option value="semi_monthly">Semi-Monthly</option>
+            <option value="monthly">Monthly</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label>Start Date</label>
+          <input type="date" id="pp_start" required>
+        </div>
+        <div class="form-group">
+          <label>End Date</label>
+          <input type="date" id="pp_end" required>
+        </div>
+        <div class="form-group">
+          <label>Pay Date</label>
+          <input type="date" id="pp_pay" required>
+        </div>
+        <div class="modal-actions">
+          <button type="button" class="btn btn-secondary" onclick="closeModal('periodModal')">Cancel</button>
+          <button type="submit" class="btn btn-primary">Create</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
   <script>
-    const menuBtn = document.getElementById("menuBtn");
-    const hrMenu = document.getElementById("hrMenu");
+    const menuBtn = document.getElementById('menuBtn');
+    const hrMenu = document.getElementById('hrMenu');
 
     menuBtn.addEventListener("click", () => {
       const isOpen = hrMenu.classList.toggle("open");
@@ -430,120 +535,13 @@
       hrMenu.setAttribute("aria-hidden", String(!isOpen));
     });
 
-    document.addEventListener("click", (event) => {
-      if (!event.target.closest(".menu-wrap")) {
-        hrMenu.classList.remove("open");
-        menuBtn.setAttribute("aria-expanded", "false");
-        hrMenu.setAttribute("aria-hidden", "true");
+    document.addEventListener('click', (event) => {
+      if (!event.target.closest('.menu-wrap')) {
+        hrMenu.classList.remove('open');
+        menuBtn.setAttribute('aria-expanded', 'false');
+        hrMenu.setAttribute('aria-hidden', 'true');
       }
     });
-
-    const payrollForm = document.getElementById("payrollForm");
-    const resultsBox = document.getElementById("resultsBox");
-    const payrollTableBody = document.getElementById("payrollTableBody");
-
-    let payrollRecords = [
-      {
-        id: "EMP001",
-        name: "John Smith",
-        hoursWorked: 80,
-        hourlyRate: 24.5,
-        deductions: 180,
-        status: "Processed"
-      },
-      {
-        id: "EMP002",
-        name: "Maria Lopez",
-        hoursWorked: 76,
-        hourlyRate: 31.25,
-        deductions: 220,
-        status: "Processed"
-      },
-      {
-        id: "EMP003",
-        name: "David Chen",
-        hoursWorked: 64,
-        hourlyRate: 27.75,
-        deductions: 160,
-        status: "Pending"
-      }
-    ];
-
-    function renderPayrollTable() {
-      payrollTableBody.innerHTML = "";
-
-      payrollRecords.forEach((record) => {
-        const grossPay = record.hoursWorked * record.hourlyRate;
-        const netPay = grossPay - record.deductions;
-
-        const row = document.createElement("tr");
-        row.innerHTML = `
-          <td>${record.id}</td>
-          <td>${record.name}</td>
-          <td>${record.hoursWorked}</td>
-          <td>$${record.hourlyRate.toFixed(2)}</td>
-          <td>$${grossPay.toFixed(2)}</td>
-          <td>$${record.deductions.toFixed(2)}</td>
-          <td>$${netPay.toFixed(2)}</td>
-          <td>
-            <span class="status ${record.status === "Processed" ? "processed" : "pending"}">
-              ${record.status}
-            </span>
-          </td>
-        `;
-        payrollTableBody.appendChild(row);
-      });
-
-      updatePayrollStats();
-    }
-
-    function updatePayrollStats() {
-      const totalPayroll = payrollRecords.reduce((sum, record) => {
-        return sum + (record.hoursWorked * record.hourlyRate - record.deductions);
-      }, 0);
-
-      const totalDeductions = payrollRecords.reduce((sum, record) => {
-        return sum + record.deductions;
-      }, 0);
-
-      document.getElementById("totalPayroll").textContent = `$${totalPayroll.toFixed(2)}`;
-      document.getElementById("employeesPaid").textContent = payrollRecords.length;
-      document.getElementById("totalDeductions").textContent = `$${totalDeductions.toFixed(2)}`;
-    }
-
-    payrollForm.addEventListener("submit", (e) => {
-      e.preventDefault();
-
-      const employeeName = document.getElementById("employeeName").value.trim();
-      const hoursWorked = parseFloat(document.getElementById("hoursWorked").value);
-      const hourlyRate = parseFloat(document.getElementById("hourlyRate").value);
-      const deductions = parseFloat(document.getElementById("deductions").value);
-
-      const grossPay = hoursWorked * hourlyRate;
-      const netPay = grossPay - deductions;
-
-      resultsBox.innerHTML = `
-        <p><strong>Gross Pay:</strong> $${grossPay.toFixed(2)}</p>
-        <p><strong>Deductions:</strong> $${deductions.toFixed(2)}</p>
-        <p><strong>Net Pay:</strong> $${netPay.toFixed(2)}</p>
-      `;
-
-      const newId = "EMP" + String(payrollRecords.length + 1).padStart(3, "0");
-
-      payrollRecords.push({
-        id: newId,
-        name: employeeName,
-        hoursWorked,
-        hourlyRate,
-        deductions,
-        status: "Pending"
-      });
-
-      renderPayrollTable();
-      payrollForm.reset();
-    });
-
-    renderPayrollTable();
   </script>
 </body>
 </html>

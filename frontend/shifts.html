@@ -6,11 +6,25 @@
   <title>Shifts</title>
   <style>
     :root {
-      --bg: #f6f9fc;
+      --bg: #eef3f9;
       --text: #1f2937;
       --surface: #ffffff;
-      --border: #d1d5db;
+      --border: #d4dde8;
       --accent: #0f766e;
+      --primary: #1d4ed8;
+      --primary-dark: #1e40af;
+      --muted: #64748b;
+      --table-border: #dbe5f0;
+    }
+
+    body.dark {
+      --bg: #0b1220;
+      --surface: #111827;
+      --text: #f3f4f6;
+      --muted: #9ca3af;
+      --border: #374151;
+      --accent: #14b8a6;
+      --table-border: #374151;
     }
 
     * { box-sizing: border-box; }
@@ -18,7 +32,10 @@
     body {
       margin: 0;
       font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
-      background: var(--bg);
+      background:
+        radial-gradient(circle at top left, #dbeafe 0%, transparent 35%),
+        radial-gradient(circle at top right, #e0f2fe 0%, transparent 30%),
+        var(--bg);
       color: var(--text);
     }
 
@@ -27,121 +44,294 @@
       justify-content: space-between;
       align-items: center;
       padding: 14px 20px;
-      background: #1d4ed8;
-      border-bottom: 1px solid #1e40af;
+      background: var(--primary);
+      border-bottom: 1px solid var(--primary-dark);
       position: relative;
     }
 
-    h1 {
-      margin: 0;
-      font-size: 1.3rem;
-      color: #ffffff;
-    }
+    h1 { margin: 0; font-size: 1.3rem; color: #fff; }
 
-    main {
-      padding: 24px 20px;
-    }
-
-    .card {
-      background: var(--surface);
-      border: 1px solid var(--border);
-      border-radius: 12px;
-      padding: 20px;
-      max-width: 780px;
-    }
-
-    .menu-wrap {
-      position: relative;
-    }
+    .menu-wrap { position: relative; }
 
     .menu-btn {
-      width: 42px;
-      height: 42px;
-      border: 1px solid rgba(255, 255, 255, 0.45);
+      width: 42px; height: 42px;
+      border: 1px solid rgba(255,255,255,0.45);
       border-radius: 8px;
-      background: rgba(255, 255, 255, 0.12);
+      background: rgba(255,255,255,0.12);
       cursor: pointer;
-      display: flex;
-      flex-direction: column;
-      justify-content: center;
-      align-items: center;
-      gap: 5px;
-      padding: 0;
+      display: flex; flex-direction: column;
+      justify-content: center; align-items: center; gap: 5px; padding: 0;
     }
 
     .menu-btn span {
-      width: 20px;
-      height: 2px;
-      background: #ffffff;
-      border-radius: 10px;
-      display: block;
+      width: 20px; height: 2px;
+      background: #fff; border-radius: 10px; display: block;
     }
 
     .menu {
-      position: absolute;
-      right: 0;
-      top: 50px;
-      min-width: 210px;
-      background: var(--surface);
-      border: 1px solid var(--border);
-      border-radius: 10px;
-      box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
-      padding: 8px;
-      display: none;
-      z-index: 20;
+      position: absolute; right: 0; top: 50px;
+      min-width: 210px; background: var(--surface);
+      border: 1px solid var(--border); border-radius: 10px;
+      box-shadow: 0 10px 25px rgba(0,0,0,0.1);
+      padding: 8px; display: none; z-index: 20;
     }
 
-    .menu.open {
-      display: block;
-    }
+    .menu.open { display: block; }
 
     .menu a {
-      display: block;
-      text-decoration: none;
-      color: var(--text);
-      padding: 10px 12px;
-      border-radius: 8px;
-      font-size: 0.95rem;
+      display: block; text-decoration: none;
+      color: var(--text); padding: 10px 12px;
+      border-radius: 8px; font-size: 0.95rem;
     }
 
-    .menu a:hover {
-      background: #ecfeff;
-      color: var(--accent);
+    .menu a:hover { background: #ecfeff; color: var(--accent); }
+
+    main { max-width: 1180px; margin: 0 auto; padding: 24px 20px 40px; }
+
+    .toolbar {
+      display: flex; gap: 12px; align-items: center;
+      flex-wrap: wrap; margin-bottom: 16px;
+    }
+
+    .toolbar input, .toolbar select {
+      padding: 8px 12px; border: 1px solid var(--border);
+      border-radius: 8px; font-size: 0.95rem;
+      background: var(--surface); color: var(--text);
+      font-family: inherit;
+    }
+
+    .toolbar input { flex: 1; min-width: 180px; }
+
+    .btn {
+      padding: 8px 16px; border: none; border-radius: 8px;
+      cursor: pointer; font-size: 0.95rem; font-family: inherit;
+      font-weight: 600;
+    }
+
+    .btn-primary { background: var(--primary); color: #fff; }
+    .btn-primary:hover { background: var(--primary-dark); }
+
+    .table-shell {
+      background: var(--surface);
+      border: 1px solid var(--table-border);
+      border-radius: 12px; padding: 12px;
+      box-shadow: 0 10px 20px rgba(15,23,42,0.06);
+    }
+
+    .table-card {
+      background: var(--surface);
+      border: 1px solid var(--table-border);
+      border-radius: 10px; overflow-x: auto;
+    }
+
+    table { width: 100%; min-width: 820px; border-collapse: collapse; }
+
+    thead th {
+      font-size: 0.95rem; font-weight: 600; text-align: left;
+      color: #334155; background: #f8fbff;
+      border-bottom: 1px solid var(--table-border);
+      padding: 12px 14px;
+    }
+
+    tbody td {
+      padding: 11px 14px; color: #374151;
+      font-size: 0.95rem; vertical-align: middle;
+    }
+
+    tbody tr + tr td { border-top: 1px solid var(--table-border); }
+    tbody tr:nth-child(even) td { background: #fcfdff; }
+
+    .badge {
+      display: inline-block; padding: 2px 9px;
+      border-radius: 20px; font-size: 0.82rem; font-weight: 600;
+    }
+
+    .badge-approved { background: #dcfce7; color: #166534; }
+    .badge-pending  { background: #fef9c3; color: #854d0e; }
+
+    .type-badge {
+      display: inline-block; padding: 2px 8px;
+      border-radius: 6px; font-size: 0.82rem;
+      background: #e0f2fe; color: #0369a1;
+    }
+
+    .action-btn {
+      padding: 4px 10px; border: 1px solid var(--border);
+      border-radius: 6px; cursor: pointer; font-size: 0.85rem;
+      background: var(--surface); color: var(--text);
+    }
+
+    .action-btn:hover { background: #f0f9ff; border-color: var(--primary); color: var(--primary); }
+
+    /* Modal */
+    .overlay {
+      display: none; position: fixed; inset: 0;
+      background: rgba(0,0,0,0.4); z-index: 100;
+      justify-content: center; align-items: center;
+    }
+
+    .overlay.open { display: flex; }
+
+    .modal {
+      background: var(--surface); border-radius: 14px;
+      padding: 28px; width: 100%; max-width: 480px;
+      box-shadow: 0 20px 50px rgba(0,0,0,0.2);
+    }
+
+    .modal h2 { margin: 0 0 20px; font-size: 1.15rem; color: #0f172a; }
+
+    .field { margin-bottom: 14px; }
+    .field label { display: block; font-size: 0.88rem; color: var(--muted); margin-bottom: 4px; }
+
+    .field input, .field select, .field textarea {
+      width: 100%; padding: 8px 10px;
+      border: 1px solid var(--border); border-radius: 8px;
+      font-size: 0.95rem; font-family: inherit; color: var(--text);
+    }
+
+    .field textarea { resize: vertical; min-height: 60px; }
+
+    .modal-footer { display: flex; gap: 10px; justify-content: flex-end; margin-top: 20px; }
+
+    .btn-ghost {
+      background: transparent; border: 1px solid var(--border);
+      color: var(--text);
+    }
+
+    .btn-ghost:hover { background: #f1f5f9; }
+
+    #formError {
+      color: #ef4444; font-size: 0.88rem; margin-top: 8px; display: none;
     }
   </style>
 </head>
 <body>
   <header>
     <h1>Shifts</h1>
-
     <div class="menu-wrap">
       <button class="menu-btn" id="menuBtn" aria-label="Open menu" aria-expanded="false" aria-controls="hrMenu">
-        <span></span>
-        <span></span>
-        <span></span>
+        <span></span><span></span><span></span>
       </button>
-
       <nav class="menu" id="hrMenu" aria-hidden="true">
+        <a href="template_main_page.html">Home</a>
         <a href="profile.html">Profile</a>
         <a href="employees.html">Employees</a>
         <a href="shifts.html">Shifts</a>
         <a href="payroll.html">Payroll</a>
-        <a href="taxes.html">Taxes</a>
-        <a href="reports.html">Reports</a>
+        <a href="benefits.html">Benefits</a>
+        <a href="taxes_and_reports.html">Taxes &amp; Reports</a>
         <a href="settings.html">Settings</a>
+        <a href="logout.html" style="color:#ef4444;">Sign Out</a>
       </nav>
     </div>
   </header>
 
   <main>
-    <section class="card">
-      <p>Shifts page content goes here.</p>
+    <div class="toolbar">
+      <input id="searchInput" type="search" placeholder="Search by employee ID">
+      <select id="typeFilter">
+        <option value="">All Types</option>
+        <option value="work">Work</option>
+        <option value="sick">Sick</option>
+        <option value="vacation">Vacation</option>
+        <option value="holiday">Holiday</option>
+        <option value="unpaid">Unpaid</option>
+      </select>
+      <select id="approvedFilter">
+        <option value="">All Statuses</option>
+        <option value="true">Approved</option>
+        <option value="false">Pending</option>
+      </select>
+      <button class="btn btn-primary" id="addBtn">+ Log Entry</button>
+    </div>
+
+    <section class="table-shell">
+      <div class="table-card">
+        <table>
+          <thead>
+            <tr>
+              <th>Entry ID</th>
+              <th>Employee</th>
+              <th>Date</th>
+              <th>Clock In</th>
+              <th>Clock Out</th>
+              <th>Reg Hrs</th>
+              <th>OT Hrs</th>
+              <th>Type</th>
+              <th>Status</th>
+              <th>Actions</th>
+            </tr>
+          </thead>
+          <tbody id="shiftsBody">
+            <tr><td colspan="10" style="text-align:center;padding:24px;color:#64748b;">Loading…</td></tr>
+          </tbody>
+        </table>
+      </div>
     </section>
   </main>
 
+  <!-- Log Entry Modal -->
+  <div class="overlay" id="entryOverlay">
+    <div class="modal">
+      <h2 id="modalTitle">Log Time Entry</h2>
+      <div class="field">
+        <label>Employee ID</label>
+        <input type="number" id="fEmployeeId" placeholder="e.g. 1">
+      </div>
+      <div class="field">
+        <label>Date</label>
+        <input type="date" id="fDate">
+      </div>
+      <div class="field">
+        <label>Clock In</label>
+        <input type="time" id="fClockIn">
+      </div>
+      <div class="field">
+        <label>Clock Out</label>
+        <input type="time" id="fClockOut">
+      </div>
+      <div class="field">
+        <label>Regular Hours</label>
+        <input type="number" step="0.25" id="fRegHours" placeholder="e.g. 8">
+      </div>
+      <div class="field">
+        <label>Overtime Hours</label>
+        <input type="number" step="0.25" id="fOtHours" placeholder="e.g. 0">
+      </div>
+      <div class="field">
+        <label>Entry Type</label>
+        <select id="fType">
+          <option value="work">Work</option>
+          <option value="sick">Sick</option>
+          <option value="vacation">Vacation</option>
+          <option value="holiday">Holiday</option>
+          <option value="unpaid">Unpaid</option>
+        </select>
+      </div>
+      <div class="field">
+        <label>Notes</label>
+        <textarea id="fNotes" placeholder="Optional notes…"></textarea>
+      </div>
+      <div id="formError"></div>
+      <div class="modal-footer">
+        <button class="btn btn-ghost" id="cancelBtn">Cancel</button>
+        <button class="btn btn-primary" id="saveBtn">Save</button>
+      </div>
+    </div>
+  </div>
+
   <script>
+    if (localStorage.getItem('payroll_dark_mode') === 'enabled') {
+      document.body.classList.add('dark');
+    }
+
+    const API   = 'http://localhost:8000';
+    const token = localStorage.getItem('access_token');
+    const headers = { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` };
+
+    // ── Menu ─────────────────────────────────────────────────────
     const menuBtn = document.getElementById('menuBtn');
-    const hrMenu = document.getElementById('hrMenu');
+    const hrMenu  = document.getElementById('hrMenu');
 
     menuBtn.addEventListener('click', () => {
       const isOpen = hrMenu.classList.toggle('open');
@@ -149,14 +339,143 @@
       hrMenu.setAttribute('aria-hidden', String(!isOpen));
     });
 
-    document.addEventListener('click', (event) => {
-      if (!event.target.closest('.menu-wrap')) {
+    document.addEventListener('click', (e) => {
+      if (!e.target.closest('.menu-wrap')) {
         hrMenu.classList.remove('open');
         menuBtn.setAttribute('aria-expanded', 'false');
         hrMenu.setAttribute('aria-hidden', 'true');
       }
     });
+
+    // ── Load & render ────────────────────────────────────────────
+    async function loadEntries() {
+      const tbody      = document.getElementById('shiftsBody');
+      const searchVal  = document.getElementById('searchInput').value.toLowerCase();
+      const typeVal    = document.getElementById('typeFilter').value;
+      const approvedVal= document.getElementById('approvedFilter').value;
+
+      try {
+        const res = await fetch(`${API}/timeentries/all`, { headers });
+
+        if (res.status === 401) {
+          tbody.innerHTML = `<tr><td colspan="10" style="text-align:center;padding:24px;color:#ef4444;">Session expired — please log in again.</td></tr>`;
+          return;
+        }
+
+        const entries = await res.json();
+
+        let rows = entries.filter(e => {
+          const searchMatch = searchVal === '' || String(e.employee_id).includes(searchVal);
+          const typeMatch   = typeVal === '' || e.entry_type === typeVal;
+          const apprMatch   = approvedVal === ''
+            || (approvedVal === 'true'  && e.approved === true)
+            || (approvedVal === 'false' && e.approved !== true);
+          return searchMatch && typeMatch && apprMatch;
+        });
+
+        if (rows.length === 0) {
+          tbody.innerHTML = `<tr><td colspan="10" style="text-align:center;padding:24px;color:#64748b;">No entries found.</td></tr>`;
+          return;
+        }
+
+        tbody.innerHTML = rows.map(e => `
+          <tr>
+            <td>${e.entry_id}</td>
+            <td>#${e.employee_id}</td>
+            <td>${e.entry_date}</td>
+            <td>${e.clock_in  ?? '—'}</td>
+            <td>${e.clock_out ?? '—'}</td>
+            <td>${e.regular_hours  ?? '—'}</td>
+            <td>${e.overtime_hours ?? '—'}</td>
+            <td><span class="type-badge">${e.entry_type ?? '—'}</span></td>
+            <td>
+              ${e.approved
+                ? '<span class="badge badge-approved">Approved</span>'
+                : '<span class="badge badge-pending">Pending</span>'}
+            </td>
+            <td>
+              ${!e.approved
+                ? `<button class="action-btn" onclick="approveEntry(${e.entry_id})">Approve</button>`
+                : ''}
+              <button class="action-btn" onclick="deleteEntry(${e.entry_id})" style="margin-left:4px;color:#ef4444;">Delete</button>
+            </td>
+          </tr>`).join('');
+      } catch (_) {
+        document.getElementById('shiftsBody').innerHTML =
+          `<tr><td colspan="10" style="text-align:center;padding:24px;color:#ef4444;">Failed to load entries.</td></tr>`;
+      }
+    }
+
+    async function approveEntry(id) {
+      const res = await fetch(`${API}/timeentries/${id}/approve`, { method: 'PATCH', headers });
+      if (res.ok) loadEntries();
+    }
+
+    async function deleteEntry(id) {
+      if (!confirm('Delete this entry?')) return;
+      const res = await fetch(`${API}/timeentries/${id}`, { method: 'DELETE', headers });
+      if (res.ok) loadEntries();
+    }
+
+    // ── Filters ──────────────────────────────────────────────────
+    document.getElementById('searchInput').addEventListener('input', loadEntries);
+    document.getElementById('typeFilter').addEventListener('change', loadEntries);
+    document.getElementById('approvedFilter').addEventListener('change', loadEntries);
+
+    // ── Modal ─────────────────────────────────────────────────────
+    const overlay   = document.getElementById('entryOverlay');
+    const formError = document.getElementById('formError');
+
+    document.getElementById('addBtn').addEventListener('click', () => {
+      formError.style.display = 'none';
+      overlay.classList.add('open');
+    });
+
+    document.getElementById('cancelBtn').addEventListener('click', () => {
+      overlay.classList.remove('open');
+    });
+
+    document.getElementById('saveBtn').addEventListener('click', async () => {
+      formError.style.display = 'none';
+
+      const employeeId = parseInt(document.getElementById('fEmployeeId').value);
+      const entryDate  = document.getElementById('fDate').value;
+
+      if (!employeeId || !entryDate) {
+        formError.textContent = 'Employee ID and Date are required.';
+        formError.style.display = 'block';
+        return;
+      }
+
+      const body = {
+        employee_id:    employeeId,
+        entry_date:     entryDate,
+        clock_in:       document.getElementById('fClockIn').value  || null,
+        clock_out:      document.getElementById('fClockOut').value || null,
+        regular_hours:  parseFloat(document.getElementById('fRegHours').value) || null,
+        overtime_hours: parseFloat(document.getElementById('fOtHours').value)  || null,
+        entry_type:     document.getElementById('fType').value,
+        notes:          document.getElementById('fNotes').value || null,
+      };
+
+      const res = await fetch(`${API}/timeentries/create`, {
+        method: 'POST', headers, body: JSON.stringify(body)
+      });
+
+      if (res.ok) {
+        overlay.classList.remove('open');
+        // Reset form
+        ['fEmployeeId','fDate','fClockIn','fClockOut','fRegHours','fOtHours','fNotes']
+          .forEach(id => { document.getElementById(id).value = ''; });
+        loadEntries();
+      } else {
+        const err = await res.json().catch(() => ({}));
+        formError.textContent = err.detail ?? 'Failed to save entry.';
+        formError.style.display = 'block';
+      }
+    });
+
+    loadEntries();
   </script>
 </body>
 </html>
-

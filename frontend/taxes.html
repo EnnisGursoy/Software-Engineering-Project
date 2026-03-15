@@ -11,15 +11,24 @@
       --surface: #ffffff;
       --border: #d1d5db;
       --accent: #0f766e;
+      --muted: #6b7280;
     }
 
-    * { box-sizing: border-box; }
+    body.dark {
+      --bg: #0b1220;
+      --surface: #111827;
+      --text: #f3f4f6;
+      --muted: #9ca3af;
+      --border: #374151;
+      --accent: #14b8a6;
+    }
 
     body {
       margin: 0;
       font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
       background: var(--bg);
       color: var(--text);
+      transition: background 0.2s ease, color 0.2s ease;
     }
 
     header {
@@ -29,7 +38,6 @@
       padding: 14px 20px;
       background: #1d4ed8;
       border-bottom: 1px solid #1e40af;
-      position: relative;
     }
 
     h1 {
@@ -50,6 +58,39 @@
       max-width: 780px;
     }
 
+    .form-group {
+      margin-bottom: 14px;
+    }
+
+    label {
+      display: block;
+      margin-bottom: 6px;
+      font-weight: 600;
+    }
+
+    input, select {
+      width: 100%;
+      padding: 10px;
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      font-size: 1rem;
+    }
+
+    button {
+      padding: 10px 16px;
+      background: #1d4ed8;
+      color: white;
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+      font-size: 1rem;
+      margin-top: 10px;
+    }
+
+    button:hover {
+      background: #1e40af;
+    }
+
     .menu-wrap {
       position: relative;
     }
@@ -66,7 +107,6 @@
       justify-content: center;
       align-items: center;
       gap: 5px;
-      padding: 0;
     }
 
     .menu-btn span {
@@ -74,7 +114,6 @@
       height: 2px;
       background: #ffffff;
       border-radius: 10px;
-      display: block;
     }
 
     .menu {
@@ -85,10 +124,8 @@
       background: var(--surface);
       border: 1px solid var(--border);
       border-radius: 10px;
-      box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
       padding: 8px;
       display: none;
-      z-index: 20;
     }
 
     .menu.open {
@@ -101,7 +138,6 @@
       color: var(--text);
       padding: 10px 12px;
       border-radius: 8px;
-      font-size: 0.95rem;
     }
 
     .menu a:hover {
@@ -110,18 +146,17 @@
     }
   </style>
 </head>
+
 <body>
   <header>
     <h1>Taxes</h1>
 
     <div class="menu-wrap">
-      <button class="menu-btn" id="menuBtn" aria-label="Open menu" aria-expanded="false" aria-controls="hrMenu">
-        <span></span>
-        <span></span>
-        <span></span>
+      <button class="menu-btn" id="menuBtn">
+        <span></span><span></span><span></span>
       </button>
 
-      <nav class="menu" id="hrMenu" aria-hidden="true">
+      <nav class="menu" id="hrMenu">
         <a href="profile.html">Profile</a>
         <a href="employees.html">Employees</a>
         <a href="shifts.html">Shifts</a>
@@ -129,34 +164,174 @@
         <a href="taxes.html">Taxes</a>
         <a href="reports.html">Reports</a>
         <a href="settings.html">Settings</a>
+        <a href="logout.html" style="color:#ef4444;">Sign Out</a>
       </nav>
     </div>
   </header>
 
   <main>
     <section class="card">
-      <p>Taxes page content goes here.</p>
+      <h2>Create or Update Tax Information</h2>
+
+      <div class="form-group">
+        <label>Employee ID</label>
+        <input id="employeeId" type="number">
+      </div>
+
+      <div class="form-group">
+        <label>Filing Status</label>
+        <select id="filingStatus">
+          <option value="single">Single</option>
+          <option value="married">Married</option>
+          <option value="head_of_household">Head of Household</option>
+        </select>
+      </div>
+
+      <div class="form-group">
+        <label>Federal Allowances</label>
+        <input id="federalAllowances" type="number">
+      </div>
+
+      <div class="form-group">
+        <label>State Allowances</label>
+        <input id="stateAllowances" type="number">
+      </div>
+
+      <div class="form-group">
+        <label>Additional Withholding</label>
+        <input id="additionalWithholding" type="number" step="0.01">
+      </div>
+
+      <div class="form-group">
+        <label>Effective Date</label>
+        <input id="effectiveDate" type="date">
+      </div>
+
+      <div class="form-group" style="display:flex; gap:24px;">
+        <label style="font-weight:600; display:flex; align-items:center; gap:8px;">
+          <input id="exemptFederal" type="checkbox"> Exempt Federal
+        </label>
+        <label style="font-weight:600; display:flex; align-items:center; gap:8px;">
+          <input id="exemptState" type="checkbox"> Exempt State
+        </label>
+      </div>
+
+      <button onclick="createTax()">Create Tax Info</button>
+      <button onclick="loadTax()">Load Tax Info</button>
+      <button onclick="updateTax()">Update Tax Info</button>
+      <button onclick="deleteTax()">Delete Tax Info</button>
+      <button onclick="listAllTax()">List All Tax (Admin)</button>
+
+      <pre id="response" style="margin-top:14px; background:#f1f5f9; padding:12px; border-radius:8px; font-size:0.85rem; white-space:pre-wrap; word-break:break-word;"></pre>
     </section>
   </main>
 
   <script>
-    const menuBtn = document.getElementById('menuBtn');
-    const hrMenu = document.getElementById('hrMenu');
+    if (localStorage.getItem('payroll_dark_mode') === 'enabled') {
+      document.body.classList.add('dark');
+    }
 
-    menuBtn.addEventListener('click', () => {
-      const isOpen = hrMenu.classList.toggle('open');
-      menuBtn.setAttribute('aria-expanded', String(isOpen));
-      hrMenu.setAttribute('aria-hidden', String(!isOpen));
-    });
+    const API = "http://localhost:8000/tax";
 
-    document.addEventListener('click', (event) => {
-      if (!event.target.closest('.menu-wrap')) {
-        hrMenu.classList.remove('open');
-        menuBtn.setAttribute('aria-expanded', 'false');
-        hrMenu.setAttribute('aria-hidden', 'true');
-      }
+    function authHeaders() {
+      const token = localStorage.getItem("access_token");
+      const headers = { "Content-Type": "application/json" };
+      if (token) headers["Authorization"] = `Bearer ${token}`;
+      return headers;
+    }
+
+    async function createTax() {
+      const body = collectData();
+      const res = await fetch(API + "/", {
+        method: "POST",
+        headers: authHeaders(),
+        body: JSON.stringify(body)
+      });
+      showResponse(res.status, await res.json());
+    }
+
+    async function loadTax() {
+      const id = document.getElementById("employeeId").value;
+      if (!id) { showResponse(null, { error: "Employee ID is required" }); return; }
+      const res = await fetch(`${API}/${id}`, { headers: authHeaders() });
+      const data = await res.json();
+      showResponse(res.status, data);
+      if (res.ok) populateForm(data);
+    }
+
+    async function updateTax() {
+      const id = document.getElementById("employeeId").value;
+      if (!id) { showResponse(null, { error: "Employee ID is required" }); return; }
+      const body = collectUpdateData();
+      const res = await fetch(`${API}/${id}`, {
+        method: "PATCH",
+        headers: authHeaders(),
+        body: JSON.stringify(body)
+      });
+      showResponse(res.status, await res.json());
+    }
+
+    async function deleteTax() {
+      const id = document.getElementById("employeeId").value;
+      if (!id) { showResponse(null, { error: "Employee ID is required" }); return; }
+      const res = await fetch(`${API}/${id}`, { method: "DELETE", headers: authHeaders() });
+      showResponse(res.status, await res.json());
+    }
+
+    async function listAllTax() {
+      const res = await fetch(API + "/", { headers: authHeaders() });
+      showResponse(res.status, await res.json());
+    }
+
+    function collectData() {
+      return {
+        employee_id: Number(document.getElementById("employeeId").value),
+        filing_status: document.getElementById("filingStatus").value,
+        federal_allowances: Number(document.getElementById("federalAllowances").value),
+        state_allowances: Number(document.getElementById("stateAllowances").value),
+        additional_withholding: Number(document.getElementById("additionalWithholding").value) || null,
+        effective_date: document.getElementById("effectiveDate").value || null,
+        exempt_federal: document.getElementById("exemptFederal").checked,
+        exempt_state: document.getElementById("exemptState").checked
+      };
+    }
+
+    function collectUpdateData() {
+      const d = {};
+      const fs = document.getElementById("filingStatus").value;
+      const fa = document.getElementById("federalAllowances").value;
+      const sa = document.getElementById("stateAllowances").value;
+      const aw = document.getElementById("additionalWithholding").value;
+      const ed = document.getElementById("effectiveDate").value;
+      if (fs) d.filing_status = fs;
+      if (fa !== "") d.federal_allowances = Number(fa);
+      if (sa !== "") d.state_allowances = Number(sa);
+      if (aw !== "") d.additional_withholding = Number(aw);
+      if (ed) d.effective_date = ed;
+      d.exempt_federal = document.getElementById("exemptFederal").checked;
+      d.exempt_state = document.getElementById("exemptState").checked;
+      return d;
+    }
+
+    function populateForm(data) {
+      if (data.filing_status) document.getElementById("filingStatus").value = data.filing_status;
+      if (data.federal_allowances != null) document.getElementById("federalAllowances").value = data.federal_allowances;
+      if (data.state_allowances != null) document.getElementById("stateAllowances").value = data.state_allowances;
+      if (data.additional_withholding != null) document.getElementById("additionalWithholding").value = data.additional_withholding;
+      if (data.effective_date) document.getElementById("effectiveDate").value = data.effective_date;
+      document.getElementById("exemptFederal").checked = !!data.exempt_federal;
+      document.getElementById("exemptState").checked = !!data.exempt_state;
+    }
+
+    function showResponse(status, data) {
+      const el = document.getElementById("response");
+      el.style.color = (status && status >= 400) ? "#dc2626" : "#166534";
+      el.textContent = JSON.stringify(data, null, 2);
+    }
+
+    document.getElementById("menuBtn").addEventListener("click", () => {
+      document.getElementById("hrMenu").classList.toggle("open");
     });
   </script>
 </body>
 </html>
-

@@ -1,4 +1,4 @@
-from sqlalchemy import Column, Integer, String, Date, Enum, TIMESTAMP, Boolean
+from sqlalchemy import Column, Integer, String, Date, Enum, TIMESTAMP, Boolean, ForeignKey
 from Backend.Database.connection import Base
 from sqlalchemy.sql import func
 
@@ -8,7 +8,10 @@ class User(Base):
     user_id = Column(Integer, primary_key=True, index=True, autoincrement=True)
     username = Column(String(100), unique=True, nullable=False)
     password_hash = Column(String(255), nullable=False)
+    first_name = Column(String(50), nullable=True)
+    last_name = Column(String(50), nullable=True)
     role = Column(Enum("admin", "manager", "hr",  name="user_roles"), default="admin") #hr = human responsibility role
+    department_id = Column(Integer, ForeignKey("departments.department_id"), nullable=True)
     is_active = Column(Boolean, default=True)
 
     created_at = Column(TIMESTAMP, server_default=func.now())
