@@ -35,7 +35,6 @@ async def update_info(employee_id : int , employee: EmployeeUpdate, user : User 
    return employee_change
 
 
-
 # soft delete — sets employment_status to "terminated"
 @router.delete('/{employee_id}/delete')
 async def remove_employee(employee_id: int, user: User = Depends(hr_only), db: Session = Depends(get_db)):

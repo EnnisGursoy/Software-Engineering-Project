@@ -6,18 +6,11 @@
   <title>Payroll</title>
   <style>
     :root {
-      --bg: #eef3f9;
+      --bg: #f6f9fc;
       --text: #1f2937;
       --surface: #ffffff;
-      --border: #d4dde8;
+      --border: #d1d5db;
       --accent: #0f766e;
-      --primary: #1d4ed8;
-      --primary-dark: #1e40af;
-      --muted: #64748b;
-      --table-bg: #ffffff;
-      --table-border: #dbe5f0;
-      --table-text: #1f2937;
-      --table-muted: #374151;
     }
 
     body.dark {
@@ -50,14 +43,28 @@
       justify-content: space-between;
       align-items: center;
       padding: 14px 20px;
-      background: var(--primary);
-      border-bottom: 1px solid var(--primary-dark);
+      background: #1d4ed8;
+      border-bottom: 1px solid #1e40af;
       position: relative;
     }
 
     h1 { margin: 0; font-size: 1.3rem; color: #ffffff; }
 
-    .menu-wrap { position: relative; }
+    main {
+      padding: 24px 20px;
+    }
+
+    .card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 20px;
+      max-width: 780px;
+    }
+
+    .menu-wrap {
+      position: relative;
+    }
 
     .menu-btn {
       width: 42px; height: 42px;
@@ -80,7 +87,9 @@
       padding: 8px; display: none; z-index: 20;
     }
 
-    .menu.open { display: block; }
+    .menu.open {
+      display: block;
+    }
 
     .menu a {
       display: block; text-decoration: none; color: var(--text);
@@ -258,8 +267,8 @@
         <a href="employees.html">Employees</a>
         <a href="shifts.html">Shifts</a>
         <a href="payroll.html">Payroll</a>
-        <a href="taxes.html">Taxes</a>
-        <a href="reports.html">Reports</a>
+        <a href="benefits.html">Benefits</a>
+        <a href="taxes_and_reports.html">Taxes &amp; Reports</a>
         <a href="settings.html">Settings</a>
         <a href="logout.html" style="color:#ef4444;">Sign Out</a>
       </nav>

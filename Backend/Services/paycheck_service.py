@@ -1,4 +1,4 @@
-﻿from sqlalchemy.orm import Session
+from sqlalchemy.orm import Session
 from fastapi import HTTPException
 from Backend.Models.Paychecks import Paychecks
 from Backend.Models.Employee import Employee

@@ -1,4 +1,4 @@
-﻿from sqlalchemy.orm import Session
+from sqlalchemy.orm import Session
 from fastapi import HTTPException
 from datetime import datetime, timedelta
 from Backend.Models.Time_entries import TimeEntries

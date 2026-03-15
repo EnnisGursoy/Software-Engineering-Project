@@ -1,0 +1,850 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Benefits</title>
+  <style>
+    :root {
+      --bg: #eef3f9; --text: #1f2937; --surface: #ffffff; --border: #d4dde8;
+      --accent: #0f766e; --primary: #1d4ed8; --primary-dark: #1e40af; --muted: #64748b;
+      --success: #0f766e; --warning: #b45309; --danger: #b91c1c;
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0; font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+      background: radial-gradient(circle at top left, #dbeafe 0%, transparent 35%),
+                  radial-gradient(circle at top right, #e0f2fe 0%, transparent 30%), var(--bg);
+      color: var(--text);
+    }
+
+    /* ── HEADER / NAV ── */
+    header {
+      display: flex; justify-content: space-between; align-items: center;
+      padding: 14px 20px; background: var(--primary); border-bottom: 1px solid var(--primary-dark);
+    }
+    h1 { margin: 0; font-size: 1.3rem; color: #fff; }
+    main { max-width: 1160px; margin: 0 auto; padding: 0 20px 40px; }
+
+    .menu-wrap { position: relative; }
+    .menu-btn {
+      width: 42px; height: 42px; border: 1px solid rgba(255,255,255,0.45);
+      border-radius: 8px; background: rgba(255,255,255,0.12); cursor: pointer;
+      display: flex; flex-direction: column; justify-content: center;
+      align-items: center; gap: 5px; padding: 0;
+    }
+    .menu-btn span { width: 20px; height: 2px; background: #fff; border-radius: 10px; display: block; }
+    .menu {
+      position: absolute; right: 0; top: 50px; min-width: 210px;
+      background: var(--surface); border: 1px solid var(--border);
+      border-radius: 10px; box-shadow: 0 10px 25px rgba(0,0,0,0.1);
+      padding: 8px; display: none; z-index: 20;
+    }
+    .menu.open { display: block; }
+    .menu a { display: block; text-decoration: none; color: var(--text); padding: 10px 12px; border-radius: 8px; font-size: 0.95rem; }
+    .menu a:hover { background: #ecfeff; color: var(--accent); }
+
+    /* ── SUBNAV ── */
+    .subnav {
+      display: flex; gap: 18px; flex-wrap: wrap; align-items: center;
+      padding: 10px 0 0; border-bottom: 1px solid rgba(15,23,42,0.08); margin-bottom: 20px;
+    }
+    .subnav a {
+      position: relative; text-decoration: none; color: #334155;
+      font-size: 0.9rem; padding: 8px 2px; display: inline-flex; align-items: center;
+    }
+    .subnav a:hover { color: #111827; }
+    .subnav a.active { color: #111827; font-weight: 650; }
+    .subnav a.active::after {
+      content: ''; position: absolute; left: 0; right: 0; bottom: -1px;
+      height: 2px; background: var(--primary); border-radius: 999px;
+    }
+    .panel { display: none; }
+    .panel.active { display: block; }
+
+    /* ── BUTTONS ── */
+    .btn {
+      border: 1px solid var(--border); border-radius: 8px; padding: 8px 14px;
+      font-size: 0.88rem; cursor: pointer; font-family: inherit;
+      background: #f8fbff; color: var(--text); transition: background 0.15s;
+    }
+    .btn.primary { background: var(--primary); color: #fff; border-color: var(--primary-dark); }
+    .btn.primary:hover { background: var(--primary-dark); }
+    .btn.small { padding: 6px 10px; font-size: 0.82rem; }
+    .btn.ghost { background: transparent; border-color: var(--border); }
+    .btn.ghost:hover { background: #f1f5f9; }
+    .btn.danger-btn { background: #fef2f2; color: #991b1b; border-color: #fecaca; }
+
+    /* ── TOOLBAR ── */
+    .toolbar {
+      display: flex; align-items: center; gap: 10px;
+      flex-wrap: wrap; margin-bottom: 16px;
+    }
+    .search-wrap { position: relative; }
+    .search-icon {
+      position: absolute; left: 9px; top: 50%; transform: translateY(-50%);
+      font-size: 0.85rem; pointer-events: none; color: var(--muted);
+    }
+    .search-input {
+      padding: 8px 10px 8px 30px; border: 1px solid var(--border); border-radius: 8px;
+      font-size: 0.88rem; font-family: inherit; background: #fff;
+      color: var(--text); outline: none; width: 220px;
+    }
+    .search-input:focus { border-color: var(--primary); }
+    select.filter {
+      padding: 8px 12px; border: 1px solid var(--border); border-radius: 8px;
+      font-size: 0.88rem; font-family: inherit; background: #fff;
+      color: var(--text); cursor: pointer; outline: none;
+    }
+    .ml-auto { margin-left: auto; }
+
+    /* ── TABLE ── */
+    .table-shell {
+      background: var(--surface); border: 1px solid var(--border); border-radius: 12px;
+      padding: 12px; box-shadow: 0 10px 20px rgba(15,23,42,0.06);
+    }
+    .table-card { background: #fff; border: 1px solid var(--border); border-radius: 10px; overflow-x: auto; }
+    table { width: 100%; border-collapse: collapse; min-width: 700px; }
+    thead th {
+      font-size: 0.78rem; font-weight: 600; text-align: left; color: #475569;
+      background: #f8fbff; border-bottom: 1px solid var(--border);
+      padding: 12px 14px; text-transform: uppercase; letter-spacing: 0.3px;
+    }
+    tbody td { padding: 11px 14px; color: #374151; font-size: 0.9rem; }
+    tbody tr + tr td { border-top: 1px solid var(--border); }
+    tbody tr:hover td { background: #f8fbff; }
+
+    /* ── BADGES ── */
+    .badge {
+      display: inline-block; font-size: 0.75rem; border-radius: 999px;
+      padding: 3px 10px; border: 1px solid transparent; white-space: nowrap;
+    }
+    .badge-active   { background: #ecfdf5; color: #065f46; border-color: #a7f3d0; }
+    .badge-inactive { background: #f1f5f9; color: #475569; border-color: #e2e8f0; }
+    .badge-pending  { background: #fffbeb; color: #92400e; border-color: #fde68a; }
+    .badge-type     { background: #eff6ff; color: #1e40af; border-color: #bfdbfe; }
+
+    /* ── TABLE ACTIONS ── */
+    .tbl-actions { display: flex; gap: 6px; justify-content: flex-end; }
+    .icon-btn {
+      width: 30px; height: 30px; border-radius: 6px; border: 1px solid var(--border);
+      background: #fff; cursor: pointer; font-size: 0.82rem;
+      display: inline-flex; align-items: center; justify-content: center;
+      transition: all 0.15s;
+    }
+    .icon-btn:hover     { border-color: var(--primary); background: #eff6ff; }
+    .icon-btn.del:hover { border-color: #ef4444; background: #fef2f2; }
+
+    .empty-row td {
+      text-align: center; color: var(--muted); font-size: 0.88rem;
+      padding: 32px 14px; font-style: italic;
+    }
+
+    /* ── PAGINATION ── */
+    .pagination {
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 12px 4px 0; font-size: 0.82rem; color: var(--muted);
+    }
+    .page-btns { display: flex; gap: 4px; }
+    .page-btn {
+      width: 30px; height: 30px; border-radius: 6px; border: 1px solid var(--border);
+      background: #fff; cursor: pointer; font-size: 0.8rem; font-family: inherit;
+      display: flex; align-items: center; justify-content: center;
+    }
+    .page-btn.active { background: var(--primary); color: #fff; border-color: var(--primary); }
+    .page-btn:hover:not(.active) { background: #f1f5f9; }
+
+    /* ── PLAN CATALOG (tab 2) ── */
+    .plan-grid {
+      display: grid; grid-template-columns: repeat(3, 1fr); gap: 14px; margin-bottom: 16px;
+    }
+    @media (max-width: 800px) { .plan-grid { grid-template-columns: 1fr 1fr; } }
+    @media (max-width: 520px) { .plan-grid { grid-template-columns: 1fr; } }
+    .plan-card {
+      background: var(--surface); border: 1px solid var(--border);
+      border-radius: 12px; padding: 16px; display: flex; flex-direction: column; gap: 8px;
+    }
+    .plan-card-head { display: flex; align-items: flex-start; justify-content: space-between; gap: 8px; }
+    .plan-name { font-weight: 600; font-size: 0.92rem; color: #0f172a; }
+    .plan-provider { font-size: 0.8rem; color: var(--muted); }
+    .plan-cost { font-size: 0.82rem; color: #334155; }
+    .plan-cost span { font-weight: 600; color: #0f172a; }
+    .plan-actions { display: flex; gap: 6px; margin-top: 4px; }
+
+    /* ── DIALOGS ── */
+    dialog {
+      width: min(600px, calc(100vw - 32px));
+      border: 1px solid var(--border); border-radius: 14px; padding: 0;
+      box-shadow: 0 18px 40px rgba(15,23,42,0.18);
+    }
+    dialog::backdrop { background: rgba(15,23,42,0.5); }
+    .dlg-head {
+      display: flex; align-items: flex-start; justify-content: space-between;
+      gap: 12px; padding: 14px 16px 10px;
+      background: #f8fafc; border-bottom: 1px solid var(--border);
+    }
+    .dlg-head h3 { margin: 0; font-size: 1.05rem; color: #0f172a; }
+    .dlg-head p  { margin: 4px 0 0; font-size: 0.82rem; color: var(--muted); }
+    .dlg-body { padding: 16px; }
+    .form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+    .form-grid .span-2 { grid-column: 1/-1; }
+    .field label { display: block; font-size: 0.82rem; color: #475569; margin-bottom: 5px; }
+    .finput, .fselect, .ftextarea {
+      width: 100%; padding: 9px 10px; border: 1px solid var(--border);
+      border-radius: 8px; font-size: 0.9rem; font-family: inherit;
+      background: #fff; color: var(--text); outline: none;
+    }
+    .finput:focus, .fselect:focus, .ftextarea:focus { border-color: var(--primary); }
+    .ftextarea { min-height: 72px; resize: vertical; }
+    .dlg-actions {
+      display: flex; justify-content: flex-end; gap: 10px;
+      padding: 12px 16px; border-top: 1px solid var(--border); background: #fff;
+    }
+    .section-divider {
+      font-size: 0.72rem; text-transform: uppercase; letter-spacing: 0.06em;
+      color: var(--muted); font-weight: 600; grid-column: 1/-1;
+      padding: 6px 0 2px; border-top: 1px solid var(--border); margin-top: 4px;
+    }
+  </style>
+</head>
+<body>
+
+<header>
+  <h1>Benefits</h1>
+  <div class="menu-wrap">
+    <button class="menu-btn" id="menuBtn" aria-label="Open menu" aria-expanded="false" aria-controls="hrMenu">
+      <span></span><span></span><span></span>
+    </button>
+    <nav class="menu" id="hrMenu" aria-hidden="true">
+      <a href="template_main_page.html">Home</a>
+      <a href="profile.html">Profile</a>
+      <a href="employees.html">Employees</a>
+      <a href="shifts.html">Shifts</a>
+      <a href="payroll.html">Payroll</a>
+      <a href="benefits.html">Benefits</a>
+      <a href="taxes_and_reports.html">Taxes &amp; Reports</a>
+      <a href="settings.html">Settings</a>
+    </nav>
+  </div>
+</header>
+
+<main>
+  <nav class="subnav" aria-label="Benefits sections">
+    <a class="active" href="#enrollments" data-panel="enrollments">Employee Enrollments</a>
+    <a href="#plans" data-panel="plans">Benefit Plans</a>
+  </nav>
+
+<!-- PANEL 1 — ENROLLMENT PLANS CATALOG DIALOGS -->
+  <section class="panel active" id="panel-enrollments" data-panel="enrollments">
+
+    <div class="toolbar">
+      <div class="search-wrap">
+        <span class="search-icon">🔍</span>
+        <input type="search" class="search-input" id="enrollSearch" placeholder="Search employee or benefit…" oninput="filterEnrollments()">
+      </div>
+      <select class="filter" id="enrollTypeFilter" onchange="filterEnrollments()">
+        <option value="">All Types</option>
+        <option>Medical</option>
+        <option>Dental</option>
+        <option>Vision</option>
+        <option>401(k)</option>
+        <option>Life Insurance</option>
+        <option>Other</option>
+      </select>
+      <select class="filter" id="enrollStatusFilter" onchange="filterEnrollments()">
+        <option value="">All Statuses</option>
+        <option>Active</option>
+        <option>Inactive</option>
+        <option>Pending</option>
+      </select>
+      <button class="btn primary ml-auto" onclick="openDlg('dlgEnrollAdd')">+ Add Enrollment</button>
+    </div>
+
+    <div class="table-shell">
+      <div class="table-card">
+        <table>
+          <thead>
+            <tr>
+              <th>Employee</th>
+              <th>Benefit Plan</th>
+              <th>Type</th>
+              <th>Provider</th>
+              <th>Employee Cost</th>
+              <th>Employer Cost</th>
+              <th>Effective Date</th>
+              <th>End Date</th>
+              <th>Status</th>
+              <th style="text-align:right;">Actions</th>
+            </tr>
+          </thead>
+          <tbody id="enrollTable"></tbody>
+        </table>
+      </div>
+      <div class="pagination">
+        <span id="enrollCount">0 enrollments</span>
+        <div class="page-btns">
+          <button class="page-btn active">1</button>
+        </div>
+      </div>
+    </div>
+  </section>
+
+<!-- PANEL 2 — BENEFIT PLANS CATALOG DIALOGS -->
+  <section class="panel" id="panel-plans" data-panel="plans">
+
+    <div class="toolbar">
+      <div class="search-wrap">
+        <span class="search-icon">🔍</span>
+        <input type="search" class="search-input" id="planSearch" placeholder="Search plans…" oninput="filterPlans()">
+      </div>
+      <select class="filter" id="planTypeFilter" onchange="filterPlans()">
+        <option value="">All Types</option>
+        <option>Medical</option>
+        <option>Dental</option>
+        <option>Vision</option>
+        <option>401(k)</option>
+        <option>Life Insurance</option>
+        <option>Other</option>
+      </select>
+      <button class="btn primary ml-auto" onclick="openDlg('dlgPlanAdd')">+ Add Plan</button>
+    </div>
+
+    <div id="planGrid" class="plan-grid"></div>
+
+  </section>
+</main>
+
+
+<!-- ENROLLMENT DIALOGS -->
+<dialog id="dlgEnrollAdd">
+  <div class="dlg-head">
+    <div><h3>Add Enrollment</h3><p>Enroll an employee in a benefit plan.</p></div>
+    <button class="btn ghost" onclick="document.getElementById('dlgEnrollAdd').close()" style="padding:4px 10px;">✕</button>
+  </div>
+  <div class="dlg-body">
+    <div class="form-grid">
+      <div class="field span-2"><label>Employee</label>
+        <select class="fselect" id="eAdd_emp">
+          <!-- populated dynamically from EMPLOYEES list in JS -->
+        </select>
+      </div>
+      <div class="field"><label>Benefit Type</label>
+        <select class="fselect" id="eAdd_type" onchange="populatePlanDropdown('eAdd_type','eAdd_plan')">
+          <option value="">— Select type —</option>
+          <option>Medical</option><option>Dental</option><option>Vision</option>
+          <option>401(k)</option><option>Life Insurance</option><option>Other</option>
+        </select>
+      </div>
+      <div class="field"><label>Plan</label>
+        <select class="fselect" id="eAdd_plan">
+          <option value="">— Select type first —</option>
+        </select>
+      </div>
+      <div class="field"><label>Employee Cost (per period)</label>
+        <input class="finput" id="eAdd_empCost" type="text" placeholder="$0.00">
+      </div>
+      <div class="field"><label>Employer Cost (per period)</label>
+        <input class="finput" id="eAdd_erCost" type="text" placeholder="$0.00">
+      </div>
+      <div class="field"><label>Effective Date</label>
+        <input class="finput" id="eAdd_start" type="date">
+      </div>
+      <div class="field"><label>End Date (optional)</label>
+        <input class="finput" id="eAdd_end" type="date">
+      </div>
+      <div class="field"><label>Status</label>
+        <select class="fselect" id="eAdd_status">
+          <option selected>Active</option><option>Pending</option><option>Inactive</option>
+        </select>
+      </div>
+      <div class="field span-2"><label>Notes</label>
+        <textarea class="ftextarea" id="eAdd_notes" placeholder="Optional notes…"></textarea>
+      </div>
+    </div>
+  </div>
+  <div class="dlg-actions">
+    <button class="btn ghost" onclick="document.getElementById('dlgEnrollAdd').close()">Cancel</button>
+    <button class="btn primary" onclick="saveEnrollment()">Add Enrollment</button>
+  </div>
+</dialog>
+
+<dialog id="dlgEnrollEdit">
+  <div class="dlg-head">
+    <div><h3>Edit Enrollment</h3><p id="dlgEnrollEditSub">Update benefit enrollment details.</p></div>
+    <button class="btn ghost" onclick="document.getElementById('dlgEnrollEdit').close()" style="padding:4px 10px;">✕</button>
+  </div>
+  <div class="dlg-body">
+    <div class="form-grid">
+      <div class="field span-2"><label>Employee</label>
+        <select class="fselect" id="eEdit_emp">
+          <!-- populated dynamically from EMPLOYEES list in JS !!!!!!!!!!!!!!!! -->
+        </select>
+      </div>
+      <div class="field"><label>Benefit Type</label>
+        <select class="fselect" id="eEdit_type">
+          <option>Medical</option><option>Dental</option><option>Vision</option>
+          <option>401(k)</option><option>Life Insurance</option><option>Other</option>
+        </select>
+      </div>
+      <div class="field"><label>Plan Name</label>
+        <input class="finput" id="eEdit_plan" type="text">
+      </div>
+      <div class="field"><label>Provider</label>
+        <input class="finput" id="eEdit_provider" type="text">
+      </div>
+      <div class="field"><label>Status</label>
+        <select class="fselect" id="eEdit_status">
+          <option>Active</option><option>Pending</option><option>Inactive</option>
+        </select>
+      </div>
+      <div class="field"><label>Employee Cost</label>
+        <input class="finput" id="eEdit_empCost" type="text">
+      </div>
+      <div class="field"><label>Employer Cost</label>
+        <input class="finput" id="eEdit_erCost" type="text">
+      </div>
+      <div class="field"><label>Effective Date</label>
+        <input class="finput" id="eEdit_start" type="date">
+      </div>
+      <div class="field"><label>End Date</label>
+        <input class="finput" id="eEdit_end" type="date">
+      </div>
+      <div class="field span-2"><label>Notes</label>
+        <textarea class="ftextarea" id="eEdit_notes"></textarea>
+      </div>
+    </div>
+  </div>
+  <div class="dlg-actions">
+    <button class="btn ghost" onclick="document.getElementById('dlgEnrollEdit').close()">Cancel</button>
+    <button class="btn primary" onclick="updateEnrollment()">Save Changes</button>
+  </div>
+</dialog>
+
+
+<!-- INCOME DIALOGS -->
+<dialog id="dlgPlanAdd">
+  <div class="dlg-head">
+    <div><h3>Add Benefit Plan</h3><p>Add a plan to the company catalog.</p></div>
+    <button class="btn ghost" onclick="document.getElementById('dlgPlanAdd').close()" style="padding:4px 10px;">✕</button>
+  </div>
+  <div class="dlg-body">
+    <div class="form-grid">
+      <div class="field"><label>Plan Name</label>
+        <input class="finput" id="pAdd_name" type="text" placeholder="e.g. Standard Medical">
+      </div>
+      <div class="field"><label>Type</label>
+        <select class="fselect" id="pAdd_type">
+          <option>Medical</option><option>Dental</option><option>Vision</option>
+          <option>401(k)</option><option>Life Insurance</option><option>Other</option>
+        </select>
+      </div>
+      <div class="field"><label>Provider</label>
+        <input class="finput" id="pAdd_provider" type="text" placeholder="e.g. BlueCross BlueShield">
+      </div>
+      <div class="field"><label>Default Employee Cost</label>
+        <input class="finput" id="pAdd_empCost" type="text" placeholder="$0.00">
+      </div>
+      <div class="field"><label>Default Employer Cost</label>
+        <input class="finput" id="pAdd_erCost" type="text" placeholder="$0.00">
+      </div>
+      <div class="field"><label>Coverage Level</label>
+        <select class="fselect" id="pAdd_coverage">
+          <option>Individual</option><option>Individual + Spouse</option>
+          <option>Individual + Children</option><option>Family</option>
+        </select>
+      </div>
+      <div class="field span-2"><label>Description / Notes</label>
+        <textarea class="ftextarea" id="pAdd_notes" placeholder="Plan details, eligibility, etc."></textarea>
+      </div>
+    </div>
+  </div>
+  <div class="dlg-actions">
+    <button class="btn ghost" onclick="document.getElementById('dlgPlanAdd').close()">Cancel</button>
+    <button class="btn primary" onclick="savePlan()">Add Plan</button>
+  </div>
+</dialog>
+
+<dialog id="dlgPlanEdit">
+  <div class="dlg-head">
+    <div><h3>Edit Benefit Plan</h3><p>Update plan details in the catalog.</p></div>
+    <button class="btn ghost" onclick="document.getElementById('dlgPlanEdit').close()" style="padding:4px 10px;">✕</button>
+  </div>
+  <div class="dlg-body">
+    <div class="form-grid">
+      <div class="field"><label>Plan Name</label>
+        <input class="finput" id="pEdit_name" type="text">
+      </div>
+      <div class="field"><label>Type</label>
+        <select class="fselect" id="pEdit_type">
+          <option>Medical</option><option>Dental</option><option>Vision</option>
+          <option>401(k)</option><option>Life Insurance</option><option>Other</option>
+        </select>
+      </div>
+      <div class="field"><label>Provider</label>
+        <input class="finput" id="pEdit_provider" type="text">
+      </div>
+      <div class="field"><label>Default Employee Cost</label>
+        <input class="finput" id="pEdit_empCost" type="text">
+      </div>
+      <div class="field"><label>Default Employer Cost</label>
+        <input class="finput" id="pEdit_erCost" type="text">
+      </div>
+      <div class="field"><label>Coverage Level</label>
+        <select class="fselect" id="pEdit_coverage">
+          <option>Individual</option><option>Individual + Spouse</option>
+          <option>Individual + Children</option><option>Family</option>
+        </select>
+      </div>
+      <div class="field span-2"><label>Description / Notes</label>
+        <textarea class="ftextarea" id="pEdit_notes"></textarea>
+      </div>
+    </div>
+  </div>
+  <div class="dlg-actions">
+    <button class="btn ghost" onclick="document.getElementById('dlgPlanEdit').close()">Cancel</button>
+    <button class="btn primary" onclick="updatePlan()">Save Changes</button>
+  </div>
+</dialog>
+
+<!-- DELETE CONFIRM -->
+<dialog id="dlgDelete">
+  <div class="dlg-head">
+    <div><h3>Delete</h3><p>This cannot be undone.</p></div>
+    <button class="btn ghost" onclick="document.getElementById('dlgDelete').close()" style="padding:4px 10px;">✕</button>
+  </div>
+  <div class="dlg-body">
+    <p style="margin:0;font-size:0.92rem;">Are you sure you want to remove <strong id="deleteLabel"></strong>?</p>
+  </div>
+  <div class="dlg-actions">
+    <button class="btn ghost" onclick="document.getElementById('dlgDelete').close()">Cancel</button>
+    <button class="btn danger-btn" id="confirmDeleteBtn">Delete</button>
+  </div>
+</dialog>
+
+
+<script>
+  // ── UTILITY ──
+  function nextId(arr) { return arr.length ? Math.max(...arr.map(x => x.id)) + 1 : 1; }
+  function openDlg(id) { document.getElementById(id).showModal(); }
+
+  // ── EMPLOYEE LIST ── !!!!!!!!!!!!!!!!!!!!!!!!!!
+  // TODO: replace this array with a fetch() call for employees API
+  // Each object needs at minimum: { id, name }!!!!!!!!!!!!!!!!!!!!!!!!!
+  const EMPLOYEES = [
+    { id:'EMP001', name:'Employee 1' },
+    { id:'EMP002', name:'Employee 2' },
+    { id:'EMP003', name:'Employee 3' },
+    { id:'EMP004', name:'Employee 4' },
+    { id:'EMP005', name:'Employee 5' },
+    { id:'EMP006', name:'Employee 6' },
+    { id:'EMP007', name:'Employee 7' },
+  ];
+
+  // Build empLabels map and populate all employee dropdowns from EMPLOYEES
+  const empLabels = {};
+  function initEmployees() {
+    EMPLOYEES.forEach(e => { empLabels[e.id] = e.name; });
+    const empOptions = EMPLOYEES.map(e =>
+      `<option value="${e.id}">${e.name} (${e.id})</option>`
+    ).join('');
+    document.getElementById('eAdd_emp').innerHTML =
+      '<option value="">— Select employee —</option>' + empOptions;
+    document.getElementById('eEdit_emp').innerHTML = empOptions;
+  }
+
+  function statusBadge(s) {
+    const cls = s === 'Active' ? 'badge-active' : s === 'Pending' ? 'badge-pending' : 'badge-inactive';
+    return `<span class="badge ${cls}">${s}</span>`;
+  }
+
+  function emptyRow(cols, msg) {
+    return `<tr><td colspan="${cols}" style="text-align:center;color:var(--muted);font-style:italic;padding:32px 14px;">${msg}</td></tr>`;
+  }
+
+  // ── DATA ──
+  let enrollments = [];
+  let plans = [];
+  let editingEnrollId = null;
+  let editingPlanId   = null;
+  let pendingDeleteType = null;
+  let pendingDeleteId   = null;
+
+  // ── PERSISTENCE (localStorage bridge to reports.html)
+  function saveToStorage() {
+    try { localStorage.setItem('hr_enrollments', JSON.stringify(enrollments)); } catch {}
+  }
+
+  function loadFromStorage() {
+    try {
+      const saved = JSON.parse(localStorage.getItem('hr_enrollments') || '[]');
+      if (Array.isArray(saved)) enrollments = saved;
+    } catch {}
+  }
+
+  // ── PLAN CATALOG ──
+  function savePlan() {
+    plans.push({
+      id:       nextId(plans),
+      name:     document.getElementById('pAdd_name').value     || 'Untitled Plan',
+      type:     document.getElementById('pAdd_type').value,
+      provider: document.getElementById('pAdd_provider').value || '—',
+      empCost:  document.getElementById('pAdd_empCost').value  || '$0.00',
+      erCost:   document.getElementById('pAdd_erCost').value   || '$0.00',
+      coverage: document.getElementById('pAdd_coverage').value,
+      notes:    document.getElementById('pAdd_notes').value,
+    });
+    document.getElementById('dlgPlanAdd').close();
+    ['pAdd_name','pAdd_provider','pAdd_empCost','pAdd_erCost','pAdd_notes']
+      .forEach(id => document.getElementById(id).value = '');
+    renderPlans();
+  }
+
+  function editPlan(id) {
+    const p = plans.find(x => x.id === id);
+    if (!p) return;
+    editingPlanId = id;
+    document.getElementById('pEdit_name').value     = p.name;
+    document.getElementById('pEdit_type').value     = p.type;
+    document.getElementById('pEdit_provider').value = p.provider;
+    document.getElementById('pEdit_empCost').value  = p.empCost;
+    document.getElementById('pEdit_erCost').value   = p.erCost;
+    document.getElementById('pEdit_coverage').value = p.coverage;
+    document.getElementById('pEdit_notes').value    = p.notes;
+    openDlg('dlgPlanEdit');
+  }
+
+  function updatePlan() {
+    const i = plans.findIndex(x => x.id === editingPlanId);
+    if (i < 0) return;
+    plans[i] = {
+      id:       editingPlanId,
+      name:     document.getElementById('pEdit_name').value,
+      type:     document.getElementById('pEdit_type').value,
+      provider: document.getElementById('pEdit_provider').value,
+      empCost:  document.getElementById('pEdit_empCost').value,
+      erCost:   document.getElementById('pEdit_erCost').value,
+      coverage: document.getElementById('pEdit_coverage').value,
+      notes:    document.getElementById('pEdit_notes').value,
+    };
+    document.getElementById('dlgPlanEdit').close();
+    renderPlans();
+  }
+
+  function renderPlans(data) {
+    const q    = document.getElementById('planSearch').value.toLowerCase();
+    const type = document.getElementById('planTypeFilter').value;
+    const filtered = plans.filter(p =>
+      (!q    || p.name.toLowerCase().includes(q) || p.provider.toLowerCase().includes(q)) &&
+      (!type || p.type === type)
+    );
+    const grid = document.getElementById('planGrid');
+    if (!filtered.length) {
+      grid.innerHTML = `<div style="grid-column:1/-1;text-align:center;color:var(--muted);font-style:italic;padding:32px 0;">No plans added yet. Click "+ Add Plan" to get started.</div>`;
+      return;
+    }
+    grid.innerHTML = filtered.map(p => `
+      <div class="plan-card">
+        <div class="plan-card-head">
+          <div>
+            <div class="plan-name">${p.name}</div>
+            <div class="plan-provider">${p.provider}</div>
+          </div>
+          <span class="badge badge-type">${p.type}</span>
+        </div>
+        <div class="plan-cost">Coverage: ${p.coverage}</div>
+        <div class="plan-cost">Employee: <span>${p.empCost}</span> &nbsp;|&nbsp; Employer: <span>${p.erCost}</span></div>
+        ${p.notes ? `<div style="font-size:0.8rem;color:var(--muted);line-height:1.4;">${p.notes}</div>` : ''}
+        <div class="plan-actions">
+          <button class="btn small" onclick="editPlan(${p.id})">✏️ Edit</button>
+          <button class="btn small danger-btn" onclick="askDelete('plan',${p.id},'${p.name.replace(/'/g,"\\'")}')">🗑️ Delete</button>
+        </div>
+      </div>`).join('');
+  }
+
+  function filterPlans() { renderPlans(); }
+
+  // populate plan dropdown in enrollment form by type
+  function populatePlanDropdown(typeSelectId, planSelectId) {
+    const type = document.getElementById(typeSelectId).value;
+    const sel  = document.getElementById(planSelectId);
+    const matching = plans.filter(p => p.type === type);
+    if (!matching.length) {
+      sel.innerHTML = `<option value="">— No plans of this type —</option>`;
+    } else {
+      sel.innerHTML = matching.map(p =>
+        `<option value="${p.id}">${p.name} (${p.provider})</option>`
+      ).join('');
+      // auto-fill costs from plan
+      const first = matching[0];
+      const empCostEl = document.getElementById('eAdd_empCost');
+      const erCostEl  = document.getElementById('eAdd_erCost');
+      if (empCostEl && !empCostEl.value) empCostEl.value = first.empCost;
+      if (erCostEl  && !erCostEl.value)  erCostEl.value  = first.erCost;
+    }
+  }
+
+  // ── ENROLLMENTS ──
+  function saveEnrollment() {
+    const typeVal = document.getElementById('eAdd_type').value;
+    const planSel = document.getElementById('eAdd_plan');
+    // resolve plan name & provider from catalog or free text
+    const planId  = parseInt(planSel.value);
+    const plan    = plans.find(p => p.id === planId);
+    enrollments.push({
+      id:       nextId(enrollments),
+      emp:      document.getElementById('eAdd_emp').value    || 'EMP001',
+      type:     typeVal,
+      plan:     plan ? plan.name : (planSel.options[planSel.selectedIndex]?.text || '—'),
+      provider: plan ? plan.provider : '—',
+      empCost:  document.getElementById('eAdd_empCost').value || '$0.00',
+      erCost:   document.getElementById('eAdd_erCost').value  || '$0.00',
+      start:    document.getElementById('eAdd_start').value   || '—',
+      end:      document.getElementById('eAdd_end').value     || '—',
+      status:   document.getElementById('eAdd_status').value,
+      notes:    document.getElementById('eAdd_notes').value,
+    });
+    document.getElementById('dlgEnrollAdd').close();
+    ['eAdd_empCost','eAdd_erCost','eAdd_start','eAdd_end','eAdd_notes']
+      .forEach(id => document.getElementById(id).value = '');
+    document.getElementById('eAdd_emp').value    = '';
+    document.getElementById('eAdd_type').value   = '';
+    document.getElementById('eAdd_plan').innerHTML = '<option value="">— Select type first —</option>';
+    saveToStorage();
+    renderEnrollments();
+  }
+
+  function editEnrollment(id) {
+    const e = enrollments.find(x => x.id === id);
+    if (!e) return;
+    editingEnrollId = id;
+    document.getElementById('eEdit_emp').value      = e.emp;
+    document.getElementById('eEdit_type').value     = e.type;
+    document.getElementById('eEdit_plan').value     = e.plan;
+    document.getElementById('eEdit_provider').value = e.provider;
+    document.getElementById('eEdit_status').value   = e.status;
+    document.getElementById('eEdit_empCost').value  = e.empCost;
+    document.getElementById('eEdit_erCost').value   = e.erCost;
+    document.getElementById('eEdit_start').value    = e.start === '—' ? '' : e.start;
+    document.getElementById('eEdit_end').value      = e.end   === '—' ? '' : e.end;
+    document.getElementById('eEdit_notes').value    = e.notes;
+    openDlg('dlgEnrollEdit');
+  }
+
+  function updateEnrollment() {
+    const i = enrollments.findIndex(x => x.id === editingEnrollId);
+    if (i < 0) return;
+    enrollments[i] = {
+      id:       editingEnrollId,
+      emp:      document.getElementById('eEdit_emp').value,
+      type:     document.getElementById('eEdit_type').value,
+      plan:     document.getElementById('eEdit_plan').value,
+      provider: document.getElementById('eEdit_provider').value,
+      status:   document.getElementById('eEdit_status').value,
+      empCost:  document.getElementById('eEdit_empCost').value,
+      erCost:   document.getElementById('eEdit_erCost').value,
+      start:    document.getElementById('eEdit_start').value || '—',
+      end:      document.getElementById('eEdit_end').value   || '—',
+      notes:    document.getElementById('eEdit_notes').value,
+    };
+    document.getElementById('dlgEnrollEdit').close();
+    saveToStorage();
+    renderEnrollments();
+  }
+
+  function renderEnrollments() {
+    const q      = document.getElementById('enrollSearch').value.toLowerCase();
+    const type   = document.getElementById('enrollTypeFilter').value;
+    const status = document.getElementById('enrollStatusFilter').value;
+
+    const filtered = enrollments.filter(e =>
+      (!q      || empLabels[e.emp].toLowerCase().includes(q) || e.plan.toLowerCase().includes(q) || e.provider.toLowerCase().includes(q)) &&
+      (!type   || e.type   === type) &&
+      (!status || e.status === status)
+    );
+
+    const tb = document.getElementById('enrollTable');
+    document.getElementById('enrollCount').textContent = filtered.length + ' enrollment' + (filtered.length !== 1 ? 's' : '');
+
+    if (!filtered.length) {
+      tb.innerHTML = emptyRow(10, 'No enrollments yet. Click "+ Add Enrollment" to get started.');
+      return;
+    }
+
+    tb.innerHTML = filtered.map(e => `<tr>
+      <td style="font-weight:600;color:#0f172a;">${empLabels[e.emp]}<br><span style="font-size:0.78rem;color:#9ca3af;font-weight:400;">${e.emp}</span></td>
+      <td>${e.plan}</td>
+      <td><span class="badge badge-type">${e.type}</span></td>
+      <td>${e.provider}</td>
+      <td style="font-family:monospace;font-size:0.88rem;">${e.empCost}</td>
+      <td style="font-family:monospace;font-size:0.88rem;">${e.erCost}</td>
+      <td>${e.start}</td>
+      <td>${e.end}</td>
+      <td>${statusBadge(e.status)}</td>
+      <td>
+        <div class="tbl-actions">
+          <button class="icon-btn" title="Edit"   onclick="editEnrollment(${e.id})">✏️</button>
+          <button class="icon-btn del" title="Delete" onclick="askDelete('enrollment',${e.id},'${e.plan.replace(/'/g,"\\'")} — ${empLabels[e.emp]}')">🗑️</button>
+        </div>
+      </td>
+    </tr>`).join('');
+  }
+
+  function filterEnrollments() { renderEnrollments(); }
+
+  // ── DELETE (shared) ──
+  function askDelete(type, id, label) {
+    pendingDeleteType = type;
+    pendingDeleteId   = id;
+    document.getElementById('deleteLabel').textContent = label;
+    openDlg('dlgDelete');
+  }
+
+  document.getElementById('confirmDeleteBtn').addEventListener('click', () => {
+    if (pendingDeleteType === 'enrollment') {
+      enrollments = enrollments.filter(x => x.id !== pendingDeleteId);
+      saveToStorage();
+      renderEnrollments();
+    } else if (pendingDeleteType === 'plan') {
+      plans = plans.filter(x => x.id !== pendingDeleteId);
+      renderPlans();
+    }
+    document.getElementById('dlgDelete').close();
+    pendingDeleteType = pendingDeleteId = null;
+  });
+
+  // ── SUBNAV ──
+  const subLinks  = Array.from(document.querySelectorAll('.subnav a[data-panel]'));
+  const subPanels = Array.from(document.querySelectorAll('.panel[data-panel]'));
+  function setPanel(name) {
+    subPanels.forEach(p => p.classList.toggle('active', p.dataset.panel === name));
+    subLinks.forEach(l  => l.classList.toggle('active',  l.dataset.panel === name));
+    history.replaceState(null, '', `#${name}`);
+  }
+  subLinks.forEach(l => l.addEventListener('click', e => { e.preventDefault(); setPanel(l.dataset.panel); }));
+  const hash = (location.hash || '').replace('#', '');
+  if (hash) setPanel(hash);
+
+  // ── MENU ──
+  const menuBtn = document.getElementById('menuBtn');
+  const hrMenu  = document.getElementById('hrMenu');
+  menuBtn.addEventListener('click', () => {
+    const open = hrMenu.classList.toggle('open');
+    menuBtn.setAttribute('aria-expanded', String(open));
+    hrMenu.setAttribute('aria-hidden', String(!open));
+  });
+  document.addEventListener('click', e => {
+    if (!e.target.closest('.menu-wrap')) {
+      hrMenu.classList.remove('open');
+      menuBtn.setAttribute('aria-expanded', 'false');
+      hrMenu.setAttribute('aria-hidden', 'true');
+    }
+  });
+
+  // ── INIT ──
+  initEmployees();
+  loadFromStorage();
+  renderEnrollments();
+  renderPlans();
+</script>
+</body>
+</html>
