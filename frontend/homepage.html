@@ -1,9 +1,11 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>HR Home Page</title>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="description" content="PayCentral HR dashboard for managing employees, payroll, shifts, benefits, taxes, and reports." />
+  <title>Dashboard | PayCentral</title>
+
   <style>
     :root {
       --bg: #eef3f9;
@@ -15,13 +17,32 @@
       --accent-hover: #115e59;
       --primary: #1d4ed8;
       --primary-dark: #1e40af;
+      --primary-light: #dbeafe;
       --muted: #64748b;
       --success: #0f766e;
       --warning: #b45309;
       --danger: #b91c1c;
+      --shadow: 0 14px 36px rgba(15, 23, 42, 0.08);
     }
 
-    * { box-sizing: border-box; }
+    body.dark {
+      --bg: #0b1220;
+      --text: #f3f4f6;
+      --surface: #111827;
+      --surface-soft: #0f172a;
+      --border: #374151;
+      --primary-light: rgba(59, 130, 246, 0.18);
+      --muted: #9ca3af;
+      --shadow: 0 16px 40px rgba(0, 0, 0, 0.35);
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    html {
+      scroll-behavior: smooth;
+    }
 
     body {
       margin: 0;
@@ -29,24 +50,117 @@
       background:
         radial-gradient(circle at top left, #dbeafe 0%, transparent 35%),
         radial-gradient(circle at top right, #e0f2fe 0%, transparent 30%),
-        var(--bg);
+        linear-gradient(180deg, #eff6ff 0%, var(--bg) 100%);
       color: var(--text);
+      transition: background 0.2s ease, color 0.2s ease;
     }
 
-    header {
+    body.dark {
+      background:
+        radial-gradient(circle at top left, rgba(29, 78, 216, 0.18) 0%, transparent 30%),
+        radial-gradient(circle at top right, rgba(14, 165, 233, 0.10) 0%, transparent 25%),
+        linear-gradient(180deg, #0b1220 0%, #111827 100%);
+    }
+
+    a {
+      color: inherit;
+      text-decoration: none;
+    }
+
+    /* TOP NAV */
+    .topbar {
+      position: sticky;
+      top: 0;
+      z-index: 100;
       display: flex;
       justify-content: space-between;
       align-items: center;
-      padding: 14px 20px;
-      background: var(--primary);
-      border-bottom: 1px solid var(--primary-dark);
-      position: relative;
+      padding: 14px 22px;
+      background: rgba(255, 255, 255, 0.88);
+      backdrop-filter: blur(10px);
+      border-bottom: 1px solid var(--border);
+      box-shadow: 0 2px 12px rgba(29, 78, 216, 0.07);
     }
 
-    h1 {
+    body.dark .topbar {
+      background: rgba(17, 24, 39, 0.85);
+    }
+
+    .topbar-left {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+    }
+
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .brand-logo {
+      width: 46px;
+      height: 46px;
+      border-radius: 14px;
+      background: var(--primary);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      overflow: hidden;
+      box-shadow: 0 8px 20px rgba(29, 78, 216, 0.22);
+    }
+
+    .brand-logo img {
+      width: 100%;
+      height: 100%;
+      object-fit: contain;
+      padding: 6px;
+    }
+
+    .brand-fallback {
+      width: 24px;
+      height: 24px;
+      fill: none;
+      stroke: white;
+      stroke-width: 2;
+      stroke-linecap: round;
+      stroke-linejoin: round;
+      display: none;
+    }
+
+    .brand-text h1 {
       margin: 0;
-      font-size: 1.3rem;
-      color: #ffffff;
+      font-size: 1.1rem;
+      line-height: 1.1;
+      letter-spacing: -0.3px;
+    }
+
+    .brand-text p {
+      margin: 3px 0 0;
+      color: var(--muted);
+      font-size: 0.82rem;
+    }
+
+    .topbar-actions {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .top-btn {
+      border: 1px solid var(--border);
+      background: var(--surface);
+      color: var(--text);
+      padding: 10px 14px;
+      border-radius: 10px;
+      font-size: 0.9rem;
+      cursor: pointer;
+      transition: 0.15s ease;
+    }
+
+    .top-btn:hover {
+      background: var(--surface-soft);
+      transform: translateY(-1px);
     }
 
     .menu-wrap {
@@ -54,11 +168,11 @@
     }
 
     .menu-btn {
-      width: 42px;
-      height: 42px;
-      border: 1px solid rgba(255, 255, 255, 0.45);
-      border-radius: 8px;
-      background: rgba(255, 255, 255, 0.12);
+      width: 44px;
+      height: 44px;
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      background: var(--surface);
       cursor: pointer;
       display: flex;
       flex-direction: column;
@@ -66,12 +180,18 @@
       align-items: center;
       gap: 5px;
       padding: 0;
+      transition: background 0.15s ease, transform 0.15s ease;
+    }
+
+    .menu-btn:hover {
+      background: var(--surface-soft);
+      transform: translateY(-1px);
     }
 
     .menu-btn span {
       width: 20px;
       height: 2px;
-      background: #ffffff;
+      background: var(--text);
       border-radius: 10px;
       display: block;
     }
@@ -79,12 +199,12 @@
     .menu {
       position: absolute;
       right: 0;
-      top: 50px;
-      min-width: 210px;
+      top: 54px;
+      min-width: 230px;
       background: var(--surface);
       border: 1px solid var(--border);
-      border-radius: 10px;
-      box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+      border-radius: 14px;
+      box-shadow: var(--shadow);
       padding: 8px;
       display: none;
       z-index: 20;
@@ -96,139 +216,279 @@
 
     .menu a {
       display: block;
-      text-decoration: none;
+      padding: 11px 12px;
+      border-radius: 10px;
+      font-size: 0.94rem;
       color: var(--text);
-      padding: 10px 12px;
-      border-radius: 8px;
-      font-size: 0.95rem;
+      transition: background 0.15s ease, color 0.15s ease;
     }
 
     .menu a:hover {
-      background: #ecfeff;
-      color: var(--accent);
+      background: var(--primary-light);
+      color: var(--primary);
     }
 
+    .menu a.signout {
+      color: #ef4444;
+      font-weight: 600;
+    }
+
+    /* MAIN */
     main {
-      padding: 28px 20px 36px;
-      max-width: 1160px;
+      padding: 28px 20px 40px;
+      max-width: 1200px;
       margin: 0 auto;
+    }
+
+    .page-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      gap: 18px;
+      margin-bottom: 22px;
+      flex-wrap: wrap;
+    }
+
+    .page-header h2 {
+      margin: 0 0 8px;
+      font-size: clamp(1.6rem, 3vw, 2.2rem);
+      letter-spacing: -0.5px;
+    }
+
+    .page-header p {
+      margin: 0;
+      color: var(--muted);
+      line-height: 1.7;
+      max-width: 640px;
+    }
+
+    .page-badge {
+      display: inline-block;
+      background: rgba(15, 118, 110, 0.10);
+      color: var(--accent);
+      border: 1px solid rgba(15, 118, 110, 0.18);
+      border-radius: 999px;
+      padding: 6px 12px;
+      font-size: 0.78rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.7px;
+      margin-bottom: 12px;
     }
 
     .card {
       background: var(--surface);
       border: 1px solid var(--border);
-      border-radius: 12px;
-      padding: 20px;
+      border-radius: 18px;
+      padding: 22px;
+      box-shadow: var(--shadow);
+    }
+
+    .card h3 {
+      margin: 0 0 10px;
+      font-size: 1.1rem;
+      letter-spacing: -0.2px;
     }
 
     .card p {
       margin: 0;
-      line-height: 1.5;
-    }
-
-    .hero {
-      display: grid;
-      grid-template-columns: 1.3fr 0.9fr;
-      gap: 16px;
-      margin-bottom: 16px;
-    }
-
-    .hero h2 {
-      margin: 0 0 8px;
-      font-size: 1.35rem;
+      line-height: 1.6;
     }
 
     .muted {
       color: var(--muted);
     }
 
+    /* HERO GRID */
+    .hero {
+      display: grid;
+      grid-template-columns: 1.35fr 0.95fr;
+      gap: 16px;
+      margin-bottom: 18px;
+    }
+
+    .hero-main {
+      position: relative;
+      overflow: hidden;
+      background:
+        radial-gradient(circle at top right, rgba(29, 78, 216, 0.12) 0%, transparent 38%),
+        radial-gradient(circle at bottom left, rgba(15, 118, 110, 0.10) 0%, transparent 30%),
+        var(--surface);
+    }
+
+    .hero-main::after {
+      content: "";
+      position: absolute;
+      right: -40px;
+      bottom: -50px;
+      width: 180px;
+      height: 180px;
+      background: rgba(29, 78, 216, 0.05);
+      border-radius: 50%;
+    }
+
     .quick-actions {
       display: flex;
       flex-wrap: wrap;
       gap: 10px;
-      margin-top: 14px;
+      margin-top: 18px;
     }
 
     .btn {
       border: 1px solid transparent;
-      border-radius: 8px;
-      padding: 9px 12px;
-      font-size: 0.9rem;
-      cursor: default;
+      border-radius: 10px;
+      padding: 10px 14px;
+      font-size: 0.92rem;
+      cursor: pointer;
       background: var(--surface-soft);
       color: var(--text);
+      transition: 0.15s ease;
+      font-weight: 600;
+    }
+
+    .btn:hover {
+      transform: translateY(-1px);
     }
 
     .btn.primary {
-      background: #dbeafe;
-      color: #1e3a8a;
-      border-color: #bfdbfe;
+      background: var(--primary);
+      color: #fff;
+      box-shadow: 0 8px 18px rgba(29, 78, 216, 0.20);
     }
 
+    .btn.primary:hover {
+      background: var(--primary-dark);
+    }
+
+    .btn.secondary {
+      background: var(--primary-light);
+      color: var(--primary);
+      border-color: rgba(29, 78, 216, 0.14);
+    }
+
+    .snapshot-grid {
+      display: grid;
+      gap: 12px;
+      margin-top: 14px;
+    }
+
+    .snapshot-item {
+      border: 1px solid var(--border);
+      background: var(--surface-soft);
+      border-radius: 12px;
+      padding: 12px 14px;
+    }
+
+    .snapshot-item strong {
+      display: block;
+      margin-bottom: 4px;
+      font-size: 0.92rem;
+    }
+
+    .snapshot-item span {
+      color: var(--muted);
+      font-size: 0.87rem;
+      line-height: 1.5;
+    }
+
+    /* STATS */
     .stats {
       display: grid;
       grid-template-columns: repeat(4, 1fr);
-      gap: 12px;
-      margin-bottom: 16px;
+      gap: 14px;
+      margin-bottom: 18px;
     }
 
     .stat {
-      padding: 14px;
-      border-radius: 12px;
+      padding: 18px;
+      border-radius: 16px;
       border: 1px solid var(--border);
       background: var(--surface);
+      box-shadow: var(--shadow);
     }
 
     .stat .label {
       font-size: 0.82rem;
       color: var(--muted);
-      margin-bottom: 6px;
+      margin-bottom: 8px;
       display: block;
+      text-transform: uppercase;
+      letter-spacing: 0.4px;
+      font-weight: 700;
     }
 
     .stat .value {
-      font-size: 1.3rem;
-      font-weight: 700;
-      letter-spacing: 0.2px;
+      font-size: 1.55rem;
+      font-weight: 800;
+      letter-spacing: -0.4px;
+    }
+
+    .stat small {
+      display: block;
+      margin-top: 8px;
+      color: var(--muted);
+      font-size: 0.82rem;
     }
 
     .stat.success .value { color: var(--success); }
     .stat.warning .value { color: var(--warning); }
     .stat.danger .value { color: var(--danger); }
 
+    /* CONTENT GRID */
     .content-grid {
       display: grid;
-      grid-template-columns: 1.2fr 0.8fr;
+      grid-template-columns: 1.25fr 0.85fr;
       gap: 16px;
+    }
+
+    .section-title-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 12px;
+      flex-wrap: wrap;
+      margin-bottom: 10px;
+    }
+
+    .section-title-row p {
+      color: var(--muted);
+      font-size: 0.92rem;
+      margin: 0;
     }
 
     .table-wrap {
       overflow-x: auto;
       border: 1px solid var(--border);
-      border-radius: 10px;
-      margin-top: 10px;
+      border-radius: 14px;
+      margin-top: 14px;
+      background: var(--surface);
     }
 
     table {
       width: 100%;
       border-collapse: collapse;
-      min-width: 560px;
+      min-width: 620px;
       background: var(--surface);
     }
 
     th, td {
-      padding: 11px 12px;
+      padding: 12px 14px;
       text-align: left;
-      border-bottom: 1px solid #e5e7eb;
-      font-size: 0.9rem;
+      border-bottom: 1px solid rgba(203, 213, 225, 0.6);
+      font-size: 0.92rem;
     }
 
     th {
-      font-size: 0.82rem;
-      letter-spacing: 0.3px;
+      font-size: 0.8rem;
+      letter-spacing: 0.4px;
       text-transform: uppercase;
       color: #475569;
       background: #f8fafc;
+    }
+
+    body.dark th {
+      background: #0f172a;
+      color: #cbd5e1;
     }
 
     tr:last-child td {
@@ -238,9 +498,10 @@
     .status {
       font-size: 0.78rem;
       border-radius: 999px;
-      padding: 4px 9px;
+      padding: 5px 10px;
       display: inline-block;
       border: 1px solid transparent;
+      font-weight: 700;
     }
 
     .status.pending {
@@ -262,34 +523,38 @@
     }
 
     .list {
-      margin: 12px 0 0;
+      margin: 14px 0 0;
       padding: 0;
       list-style: none;
       display: grid;
-      gap: 10px;
+      gap: 12px;
     }
 
     .list li {
       border: 1px solid var(--border);
-      border-radius: 10px;
-      padding: 10px 12px;
-      background: #fbfdff;
+      border-radius: 12px;
+      padding: 13px 14px;
+      background: var(--surface-soft);
     }
 
     .list strong {
       display: block;
-      margin-bottom: 4px;
-      font-size: 0.92rem;
+      margin-bottom: 5px;
+      font-size: 0.94rem;
     }
 
     .list span {
       color: var(--muted);
-      font-size: 0.85rem;
+      font-size: 0.87rem;
+      line-height: 1.6;
     }
 
-    @media (max-width: 600px) {
-      h1 { font-size: 1.1rem; }
-      .menu { min-width: 180px; }
+    .footer-note {
+      text-align: center;
+      color: var(--muted);
+      font-size: 0.84rem;
+      margin-top: 26px;
+      line-height: 1.6;
     }
 
     @media (max-width: 940px) {
@@ -303,102 +568,289 @@
       }
     }
 
+    @media (max-width: 700px) {
+      .topbar {
+        padding: 12px 16px;
+      }
+
+      .topbar-left {
+        gap: 10px;
+      }
+
+      .brand-text p {
+        display: none;
+      }
+
+      .top-btn {
+        padding: 9px 12px;
+        font-size: 0.84rem;
+      }
+    }
+
     @media (max-width: 520px) {
       .stats {
         grid-template-columns: 1fr;
+      }
+
+      .menu {
+        min-width: 190px;
+      }
+
+      main {
+        padding: 20px 14px 32px;
+      }
+
+      .card {
+        padding: 18px;
+        border-radius: 16px;
+      }
+
+      .quick-actions {
+        flex-direction: column;
+      }
+
+      .btn {
+        width: 100%;
       }
     }
   </style>
 </head>
 <body>
-  <header>
-    <h1>HR Home Page</h1>
+  <header class="topbar">
+    <div class="topbar-left">
+      <a href="homepage.html" class="brand">
+        <div class="brand-logo">
+          <img src="PAY CENTRAL LOGO.png" alt="PayCentral logo" onerror="this.style.display='none'; this.nextElementSibling.style.display='block';">
+          <svg class="brand-fallback" viewBox="0 0 24 24">
+            <line x1="12" y1="1" x2="12" y2="23"></line>
+            <path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"></path>
+          </svg>
+        </div>
 
-    <div class="menu-wrap">
-      <button class="menu-btn" id="menuBtn" aria-label="Open menu" aria-expanded="false" aria-controls="hrMenu">
-        <span></span>
-        <span></span>
-        <span></span>
-      </button>
+        <div class="brand-text">
+          <h1>PayCentral</h1>
+          <p>HR Dashboard</p>
+        </div>
+      </a>
+    </div>
 
-                  <nav class="menu" id="hrMenu" aria-hidden="true">
-        <a href="homepage.html">Home</a>
-        <a href="profile.html">Profile</a>
-        <a href="employees.html">Employees</a>
-        <a href="shifts.html">Shifts</a>
-        <a href="payroll.html">Payroll</a>
-        <a href="benefits.html">Benefits</a>
-        <a href="taxes.html">Taxes</a>
-        <a href="reports.html">Reports</a>
-        <a href="settings.html">Settings</a>
-        <a href="logout.html" style="color:#ef4444;">Sign Out</a>
-      </nav>
+    <div class="topbar-actions">
+      <button class="top-btn" id="themeToggle" type="button">Toggle Theme</button>
+
+      <div class="menu-wrap">
+        <button class="menu-btn" id="menuBtn" aria-label="Open menu" aria-expanded="false" aria-controls="hrMenu">
+          <span></span>
+          <span></span>
+          <span></span>
+        </button>
+
+        <nav class="menu" id="hrMenu" aria-hidden="true">
+          <a href="homepage.html">Home</a>
+          <a href="profile.html">Profile</a>
+          <a href="employees.html">Employees</a>
+          <a href="shifts.html">Shifts</a>
+          <a href="payroll.html">Payroll</a>
+          <a href="benefits.html">Benefits</a>
+          <a href="taxes.html">Taxes</a>
+          <a href="reports.html">Reports</a>
+          <a href="settings.html">Settings</a>
+          <a href="logout.html" class="signout">Sign Out</a>
+        </nav>
+      </div>
     </div>
   </header>
 
   <main>
+    <section class="page-header">
+      <div>
+        <div class="page-badge">Main Dashboard</div>
+        <h2>Welcome back to PayCentral</h2>
+        <p>
+          Review payroll readiness, employee activity, shift planning, and outstanding actions
+          from one clean dashboard built for your HR and payroll workflow.
+        </p>
+      </div>
+    </section>
+
     <section class="hero">
-      <article class="card">
-        <h2>Dashboard</h2>
-        <p class="muted">This dashboard gives a quick view of attendance, payroll readiness, and pending actions for the week.</p>
+      <article class="card hero-main">
+        <h3>Dashboard Overview</h3>
+        <p class="muted">
+          This workspace gives your team a quick summary of attendance, payroll processing,
+          compliance issues, and tasks that still need attention this week.
+        </p>
+
         <div class="quick-actions">
           <button class="btn primary" type="button">Run Payroll Preview</button>
-          <button class="btn" type="button">Create Shift Plan</button>
+          <button class="btn secondary" type="button">Create Shift Plan</button>
           <button class="btn" type="button">Export Monthly Report</button>
         </div>
       </article>
 
       <aside class="card">
-        <h2>Today Snapshot</h2>
-        <p>Example</p>
+        <h3>Today Snapshot</h3>
+        <div class="snapshot-grid">
+          <div class="snapshot-item">
+            <strong>Payroll Cycle</strong>
+            <span>Biweekly payroll closes this Friday at 5:00 PM.</span>
+          </div>
+          <div class="snapshot-item">
+            <strong>Attendance Review</strong>
+            <span>3 employee attendance entries still need verification.</span>
+          </div>
+          <div class="snapshot-item">
+            <strong>Benefits Update</strong>
+            <span>Open enrollment documents are pending final review.</span>
+          </div>
+        </div>
       </aside>
     </section>
 
     <section class="stats" aria-label="Key metrics">
       <article class="stat">
         <span class="label">Active Employees</span>
-        <div class="value">0</div>
+        <div class="value">124</div>
+        <small>Total employees currently in the system</small>
       </article>
+
       <article class="stat success">
         <span class="label">Payroll Ready</span>
-        <div class="value">0</div>
+        <div class="value">118</div>
+        <small>Records verified and ready for processing</small>
       </article>
+
       <article class="stat warning">
         <span class="label">Pending Leave Requests</span>
-        <div class="value">0</div>
+        <div class="value">6</div>
+        <small>Requests waiting for approval or follow-up</small>
       </article>
+
       <article class="stat danger">
         <span class="label">Compliance Alerts</span>
-        <div class="value">0</div>
+        <div class="value">2</div>
+        <small>Items requiring review before payroll closes</small>
       </article>
     </section>
 
     <section class="content-grid">
       <article class="card">
-        <h2>Recent Payroll Activity</h2>
+        <div class="section-title-row">
+          <div>
+            <h3>Recent Payroll Activity</h3>
+            <p>Track the latest payroll processing activity and current status updates.</p>
+          </div>
+        </div>
+
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr>
+                <th>Run ID</th>
+                <th>Department</th>
+                <th>Pay Period</th>
+                <th>Status</th>
+                <th>Processed By</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td>PR-24051</td>
+                <td>Operations</td>
+                <td>Mar 1 – Mar 15</td>
+                <td><span class="status ready">Ready</span></td>
+                <td>J. Rivera</td>
+              </tr>
+              <tr>
+                <td>PR-24052</td>
+                <td>Customer Support</td>
+                <td>Mar 1 – Mar 15</td>
+                <td><span class="status pending">Pending</span></td>
+                <td>M. Torres</td>
+              </tr>
+              <tr>
+                <td>PR-24053</td>
+                <td>Finance</td>
+                <td>Mar 1 – Mar 15</td>
+                <td><span class="status issue">Issue</span></td>
+                <td>A. Patel</td>
+              </tr>
+              <tr>
+                <td>PR-24054</td>
+                <td>Human Resources</td>
+                <td>Mar 1 – Mar 15</td>
+                <td><span class="status ready">Ready</span></td>
+                <td>E. Diaz</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
       </article>
 
       <aside class="card">
-        <h2>Action Items</h2>
+        <div class="section-title-row">
+          <div>
+            <h3>Action Items</h3>
+            <p>Important tasks that still need attention today.</p>
+          </div>
+        </div>
+
+        <ul class="list">
+          <li>
+            <strong>Approve pending leave requests</strong>
+            <span>Review 6 submitted employee requests before end of day.</span>
+          </li>
+          <li>
+            <strong>Verify payroll exceptions</strong>
+            <span>2 payroll records contain missing or flagged data.</span>
+          </li>
+          <li>
+            <strong>Review tax update notices</strong>
+            <span>Confirm current deduction rules for the new pay cycle.</span>
+          </li>
+          <li>
+            <strong>Complete benefits audit</strong>
+            <span>Check pending enrollment adjustments for this month.</span>
+          </li>
+        </ul>
       </aside>
     </section>
+
+    <p class="footer-note">
+      PayCentral dashboard overview. Use the menu to manage employees, payroll, taxes, reports, and system settings.
+    </p>
   </main>
 
   <script>
-    const menuBtn = document.getElementById('menuBtn');
-    const hrMenu = document.getElementById('hrMenu');
+    const menuBtn = document.getElementById("menuBtn");
+    const hrMenu = document.getElementById("hrMenu");
+    const themeToggle = document.getElementById("themeToggle");
+    const body = document.body;
 
-    menuBtn.addEventListener('click', () => {
-      const isOpen = hrMenu.classList.toggle('open');
-      menuBtn.setAttribute('aria-expanded', String(isOpen));
-      hrMenu.setAttribute('aria-hidden', String(!isOpen));
+    if (localStorage.getItem("payroll_dark_mode") === "enabled") {
+      body.classList.add("dark");
+    }
+
+    themeToggle.addEventListener("click", () => {
+      body.classList.toggle("dark");
+
+      if (body.classList.contains("dark")) {
+        localStorage.setItem("payroll_dark_mode", "enabled");
+      } else {
+        localStorage.setItem("payroll_dark_mode", "disabled");
+      }
     });
 
-    document.addEventListener('click', (event) => {
-      if (!event.target.closest('.menu-wrap')) {
-        hrMenu.classList.remove('open');
-        menuBtn.setAttribute('aria-expanded', 'false');
-        hrMenu.setAttribute('aria-hidden', 'true');
+    menuBtn.addEventListener("click", () => {
+      const isOpen = hrMenu.classList.toggle("open");
+      menuBtn.setAttribute("aria-expanded", String(isOpen));
+      hrMenu.setAttribute("aria-hidden", String(!isOpen));
+    });
+
+    document.addEventListener("click", (event) => {
+      if (!event.target.closest(".menu-wrap")) {
+        hrMenu.classList.remove("open");
+        menuBtn.setAttribute("aria-expanded", "false");
+        hrMenu.setAttribute("aria-hidden", "true");
       }
     });
   </script>
