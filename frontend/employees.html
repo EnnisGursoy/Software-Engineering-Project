@@ -11,6 +11,16 @@
       --surface: #ffffff;
       --border: #d1d5db;
       --accent: #0f766e;
+      --muted: #6b7280;
+    }
+
+    body.dark {
+      --bg: #0b1220;
+      --surface: #111827;
+      --text: #f3f4f6;
+      --muted: #9ca3af;
+      --border: #374151;
+      --accent: #14b8a6;
     }
 
     * { box-sizing: border-box; }
@@ -20,6 +30,7 @@
       font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
       background: var(--bg);
       color: var(--text);
+      transition: background 0.2s ease, color 0.2s ease;
     }
 
     header {
@@ -32,95 +43,174 @@
       position: relative;
     }
 
-    h1 {
-      margin: 0;
-      font-size: 1.3rem;
-      color: #ffffff;
-    }
+    h1 { margin: 0; font-size: 1.3rem; color: #ffffff; }
 
-    main {
-      padding: 24px 20px;
-    }
+    main { padding: 24px 20px; }
 
     .card {
       background: var(--surface);
       border: 1px solid var(--border);
       border-radius: 12px;
       padding: 20px;
-      max-width: 780px;
     }
 
-    .menu-wrap {
-      position: relative;
-    }
+    /* ── Hamburger menu ── */
+    .menu-wrap { position: relative; }
 
     .menu-btn {
-      width: 42px;
-      height: 42px;
-      border: 1px solid rgba(255, 255, 255, 0.45);
+      width: 42px; height: 42px;
+      border: 1px solid rgba(255,255,255,0.45);
       border-radius: 8px;
-      background: rgba(255, 255, 255, 0.12);
+      background: rgba(255,255,255,0.12);
       cursor: pointer;
-      display: flex;
-      flex-direction: column;
-      justify-content: center;
-      align-items: center;
-      gap: 5px;
-      padding: 0;
+      display: flex; flex-direction: column;
+      justify-content: center; align-items: center;
+      gap: 5px; padding: 0;
     }
 
     .menu-btn span {
-      width: 20px;
-      height: 2px;
-      background: #ffffff;
-      border-radius: 10px;
-      display: block;
+      width: 20px; height: 2px;
+      background: #ffffff; border-radius: 10px; display: block;
     }
 
     .menu {
-      position: absolute;
-      right: 0;
-      top: 50px;
+      position: absolute; right: 0; top: 50px;
       min-width: 210px;
       background: var(--surface);
       border: 1px solid var(--border);
       border-radius: 10px;
-      box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
-      padding: 8px;
-      display: none;
-      z-index: 20;
+      box-shadow: 0 10px 25px rgba(0,0,0,0.1);
+      padding: 8px; display: none; z-index: 20;
     }
 
-    .menu.open {
-      display: block;
-    }
+    .menu.open { display: block; }
 
     .menu a {
-      display: block;
-      text-decoration: none;
-      color: var(--text);
-      padding: 10px 12px;
-      border-radius: 8px;
-      font-size: 0.95rem;
+      display: block; text-decoration: none;
+      color: var(--text); padding: 10px 12px;
+      border-radius: 8px; font-size: 0.95rem;
     }
 
-    .menu a:hover {
-      background: #ecfeff;
-      color: var(--accent);
+    .menu a:hover { background: #ecfeff; color: var(--accent); }
+
+    /* ── Toolbar ── */
+    .toolbar {
+      display: flex; justify-content: space-between;
+      align-items: center; margin-bottom: 16px;
+      flex-wrap: wrap; gap: 10px;
     }
+
+    .toolbar h2 { margin: 0; font-size: 1.1rem; }
+
+    .btn {
+      padding: 8px 16px; border: none;
+      border-radius: 8px; cursor: pointer;
+      font-size: 0.9rem; font-weight: 600;
+    }
+
+    .btn-primary   { background: #1d4ed8; color: #fff; }
+    .btn-primary:hover   { background: #1e40af; }
+    .btn-warning   { background: #d97706; color: #fff; }
+    .btn-warning:hover   { background: #b45309; }
+    .btn-danger    { background: #dc2626; color: #fff; }
+    .btn-danger:hover    { background: #b91c1c; }
+    .btn-secondary { background: #e5e7eb; color: var(--text); }
+    .btn-secondary:hover { background: #d1d5db; }
+
+    /* ── Table ── */
+    .table-wrap { overflow-x: auto; }
+
+    table { width: 100%; border-collapse: collapse; font-size: 0.9rem; }
+
+    thead th {
+      background: #f3f4f6; padding: 10px 12px;
+      text-align: left; border-bottom: 1px solid var(--border);
+      white-space: nowrap;
+    }
+
+    tbody tr:hover { background: #f9fafb; }
+
+    tbody td {
+      padding: 10px 12px;
+      border-bottom: 1px solid #e5e7eb;
+      vertical-align: middle;
+    }
+
+    .badge {
+      display: inline-block; padding: 2px 10px;
+      border-radius: 999px; font-size: 0.78rem;
+      font-weight: 600; text-transform: capitalize;
+    }
+
+    .badge-active     { background: #d1fae5; color: #065f46; }
+    .badge-terminated { background: #fee2e2; color: #991b1b; }
+
+    .actions { display: flex; gap: 6px; }
+
+    /* ── Status message ── */
+    #statusMsg {
+      margin-bottom: 12px; padding: 10px 14px;
+      border-radius: 8px; font-size: 0.9rem; display: none;
+    }
+
+    #statusMsg.success { background: #d1fae5; color: #065f46; display: block; }
+    #statusMsg.error   { background: #fee2e2; color: #991b1b; display: block; }
+    #statusMsg.info    { background: #dbeafe; color: #1e40af; display: block; }
+
+    /* ── Modal ── */
+    .modal-backdrop {
+      position: fixed; inset: 0;
+      background: rgba(0,0,0,0.4);
+      display: none;
+      align-items: center; justify-content: center;
+      z-index: 100;
+    }
+
+    .modal-backdrop.open { display: flex; }
+
+    .modal {
+      background: var(--surface); border-radius: 14px;
+      padding: 28px; width: 100%; max-width: 560px;
+      max-height: 90vh; overflow-y: auto;
+      box-shadow: 0 20px 50px rgba(0,0,0,0.2);
+    }
+
+    .modal h3 { margin: 0 0 20px; font-size: 1.1rem; }
+
+    .form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+
+    .form-group { display: flex; flex-direction: column; gap: 4px; }
+    .form-group.full { grid-column: 1 / -1; }
+
+    label { font-size: 0.82rem; font-weight: 600; color: #374151; }
+
+    input, select {
+      border: 1px solid var(--border); border-radius: 8px;
+      padding: 8px 10px; font-size: 0.9rem;
+      width: 100%; outline: none; font-family: inherit;
+    }
+
+    input:focus, select:focus {
+      border-color: #1d4ed8;
+      box-shadow: 0 0 0 2px #bfdbfe;
+    }
+
+    .modal-actions {
+      display: flex; justify-content: flex-end;
+      gap: 10px; margin-top: 22px;
+    }
+
+    .required-note { font-size: 0.78rem; color: #6b7280; margin-bottom: 14px; }
   </style>
 </head>
 <body>
+
   <header>
     <h1>Employees</h1>
-
     <div class="menu-wrap">
       <button class="menu-btn" id="menuBtn" aria-label="Open menu" aria-expanded="false" aria-controls="hrMenu">
-        <span></span>
-        <span></span>
-        <span></span>
+        <span></span><span></span><span></span>
       </button>
-
       <nav class="menu" id="hrMenu" aria-hidden="true">
         <a href="profile.html">Profile</a>
         <a href="employees.html">Employees</a>
@@ -129,19 +219,195 @@
         <a href="taxes.html">Taxes</a>
         <a href="reports.html">Reports</a>
         <a href="settings.html">Settings</a>
+        <a href="logout.html" style="color:#ef4444;">Sign Out</a>
       </nav>
     </div>
   </header>
 
   <main>
     <section class="card">
-      <p>Employees page content goes here.</p>
+      <div class="toolbar">
+        <h2>All Employees</h2>
+        <button class="btn btn-primary" onclick="openAddModal()">+ Add Employee</button>
+      </div>
+
+      <div id="statusMsg"></div>
+
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th>ID</th>
+              <th>Name</th>
+              <th>Email</th>
+              <th>Phone</th>
+              <th>City</th>
+              <th>State</th>
+              <th>Status</th>
+              <th>Actions</th>
+            </tr>
+          </thead>
+          <tbody id="employeeTableBody">
+            <tr><td colspan="8" style="text-align:center;padding:32px;color:#6b7280;">Loading…</td></tr>
+          </tbody>
+        </table>
+      </div>
     </section>
   </main>
 
+  <!-- ── Add Employee Modal ── -->
+  <div class="modal-backdrop" id="addModal">
+    <div class="modal">
+      <h3>Add Employee</h3>
+      <p class="required-note">Fields marked * are required.</p>
+      <form id="addForm" onsubmit="submitAdd(event)">
+        <div class="form-grid">
+          <div class="form-group">
+            <label for="add_first_name">First Name *</label>
+            <input id="add_first_name" name="first_name" required>
+          </div>
+          <div class="form-group">
+            <label for="add_last_name">Last Name *</label>
+            <input id="add_last_name" name="last_name" required>
+          </div>
+          <div class="form-group full">
+            <label for="add_email">Email *</label>
+            <input id="add_email" name="email" type="email" required>
+          </div>
+          <div class="form-group">
+            <label for="add_phone">Phone</label>
+            <input id="add_phone" name="phone">
+          </div>
+          <div class="form-group">
+            <label for="add_ssn">SSN * (XXX-XX-XXXX)</label>
+            <input id="add_ssn" name="ssn" placeholder="000-00-0000" required>
+          </div>
+          <div class="form-group">
+            <label for="add_hire_date">Hire Date *</label>
+            <input id="add_hire_date" name="hire_date" type="date" required>
+          </div>
+          <div class="form-group">
+            <label for="add_dob">Date of Birth</label>
+            <input id="add_dob" name="date_of_birth" type="date">
+          </div>
+          <div class="form-group full">
+            <label for="add_address">Address</label>
+            <input id="add_address" name="address">
+          </div>
+          <div class="form-group">
+            <label for="add_city">City</label>
+            <input id="add_city" name="city">
+          </div>
+          <div class="form-group">
+            <label for="add_state">State</label>
+            <input id="add_state" name="state" maxlength="2" placeholder="e.g. TX">
+          </div>
+          <div class="form-group">
+            <label for="add_zip">Zip Code</label>
+            <input id="add_zip" name="zip_code">
+          </div>
+          <div class="form-group">
+            <label for="add_status">Employment Status</label>
+            <select id="add_status" name="employment_status">
+              <option value="active">Active</option>
+              <option value="terminated">Terminated</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label for="add_department">Department</label>
+            <input id="add_department" name="department_name" placeholder="e.g. Engineering">
+          </div>
+        </div>
+        <div class="modal-actions">
+          <button type="button" class="btn btn-secondary" onclick="closeModal('addModal')">Cancel</button>
+          <button type="submit" class="btn btn-primary">Create Employee</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- ── Edit Employee Modal ── -->
+  <div class="modal-backdrop" id="editModal">
+    <div class="modal">
+      <h3>Edit Employee</h3>
+      <form id="editForm" onsubmit="submitEdit(event)">
+        <input type="hidden" id="edit_id">
+        <div class="form-grid">
+          <div class="form-group">
+            <label for="edit_first_name">First Name</label>
+            <input id="edit_first_name" name="first_name">
+          </div>
+          <div class="form-group">
+            <label for="edit_last_name">Last Name</label>
+            <input id="edit_last_name" name="last_name">
+          </div>
+          <div class="form-group full">
+            <label for="edit_email">Email</label>
+            <input id="edit_email" name="email" type="email">
+          </div>
+          <div class="form-group">
+            <label for="edit_phone">Phone</label>
+            <input id="edit_phone" name="phone">
+          </div>
+          <div class="form-group full">
+            <label for="edit_address">Address</label>
+            <input id="edit_address" name="address">
+          </div>
+          <div class="form-group">
+            <label for="edit_city">City</label>
+            <input id="edit_city" name="city">
+          </div>
+          <div class="form-group">
+            <label for="edit_state">State</label>
+            <input id="edit_state" name="state" maxlength="2">
+          </div>
+          <div class="form-group">
+            <label for="edit_zip">Zip Code</label>
+            <input id="edit_zip" name="zip_code">
+          </div>
+        </div>
+        <div class="modal-actions">
+          <button type="button" class="btn btn-secondary" onclick="closeModal('editModal')">Cancel</button>
+          <button type="submit" class="btn btn-warning">Save Changes</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
   <script>
+    const API_BASE = 'http://127.0.0.1:8000';
+
+    // ── Dark mode ─────────────────────────────────────────────────────────
+    if (localStorage.getItem('payroll_dark_mode') === 'enabled') {
+      document.body.classList.add('dark');
+    }
+
+    // ── Access control ────────────────────────────────────────────────────
+    (function guardPage() {
+      const token = localStorage.getItem('access_token');
+      const role  = localStorage.getItem('user_role');
+      if (!token || (role !== 'hr' && role !== 'admin' && role !== 'manager')) {
+        window.location.href = 'login.html';
+      }
+    })();
+
+    // ── Auth helpers ──────────────────────────────────────────────────────
+    function authHeaders() {
+      const token = localStorage.getItem('access_token') ?? '';
+      return { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` };
+    }
+
+    // ── Status message ────────────────────────────────────────────────────
+    function showStatus(msg, type = 'info') {
+      const el = document.getElementById('statusMsg');
+      el.className = type;
+      el.textContent = msg;
+      setTimeout(() => { el.className = ''; el.textContent = ''; }, 4000);
+    }
+
+    // ── Hamburger menu ────────────────────────────────────────────────────
     const menuBtn = document.getElementById('menuBtn');
-    const hrMenu = document.getElementById('hrMenu');
+    const hrMenu  = document.getElementById('hrMenu');
 
     menuBtn.addEventListener('click', () => {
       const isOpen = hrMenu.classList.toggle('open');
@@ -149,14 +415,240 @@
       hrMenu.setAttribute('aria-hidden', String(!isOpen));
     });
 
-    document.addEventListener('click', (event) => {
-      if (!event.target.closest('.menu-wrap')) {
+    document.addEventListener('click', (e) => {
+      if (!e.target.closest('.menu-wrap')) {
         hrMenu.classList.remove('open');
         menuBtn.setAttribute('aria-expanded', 'false');
         hrMenu.setAttribute('aria-hidden', 'true');
       }
     });
+
+    // ── Modal helpers ─────────────────────────────────────────────────────
+    function openModal(id)  { document.getElementById(id).classList.add('open'); }
+    function closeModal(id) { document.getElementById(id).classList.remove('open'); }
+
+    document.querySelectorAll('.modal-backdrop').forEach(backdrop => {
+      backdrop.addEventListener('click', (e) => {
+        if (e.target === backdrop) backdrop.classList.remove('open');
+      });
+    });
+
+    // ── Render table ──────────────────────────────────────────────────────
+    function renderTable(employees) {
+      const tbody = document.getElementById('employeeTableBody');
+      tbody.innerHTML = '';
+
+      if (!employees || employees.length === 0) {
+        tbody.innerHTML = '<tr><td colspan="8" style="text-align:center;padding:32px;color:#6b7280;">No employees found.</td></tr>';
+        return;
+      }
+
+      const isAdmin = localStorage.getItem('user_role') === 'admin';
+
+      employees.forEach(emp => {
+        const statusClass = emp.employment_status === 'active' ? 'badge-active' : 'badge-terminated';
+        const tr = document.createElement('tr');
+        tr.innerHTML = `
+          <td>${emp.employee_id}</td>
+          <td>${emp.first_name} ${emp.last_name}</td>
+          <td>${emp.email ?? '—'}</td>
+          <td>${emp.phone ?? '—'}</td>
+          <td>${emp.city ?? '—'}</td>
+          <td>${emp.state ?? '—'}</td>
+          <td><span class="badge ${statusClass}">${emp.employment_status ?? 'active'}</span></td>
+          <td>
+            <div class="actions">
+              <button class="btn btn-warning" onclick="openEditModal(${emp.employee_id})">Edit</button>
+              <button class="btn btn-danger"  onclick="terminateEmployee(${emp.employee_id})">Terminate</button>
+              ${isAdmin ? `<button class="btn btn-danger" style="background:#7f1d1d;" onclick="hardDeleteEmployee(${emp.employee_id})">Delete</button>` : ''}
+            </div>
+          </td>`;
+        tbody.appendChild(tr);
+      });
+    }
+
+    // ── Load employees (role-aware) ───────────────────────────────────────
+    async function loadEmployees() {
+      const role = localStorage.getItem('user_role');
+      try {
+        let employees;
+
+        if (role === 'manager') {
+          // 1. find the manager's department
+          const deptRes = await fetch(`${API_BASE}/department/mine`, { headers: authHeaders() });
+          if (deptRes.status === 401 || deptRes.status === 403) { redirectLogin(); return; }
+          if (!deptRes.ok) {
+            const err = await deptRes.json().catch(() => ({}));
+            throw new Error(err.detail ?? `Error ${deptRes.status}`);
+          }
+          const dept = await deptRes.json();
+
+          // 2. fetch employees in that department
+          const empRes = await fetch(`${API_BASE}/employee/by-department/${dept.department_id}`, { headers: authHeaders() });
+          if (!empRes.ok) throw new Error(`Error ${empRes.status}`);
+          employees = await empRes.json();
+
+          // show which department we're viewing
+          document.querySelector('.toolbar h2').textContent = `${dept.department_name} — Employees`;
+        } else {
+          // hr / admin see everyone
+          const res = await fetch(`${API_BASE}/employee/all`, { headers: authHeaders() });
+          if (res.status === 401 || res.status === 403) { redirectLogin(); return; }
+          if (!res.ok) throw new Error(`Error ${res.status}: ${res.statusText}`);
+          employees = await res.json();
+        }
+
+        renderTable(employees);
+      } catch (err) {
+        document.getElementById('employeeTableBody').innerHTML =
+          `<tr><td colspan="8" style="text-align:center;padding:32px;color:#dc2626;">Failed to load employees: ${err.message}</td></tr>`;
+      }
+    }
+
+    function redirectLogin() {
+      localStorage.removeItem('access_token');
+      localStorage.removeItem('user_role');
+      window.location.href = 'login.html';
+    }
+
+    // ── POST /employee/sign_up ────────────────────────────────────────────
+    function openAddModal() {
+      document.getElementById('addForm').reset();
+      openModal('addModal');
+    }
+
+    async function submitAdd(e) {
+      e.preventDefault();
+      const form = e.target;
+      const body = {
+        first_name:        form.first_name.value.trim(),
+        last_name:         form.last_name.value.trim(),
+        email:             form.email.value.trim(),
+        phone:             form.phone.value.trim()         || null,
+        ssn:               form.ssn.value.trim(),
+        hire_date:         form.hire_date.value,
+        date_of_birth:     form.date_of_birth.value        || null,
+        address:           form.address.value.trim()       || null,
+        city:              form.city.value.trim()          || null,
+        state:             form.state.value.trim()         || null,
+        zip_code:          form.zip_code.value.trim()      || null,
+        employment_status: form.employment_status.value,
+        department_name:   form.department_name.value.trim() || null,
+      };
+
+      try {
+        const res = await fetch(`${API_BASE}/employee/sign_up`, {
+          method: 'POST',
+          headers: authHeaders(),
+          body: JSON.stringify(body),
+        });
+        const data = await res.json();
+        if (!res.ok) throw new Error(data.detail ?? res.statusText);
+        closeModal('addModal');
+        showStatus('Employee created successfully.', 'success');
+        loadEmployees();
+      } catch (err) {
+        showStatus(`Failed to create employee: ${err.message}`, 'error');
+      }
+    }
+
+    // ── PATCH /employee/{id}/update ───────────────────────────────────────
+    async function openEditModal(employeeId) {
+      try {
+        const res = await fetch(`${API_BASE}/employee/${employeeId}`, { headers: authHeaders() });
+        if (!res.ok) throw new Error(`Error ${res.status}`);
+        const emp = await res.json();
+
+        document.getElementById('edit_id').value         = emp.employee_id;
+        document.getElementById('edit_first_name').value = emp.first_name  ?? '';
+        document.getElementById('edit_last_name').value  = emp.last_name   ?? '';
+        document.getElementById('edit_email').value      = emp.email       ?? '';
+        document.getElementById('edit_phone').value      = emp.phone       ?? '';
+        document.getElementById('edit_address').value    = emp.address     ?? '';
+        document.getElementById('edit_city').value       = emp.city        ?? '';
+        document.getElementById('edit_state').value      = emp.state       ?? '';
+        document.getElementById('edit_zip').value        = emp.zip_code    ?? '';
+
+        openModal('editModal');
+      } catch (err) {
+        showStatus(`Could not load employee: ${err.message}`, 'error');
+      }
+    }
+
+    async function submitEdit(e) {
+      e.preventDefault();
+      const id = document.getElementById('edit_id').value;
+      const form = e.target;
+
+      const fieldMap = {
+        first_name: form.first_name,
+        last_name:  form.last_name,
+        email:      form.email,
+        phone:      form.phone,
+        address:    form.address,
+        city:       form.city,
+        state:      form.state,
+        zip_code:   form.zip_code,
+      };
+
+      const body = {};
+      Object.entries(fieldMap).forEach(([key, input]) => {
+        const val = input.value.trim();
+        if (val !== '') body[key] = val;
+      });
+
+      try {
+        const res = await fetch(`${API_BASE}/employee/${id}/update`, {
+          method: 'PATCH',
+          headers: authHeaders(),
+          body: JSON.stringify(body),
+        });
+        const data = await res.json();
+        if (!res.ok) throw new Error(data.detail ?? res.statusText);
+        closeModal('editModal');
+        showStatus('Employee updated successfully.', 'success');
+        loadEmployees();
+      } catch (err) {
+        showStatus(`Failed to update employee: ${err.message}`, 'error');
+      }
+    }
+
+    // ── DELETE /employee/{id}/delete ──────────────────────────────────────
+    async function terminateEmployee(employeeId) {
+      if (!confirm('Mark this employee as terminated?')) return;
+      try {
+        const res = await fetch(`${API_BASE}/employee/${employeeId}/delete`, {
+          method: 'DELETE',
+          headers: authHeaders(),
+        });
+        const data = await res.json();
+        if (!res.ok) throw new Error(data.detail ?? res.statusText);
+        showStatus(data.message ?? 'Employee terminated.', 'success');
+        loadEmployees();
+      } catch (err) {
+        showStatus(`Failed to terminate employee: ${err.message}`, 'error');
+      }
+    }
+
+    // ── DELETE /employee/{id}/hard-delete ─────────────────────────────────
+    async function hardDeleteEmployee(employeeId) {
+      if (!confirm(`Permanently delete employee #${employeeId}?\n\nThis will remove all their records including time entries, paychecks, and tax information. This cannot be undone.`)) return;
+      try {
+        const res = await fetch(`${API_BASE}/employee/${employeeId}/hard-delete`, {
+          method: 'DELETE',
+          headers: authHeaders(),
+        });
+        const data = await res.json();
+        if (!res.ok) throw new Error(data.detail ?? res.statusText);
+        showStatus(data.message ?? 'Employee permanently deleted.', 'success');
+        loadEmployees();
+      } catch (err) {
+        showStatus(`Failed to delete employee: ${err.message}`, 'error');
+      }
+    }
+
+    // ── Init ──────────────────────────────────────────────────────────────
+    loadEmployees();
   </script>
 </body>
 </html>
-

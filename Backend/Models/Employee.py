@@ -1,4 +1,4 @@
-from sqlalchemy import Column, Integer, String, Date, Enum, TIMESTAMP
+from sqlalchemy import Column, Integer, String, Date, Enum, TIMESTAMP, ForeignKey
 from Backend.Database.connection import Base
 from datetime import datetime
 
@@ -23,6 +23,7 @@ class Employee(Base):
         nullable=True,
         default="active"
     )
+    department_id = Column(Integer, ForeignKey("departments.department_id"), nullable=True)
     created_at = Column(Date, default=datetime.utcnow)
     updated_at = Column(Date, default=datetime.utcnow, onupdate=datetime.utcnow)
 

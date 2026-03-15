@@ -11,6 +11,16 @@
       --surface: #ffffff;
       --border: #d1d5db;
       --accent: #0f766e;
+      --muted: #6b7280;
+    }
+
+    body.dark {
+      --bg: #0b1220;
+      --surface: #111827;
+      --text: #f3f4f6;
+      --muted: #9ca3af;
+      --border: #374151;
+      --accent: #14b8a6;
     }
 
     * { box-sizing: border-box; }
@@ -20,6 +30,7 @@
       font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
       background: var(--bg);
       color: var(--text);
+      transition: background 0.2s ease, color 0.2s ease;
     }
 
     header {
@@ -42,17 +53,141 @@
       padding: 24px 20px;
     }
 
-    .card {
+    .profile-card {
       background: var(--surface);
       border: 1px solid var(--border);
       border-radius: 12px;
-      padding: 20px;
-      max-width: 780px;
+      padding: 28px;
+      max-width: 520px;
     }
 
-    .menu-wrap {
-      position: relative;
+    .avatar {
+      width: 72px;
+      height: 72px;
+      border-radius: 50%;
+      background: #1d4ed8;
+      color: #fff;
+      font-size: 1.8rem;
+      font-weight: 700;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin-bottom: 16px;
     }
+
+    .profile-card h2 {
+      margin: 0 0 4px;
+      font-size: 1.3rem;
+    }
+
+    .role-badge {
+      display: inline-block;
+      padding: 3px 10px;
+      border-radius: 999px;
+      font-size: 0.78rem;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+      margin-bottom: 20px;
+    }
+
+    .role-badge.admin   { background: #fef3c7; color: #92400e; }
+    .role-badge.manager { background: #dbeafe; color: #1e40af; }
+    .role-badge.hr      { background: #d1fae5; color: #065f46; }
+
+    .info-grid {
+      display: grid;
+      grid-template-columns: 140px 1fr;
+      gap: 12px 0;
+      border-top: 1px solid var(--border);
+      padding-top: 20px;
+    }
+
+    .info-grid dt {
+      font-size: 0.85rem;
+      color: var(--muted);
+      font-weight: 600;
+      padding: 2px 0;
+    }
+
+    .info-grid dd {
+      margin: 0;
+      font-size: 0.95rem;
+      padding: 2px 0;
+    }
+
+    .status-dot {
+      display: inline-block;
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background: #22c55e;
+      margin-right: 6px;
+    }
+
+    .divider {
+      border: none;
+      border-top: 1px solid var(--border);
+      margin: 24px 0;
+    }
+
+    .section-title {
+      font-size: 0.95rem;
+      font-weight: 700;
+      margin: 0 0 14px;
+    }
+
+    .form-group {
+      margin-bottom: 14px;
+    }
+
+    .form-group label {
+      display: block;
+      font-size: 0.85rem;
+      font-weight: 600;
+      margin-bottom: 5px;
+      color: var(--muted);
+    }
+
+    .form-group input {
+      width: 100%;
+      padding: 9px 12px;
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      font-size: 0.95rem;
+      color: var(--text);
+      background: var(--bg);
+    }
+
+    .form-group input:focus {
+      outline: none;
+      border-color: var(--accent);
+      box-shadow: 0 0 0 3px rgba(15, 118, 110, 0.12);
+    }
+
+    .btn {
+      padding: 9px 20px;
+      border: none;
+      border-radius: 8px;
+      font-size: 0.9rem;
+      font-weight: 600;
+      cursor: pointer;
+      background: var(--accent);
+      color: #fff;
+    }
+
+    .btn:hover { opacity: 0.9; }
+
+    .msg {
+      font-size: 0.85rem;
+      margin-top: 10px;
+      min-height: 1.2em;
+    }
+
+    .msg.success { color: #16a34a; }
+    .msg.error   { color: #dc2626; }
+
+    .menu-wrap { position: relative; }
 
     .menu-btn {
       width: 42px;
@@ -91,9 +226,7 @@
       z-index: 20;
     }
 
-    .menu.open {
-      display: block;
-    }
+    .menu.open { display: block; }
 
     .menu a {
       display: block;
@@ -129,19 +262,93 @@
         <a href="taxes.html">Taxes</a>
         <a href="reports.html">Reports</a>
         <a href="settings.html">Settings</a>
+        <a href="logout.html" style="color:#ef4444;">Sign Out</a>
       </nav>
     </div>
   </header>
 
   <main>
-    <section class="card">
-      <p>Profile page content goes here.</p>
-    </section>
+    <div class="profile-card">
+
+
+      <div class="avatar" id="avatarInitial">?</div>
+      <h2 id="displayName">Loading...</h2>
+      <p id="displayUsername" style="margin:0 0 6px; color:var(--muted); font-size:0.9rem;"></p>
+      <span class="role-badge" id="roleBadge"></span>
+
+      <!-- Account info -->
+      <dl class="info-grid">
+        <dt>User ID</dt>
+        <dd id="infoId">—</dd>
+
+        <dt>Status</dt>
+        <dd><span class="status-dot"></span>Active</dd>
+
+        <dt>Role</dt>
+        <dd id="infoRole">—</dd>
+      </dl>
+
+      <hr class="divider">
+
+      <!-- Edit name -->
+      <p class="section-title">Edit Name</p>
+
+      <div class="form-group">
+        <label for="editFirstName">First name</label>
+        <input type="text" id="editFirstName" autocomplete="given-name">
+      </div>
+      <div class="form-group">
+        <label for="editLastName">Last name</label>
+        <input type="text" id="editLastName" autocomplete="family-name">
+      </div>
+
+      <button class="btn" id="updateNameBtn">Update name</button>
+      <p class="msg" id="nameMsg"></p>
+
+      <hr class="divider">
+
+      <!-- Change password -->
+      <p class="section-title">Change Password</p>
+
+      <div class="form-group">
+        <label for="currentPassword">Current password</label>
+        <input type="password" id="currentPassword" autocomplete="current-password">
+      </div>
+      <div class="form-group">
+        <label for="newPassword">New password</label>
+        <input type="password" id="newPassword" autocomplete="new-password">
+      </div>
+      <div class="form-group">
+        <label for="confirmPassword">Confirm new password</label>
+        <input type="password" id="confirmPassword" autocomplete="new-password">
+      </div>
+
+      <button class="btn" id="saveBtn">Save changes</button>
+      <p class="msg" id="msg"></p>
+    </div>
   </main>
 
   <script>
+    if (localStorage.getItem('payroll_dark_mode') === 'enabled') {
+      document.body.classList.add('dark');
+    }
+
+    const API = 'http://127.0.0.1:8000';
+
+    // --- Redirect to login on 401 ---
+    function handleUnauthorized(res) {
+      if (res.status === 401) {
+        localStorage.removeItem('access_token');
+        localStorage.removeItem('user_role');
+        window.location.href = 'login.html';
+        return true;
+      }
+      return false;
+    }
+
+    // --- Nav menu ---
     const menuBtn = document.getElementById('menuBtn');
-    const hrMenu = document.getElementById('hrMenu');
+    const hrMenu  = document.getElementById('hrMenu');
 
     menuBtn.addEventListener('click', () => {
       const isOpen = hrMenu.classList.toggle('open');
@@ -149,13 +356,161 @@
       hrMenu.setAttribute('aria-hidden', String(!isOpen));
     });
 
-    document.addEventListener('click', (event) => {
-      if (!event.target.closest('.menu-wrap')) {
+    document.addEventListener('click', (e) => {
+      if (!e.target.closest('.menu-wrap')) {
         hrMenu.classList.remove('open');
         menuBtn.setAttribute('aria-expanded', 'false');
         hrMenu.setAttribute('aria-hidden', 'true');
       }
     });
+
+    // --- Decode JWT payload (no verification — display only) ---
+    function parseJwt(token) {
+      try {
+        return JSON.parse(atob(token.split('.')[1].replace(/-/g, '+').replace(/_/g, '/')));
+      } catch { return null; }
+    }
+
+    // --- Populate profile from token ---
+    function loadProfile() {
+      const token = localStorage.getItem('access_token');
+      if (!token) { window.location.href = 'login.html'; return; }
+
+      const payload = parseJwt(token);
+      if (!payload) { window.location.href = 'login.html'; return; }
+
+      // Redirect if token is expired
+      if (payload.exp && Date.now() / 1000 > payload.exp) {
+        localStorage.removeItem('access_token');
+        localStorage.removeItem('user_role');
+        window.location.href = 'login.html';
+        return;
+      }
+
+      const username  = payload.username ?? payload.sub ?? 'Unknown';
+      const firstName = payload.first_name ?? '';
+      const lastName  = payload.last_name  ?? '';
+      const fullName  = (firstName || lastName) ? `${firstName} ${lastName}`.trim() : username;
+      const role      = payload.role ?? '—';
+      const userId    = payload.sub ?? '—';
+
+      document.getElementById('displayName').textContent    = fullName;
+      document.getElementById('displayUsername').textContent = `@${username}`;
+      document.getElementById('avatarInitial').textContent  = fullName.charAt(0).toUpperCase();
+      document.getElementById('infoId').textContent         = userId;
+      document.getElementById('infoRole').textContent       = role;
+
+      // Pre-fill name inputs with current values
+      document.getElementById('editFirstName').value = firstName;
+      document.getElementById('editLastName').value  = lastName;
+
+      const badge = document.getElementById('roleBadge');
+      badge.textContent = role;
+      badge.className   = `role-badge ${role}`;
+    }
+
+    // --- Update name ---
+    document.getElementById('updateNameBtn').addEventListener('click', async () => {
+      const nameMsg   = document.getElementById('nameMsg');
+      const firstName = document.getElementById('editFirstName').value.trim();
+      const lastName  = document.getElementById('editLastName').value.trim();
+      const token     = localStorage.getItem('access_token');
+
+      nameMsg.className = 'msg';
+      nameMsg.textContent = '';
+
+      if (!firstName && !lastName) {
+        nameMsg.className = 'msg error';
+        nameMsg.textContent = 'Please enter at least a first or last name.';
+        return;
+      }
+
+      try {
+        const res = await fetch(`${API}/auth/me`, {
+          method: 'PATCH',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${token}`
+          },
+          body: JSON.stringify({ first_name: firstName || null, last_name: lastName || null })
+        });
+
+        if (handleUnauthorized(res)) return;
+        if (res.ok) {
+          const data = await res.json();
+          const fullName = [data.first_name, data.last_name].filter(Boolean).join(' ') || data.username;
+          document.getElementById('displayName').textContent   = fullName;
+          document.getElementById('avatarInitial').textContent = fullName.charAt(0).toUpperCase();
+          nameMsg.className = 'msg success';
+          nameMsg.textContent = 'Name updated successfully.';
+        } else {
+          const data = await res.json().catch(() => ({}));
+          nameMsg.className = 'msg error';
+          nameMsg.textContent = data.detail ?? 'Failed to update name.';
+        }
+      } catch {
+        nameMsg.className = 'msg error';
+        nameMsg.textContent = 'Network error. Please try again.';
+      }
+    });
+
+    // --- Change password ---
+    document.getElementById('saveBtn').addEventListener('click', async () => {
+      const msg     = document.getElementById('msg');
+      const current = document.getElementById('currentPassword').value.trim();
+      const next    = document.getElementById('newPassword').value.trim();
+      const confirm = document.getElementById('confirmPassword').value.trim();
+
+      msg.className = 'msg';
+      msg.textContent = '';
+
+      if (!current || !next || !confirm) {
+        msg.className = 'msg error';
+        msg.textContent = 'Please fill in all fields.';
+        return;
+      }
+      if (next !== confirm) {
+        msg.className = 'msg error';
+        msg.textContent = 'New passwords do not match.';
+        return;
+      }
+      if (next.length < 6) {
+        msg.className = 'msg error';
+        msg.textContent = 'New password must be at least 6 characters.';
+        return;
+      }
+
+      const token = localStorage.getItem('access_token');
+
+      try {
+        const res = await fetch(`${API}/auth/change-password`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${token}`
+          },
+          body: JSON.stringify({ current_password: current, new_password: next })
+        });
+
+        if (handleUnauthorized(res)) return;
+        if (res.ok) {
+          msg.className = 'msg success';
+          msg.textContent = 'Password updated successfully.';
+          document.getElementById('currentPassword').value = '';
+          document.getElementById('newPassword').value     = '';
+          document.getElementById('confirmPassword').value = '';
+        } else {
+          const data = await res.json().catch(() => ({}));
+          msg.className = 'msg error';
+          msg.textContent = data.detail ?? 'Failed to update password.';
+        }
+      } catch {
+        msg.className = 'msg error';
+        msg.textContent = 'Network error. Please try again.';
+      }
+    });
+
+    loadProfile();
   </script>
 </body>
 </html>

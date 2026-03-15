@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Payroll v1</title>
+  <title>Payroll</title>
   <style>
     :root {
       --bg: #eef3f9;
@@ -20,16 +20,29 @@
       --table-muted: #374151;
     }
 
+    body.dark {
+      --bg: #0b1220;
+      --surface: #111827;
+      --text: #f3f4f6;
+      --muted: #9ca3af;
+      --border: #374151;
+      --accent: #14b8a6;
+      --table-bg: #111827;
+      --table-border: #374151;
+      --table-text: #f3f4f6;
+      --table-muted: #d1d5db;
+    }
+
     * { box-sizing: border-box; }
 
     body {
       margin: 0;
       font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
-      background:
-        radial-gradient(circle at top left, #dbeafe 0%, transparent 35%),
-        radial-gradient(circle at top right, #e0f2fe 0%, transparent 30%),
-        var(--bg);
+      background: radial-gradient(circle at top left, #dbeafe 0%, transparent 35%),
+                  radial-gradient(circle at top right, #e0f2fe 0%, transparent 30%),
+                  var(--bg);
       color: var(--text);
+      transition: background 0.2s, color 0.2s;
     }
 
     header {
@@ -42,76 +55,72 @@
       position: relative;
     }
 
-    h1 {
-      margin: 0;
-      font-size: 1.3rem;
-      color: #ffffff;
-    }
+    h1 { margin: 0; font-size: 1.3rem; color: #ffffff; }
 
     .menu-wrap { position: relative; }
 
     .menu-btn {
-      width: 42px;
-      height: 42px;
-      border: 1px solid rgba(255, 255, 255, 0.45);
+      width: 42px; height: 42px;
+      border: 1px solid rgba(255,255,255,0.45);
       border-radius: 8px;
-      background: rgba(255, 255, 255, 0.12);
+      background: rgba(255,255,255,0.12);
       cursor: pointer;
-      display: flex;
-      flex-direction: column;
-      justify-content: center;
-      align-items: center;
-      gap: 5px;
-      padding: 0;
+      display: flex; flex-direction: column;
+      justify-content: center; align-items: center;
+      gap: 5px; padding: 0;
     }
 
-    .menu-btn span {
-      width: 20px;
-      height: 2px;
-      background: #ffffff;
-      border-radius: 10px;
-      display: block;
-    }
+    .menu-btn span { width: 20px; height: 2px; background: #fff; border-radius: 10px; display: block; }
 
     .menu {
-      position: absolute;
-      right: 0;
-      top: 50px;
-      min-width: 210px;
-      background: var(--surface);
-      border: 1px solid var(--border);
-      border-radius: 10px;
-      box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
-      padding: 8px;
-      display: none;
-      z-index: 20;
+      position: absolute; right: 0; top: 50px;
+      min-width: 210px; background: var(--surface);
+      border: 1px solid var(--border); border-radius: 10px;
+      box-shadow: 0 10px 25px rgba(0,0,0,0.1);
+      padding: 8px; display: none; z-index: 20;
     }
 
     .menu.open { display: block; }
 
     .menu a {
-      display: block;
-      text-decoration: none;
-      color: var(--text);
-      padding: 10px 12px;
-      border-radius: 8px;
-      font-size: 0.95rem;
+      display: block; text-decoration: none; color: var(--text);
+      padding: 10px 12px; border-radius: 8px; font-size: 0.95rem;
     }
 
-    .menu a:hover {
-      background: #ecfeff;
-      color: var(--accent);
+    .menu a:hover { background: #ecfeff; color: var(--accent); }
+
+    main { max-width: 1180px; margin: 0 auto; padding: 24px 20px 40px; }
+
+    /* ── Toolbar ── */
+    .toolbar {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      flex-wrap: wrap;
+      margin-bottom: 16px;
     }
 
-    main {
-      max-width: 1180px;
-      margin: 0 auto;
-      padding: 24px 20px 40px;
+    .toolbar-left { display: flex; gap: 10px; flex: 1; flex-wrap: wrap; align-items: center; }
+
+    .btn {
+      padding: 9px 16px;
+      border: none; border-radius: 8px;
+      font-size: 0.9rem; font-weight: 600;
+      font-family: inherit; cursor: pointer;
     }
 
+    .btn-primary   { background: var(--primary); color: #fff; }
+    .btn-primary:hover { background: var(--primary-dark); }
+    .btn-green     { background: #15803d; color: #fff; }
+    .btn-green:hover { background: #166534; }
+    .btn-secondary { background: var(--border); color: var(--text); }
+    .btn-secondary:hover { background: #cbd5e1; }
+    .btn:disabled  { opacity: 0.5; cursor: not-allowed; }
+
+    /* ── Filters ── */
     .filters {
       display: grid;
-      grid-template-columns: 1.05fr auto 1fr auto 1.25fr;
+      grid-template-columns: 1.2fr auto 1.2fr auto 1fr;
       align-items: center;
       gap: 14px;
       background: var(--surface);
@@ -120,155 +129,129 @@
       margin-bottom: 16px;
     }
 
-    .divider {
-      color: #475569;
-      font-size: 1.35rem;
-      line-height: 1;
-      user-select: none;
-    }
+    .divider { color: #475569; font-size: 1.35rem; line-height: 1; user-select: none; }
 
     .control {
-      width: 100%;
-      border: 0;
-      outline: 0;
-      background: transparent;
-      color: #1f2937;
-      font-size: 1rem;
-      font-family: inherit;
-      padding: 4px 0;
+      width: 100%; border: 0; outline: 0;
+      background: transparent; color: var(--text);
+      font-size: 1rem; font-family: inherit; padding: 4px 0;
     }
 
     .control::placeholder { color: var(--muted); }
 
-    .select-wrap {
-      position: relative;
-      width: 100%;
-    }
+    .select-wrap { position: relative; width: 100%; }
 
-    select.control {
-      appearance: none;
-      cursor: pointer;
-      padding-right: 18px;
-    }
+    select.control { appearance: none; cursor: pointer; padding-right: 18px; }
 
     .select-wrap::after {
-      content: "";
-      position: absolute;
-      right: 2px;
-      top: 50%;
-      width: 8px;
-      height: 8px;
-      border-right: 2px solid #475569;
-      border-bottom: 2px solid #475569;
-      transform: translateY(-70%) rotate(45deg);
-      pointer-events: none;
+      content: ""; position: absolute; right: 2px; top: 50%;
+      width: 8px; height: 8px;
+      border-right: 2px solid #475569; border-bottom: 2px solid #475569;
+      transform: translateY(-70%) rotate(45deg); pointer-events: none;
     }
 
+    /* ── Table ── */
     .table-shell {
       background: var(--surface);
       border: 1px solid var(--table-border);
-      border-radius: 12px;
-      padding: 12px;
-      box-shadow: 0 10px 20px rgba(15, 23, 42, 0.06);
+      border-radius: 12px; padding: 12px;
+      box-shadow: 0 10px 20px rgba(15,23,42,0.06);
     }
 
     .table-card {
       background: var(--table-bg);
       border: 1px solid var(--table-border);
-      border-radius: 10px;
-      overflow-x: auto;
+      border-radius: 10px; overflow-x: auto;
     }
 
-    table {
-      width: 100%;
-      min-width: 900px;
-      border-collapse: collapse;
-      color: var(--table-text);
-    }
+    table { width: 100%; min-width: 860px; border-collapse: collapse; color: var(--table-text); }
 
     thead th {
-      font-size: 1.05rem;
-      font-weight: 600;
-      text-align: left;
-      color: #334155;
-      background: #f8fbff;
+      font-size: 0.95rem; font-weight: 600; text-align: left;
+      color: #334155; background: #f8fbff;
       border-bottom: 1px solid var(--table-border);
-      padding: 14px 16px 11px;
-      vertical-align: top;
+      padding: 13px 16px 10px;
     }
 
-    tbody td {
-      padding: 12px 16px;
-      color: var(--table-muted);
-      vertical-align: top;
-      font-size: 0.98rem;
+    tbody td { padding: 12px 16px; color: var(--table-muted); font-size: 0.97rem; }
+
+    .name  { font-weight: 700; color: var(--text); line-height: 1.25; }
+    .amount { font-weight: 700; color: var(--text); }
+    .small { font-size: 0.85rem; color: #9ca3af; display: block; margin-top: 3px; }
+    tbody tr + tr td { border-top: 1px solid var(--table-border); }
+    tbody tr:nth-child(even) td { background: #fcfdff; }
+
+    /* ── Status badge ── */
+    .badge {
+      display: inline-block; font-size: 0.78rem; font-weight: 600;
+      padding: 2px 8px; border-radius: 99px;
+    }
+    .badge-processed { background: #d1fae5; color: #065f46; }
+    .badge-pending   { background: #fef3c7; color: #92400e; }
+    .badge-paid      { background: #dbeafe; color: #1e40af; }
+    .badge-void      { background: #fee2e2; color: #991b1b; }
+
+    /* ── Modal ── */
+    .modal-backdrop {
+      display: none; position: fixed; inset: 0;
+      background: rgba(0,0,0,0.45); z-index: 100;
+      align-items: center; justify-content: center;
+    }
+    .modal-backdrop.open { display: flex; }
+
+    .modal {
+      background: var(--surface); border-radius: 14px;
+      padding: 28px 30px; width: 100%; max-width: 440px;
+      box-shadow: 0 20px 50px rgba(0,0,0,0.2);
     }
 
-    .name {
-      font-weight: 700;
-      color: #0f172a;
-      line-height: 1.25;
-      font-size: 1rem;
+    .modal h3 { margin: 0 0 18px; font-size: 1.1rem; color: var(--text); }
+
+    .form-group { margin-bottom: 14px; }
+
+    .form-group label {
+      display: block; font-size: 0.8rem; font-weight: 600;
+      color: var(--muted); margin-bottom: 4px;
+      text-transform: uppercase; letter-spacing: 0.3px;
     }
 
-    .amount {
-      font-weight: 700;
-      color: #0f172a;
-      font-size: 1rem;
+    .form-group input,
+    .form-group select {
+      width: 100%; padding: 9px 11px;
+      border: 1px solid var(--border); border-radius: 8px;
+      font-size: 0.93rem; font-family: inherit;
+      color: var(--text); background: var(--surface); outline: none;
     }
 
-    tbody tr + tr td {
-      border-top: 1px solid var(--table-border);
+    .form-group input:focus,
+    .form-group select:focus {
+      border-color: var(--primary);
+      box-shadow: 0 0 0 3px rgba(29,78,216,0.12);
     }
 
-    tbody tr:nth-child(even) td {
-      background: #fcfdff;
+    .modal-actions { display: flex; justify-content: flex-end; gap: 10px; margin-top: 20px; }
+
+    .status-bar {
+      padding: 10px 14px; border-radius: 8px;
+      font-size: 0.88rem; font-weight: 500; margin-bottom: 14px; display: none;
     }
+    .status-bar.success { background: #d1fae5; color: #065f46; display: block; }
+    .status-bar.error   { background: #fee2e2; color: #991b1b; display: block; }
+    .status-bar.info    { background: #dbeafe; color: #1e40af; display: block; }
 
-    .small {
-      font-size: 0.92rem;
-      color: #9ca3af;
-      display: block;
-      margin-top: 4px;
-    }
-
-    @media (max-width: 980px) {
-      .filters {
-        grid-template-columns: 1fr;
-        gap: 8px;
-      }
-
+    @media (max-width: 900px) {
+      .filters { grid-template-columns: 1fr; gap: 8px; }
       .divider { display: none; }
-
-      .filters .control,
-      .filters .select-wrap {
-        border: 1px solid var(--border);
-        border-radius: 8px;
-        padding: 8px 10px;
-        background: #f8fafc;
-      }
-
-      select.control {
-        padding-right: 28px;
-      }
-
-      .select-wrap::after {
-        right: 11px;
-      }
     }
   </style>
 </head>
 <body>
   <header>
     <h1>Payroll</h1>
-
     <div class="menu-wrap">
       <button class="menu-btn" id="menuBtn" aria-label="Open menu" aria-expanded="false" aria-controls="hrMenu">
-        <span></span>
-        <span></span>
-        <span></span>
+        <span></span><span></span><span></span>
       </button>
-
       <nav class="menu" id="hrMenu" aria-hidden="true">
         <a href="template_main_page.html">Home</a>
         <a href="profile.html">Profile</a>
@@ -278,81 +261,108 @@
         <a href="taxes.html">Taxes</a>
         <a href="reports.html">Reports</a>
         <a href="settings.html">Settings</a>
+        <a href="logout.html" style="color:#ef4444;">Sign Out</a>
       </nav>
     </div>
   </header>
 
   <main>
+    <div id="statusBar" class="status-bar"></div>
+
+    <!-- Toolbar -->
+    <div class="toolbar">
+      <div class="toolbar-left">
+        <button class="btn btn-primary" onclick="openModal('periodModal')">+ New Pay Period</button>
+        <select id="periodSelect" style="padding:9px 11px;border:1px solid var(--border);border-radius:8px;font-size:0.9rem;font-family:inherit;background:var(--surface);color:var(--text);min-width:220px;">
+          <option value="">Select pay period to run…</option>
+        </select>
+        <button class="btn btn-green" id="runBtn" onclick="runPayroll()">▶ Run Payroll</button>
+      </div>
+    </div>
+
+    <!-- Filters -->
     <section class="filters" aria-label="Payroll filters">
-      <input class="control" type="search" placeholder="Search" aria-label="Search employee">
+      <input class="control" id="searchInput" type="search" placeholder="Search by employee ID" aria-label="Search employee">
       <span class="divider" aria-hidden="true">|</span>
       <div class="select-wrap">
-        <select class="control" aria-label="Fiscal year and quarter">
-          <option>Fiscal Year/Quarter</option>
-          <option>2026 Q1</option>
-          <option>2025 Q4</option>
-          <option>2025 Q3</option>
+        <select class="control" id="periodFilter" aria-label="Filter by pay period">
+          <option value="">All Pay Periods</option>
         </select>
       </div>
       <span class="divider" aria-hidden="true">|</span>
       <div class="select-wrap">
-        <select class="control" aria-label="Payment status">
-          <option>Drop down of (Paid, Pending, Overdue)</option>
-          <option>Paid</option>
-          <option>Pending</option>
-          <option>Overdue</option>
+        <select class="control" id="statusFilter" aria-label="Payment status">
+          <option value="">All Statuses</option>
+          <option value="paid">Paid</option>
+          <option value="pending">Pending</option>
+          <option value="processed">Processed</option>
+          <option value="void">Void</option>
         </select>
       </div>
     </section>
 
-    <section class="table-shell" aria-label="Payroll table container">
+    <!-- Table -->
+    <section class="table-shell">
       <div class="table-card">
-        <table aria-label="Payroll records">
+        <table>
           <thead>
             <tr>
-              <th>Employee (ID)</th>
-              <th>Tax<br>Period</th>
-              <th>Gross<br>Pay</th>
-              <th>Fed<br>Withholding</th>
-              <th>State<br>Tax</th>
-              <th>Employer<br>FICA</th>
-              <th>Total<br>Tax</th>
+              <th>Employee</th>
+              <th>Pay Period</th>
+              <th>Gross Pay</th>
+              <th>Fed Tax</th>
+              <th>State Tax</th>
+              <th>FICA</th>
+              <th>Net Pay</th>
+              <th>Status</th>
             </tr>
           </thead>
-          <tbody>
-            <tr>
-              <td>
-                <span class="name">User 1</span>
-                <span class="small">(#104)</span>
-              </td>
-              <td>2026 Q1</td>
-              <td class="amount">$0</td>
-              <td>$0</td>
-              <td>$0</td>
-              <td>$0</td>
-              <td class="amount">$0</td>
-            </tr>
-            <tr>
-              <td>
-                <span class="name">User 2</span>
-                <span class="small">(#102)</span>
-              </td>
-              <td>2026 Q1</td>
-              <td class="amount">$0</td>
-              <td>$0</td>
-              <td>$0</td>
-              <td>$0</td>
-              <td class="amount">$0</td>
-            </tr>
+          <tbody id="payrollBody">
+            <tr><td colspan="8" style="text-align:center;padding:24px;color:#64748b;">Loading…</td></tr>
           </tbody>
         </table>
       </div>
     </section>
   </main>
 
+  <!-- New Pay Period Modal -->
+  <div class="modal-backdrop" id="periodModal">
+    <div class="modal">
+      <h3>New Pay Period</h3>
+      <form id="periodForm" onsubmit="submitPeriod(event)">
+        <div class="form-group">
+          <label>Period Type</label>
+          <select id="pp_type" required>
+            <option value="weekly">Weekly</option>
+            <option value="bi_weekly" selected>Bi-Weekly</option>
+            <option value="semi_monthly">Semi-Monthly</option>
+            <option value="monthly">Monthly</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label>Start Date</label>
+          <input type="date" id="pp_start" required>
+        </div>
+        <div class="form-group">
+          <label>End Date</label>
+          <input type="date" id="pp_end" required>
+        </div>
+        <div class="form-group">
+          <label>Pay Date</label>
+          <input type="date" id="pp_pay" required>
+        </div>
+        <div class="modal-actions">
+          <button type="button" class="btn btn-secondary" onclick="closeModal('periodModal')">Cancel</button>
+          <button type="submit" class="btn btn-primary">Create</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
   <script>
+    // ── Menu ──────────────────────────────────────────────────────
     const menuBtn = document.getElementById('menuBtn');
-    const hrMenu = document.getElementById('hrMenu');
+    const hrMenu  = document.getElementById('hrMenu');
 
     menuBtn.addEventListener('click', () => {
       const isOpen = hrMenu.classList.toggle('open');
@@ -360,13 +370,188 @@
       hrMenu.setAttribute('aria-hidden', String(!isOpen));
     });
 
-    document.addEventListener('click', (event) => {
-      if (!event.target.closest('.menu-wrap')) {
+    document.addEventListener('click', e => {
+      if (!e.target.closest('.menu-wrap')) {
         hrMenu.classList.remove('open');
         menuBtn.setAttribute('aria-expanded', 'false');
         hrMenu.setAttribute('aria-hidden', 'true');
       }
     });
+
+    // ── Dark mode ─────────────────────────────────────────────────
+    if (localStorage.getItem('payroll_dark_mode') === 'enabled') {
+      document.body.classList.add('dark');
+    }
+
+    // ── Config ────────────────────────────────────────────────────
+    const API   = 'http://localhost:8000';
+    const token = localStorage.getItem('access_token');
+    const hdrs  = { 'Authorization': `Bearer ${token}`, 'Content-Type': 'application/json' };
+
+    const fmt = n => n != null ? '$' + Number(n).toFixed(2) : '—';
+
+    let allPaychecks = [];
+    let periodLabels = {};   // id → "start – end"
+
+    // ── Status bar ────────────────────────────────────────────────
+    function showStatus(msg, type = 'info') {
+      const bar = document.getElementById('statusBar');
+      bar.textContent = msg;
+      bar.className = `status-bar ${type}`;
+      if (type !== 'error') setTimeout(() => bar.className = 'status-bar', 4000);
+    }
+
+    // ── Modal helpers ─────────────────────────────────────────────
+    function openModal(id)  { document.getElementById(id).classList.add('open'); }
+    function closeModal(id) { document.getElementById(id).classList.remove('open'); }
+
+    // ── Load pay periods → populate selects ───────────────────────
+    async function loadPeriods() {
+      try {
+        const res = await fetch(`${API}/pay-periods/all`, { headers: hdrs });
+        if (!res.ok) return;
+        const periods = await res.json();
+
+        const runSel    = document.getElementById('periodSelect');
+        const filterSel = document.getElementById('periodFilter');
+
+        // keep only open/processing in the run dropdown
+        periods.forEach(p => {
+          periodLabels[p.pay_period_id] = `${p.period_start_date} – ${p.period_end_date}`;
+
+          const label = `${p.period_start_date} – ${p.period_end_date} (${p.status})`;
+
+          if (p.status === 'open' || p.status === 'processing') {
+            const opt = new Option(label, p.pay_period_id);
+            runSel.appendChild(opt);
+          }
+
+          const fopt = new Option(label, p.pay_period_id);
+          filterSel.appendChild(fopt);
+        });
+      } catch (_) {}
+    }
+
+    // ── Load paychecks ────────────────────────────────────────────
+    async function loadPayroll() {
+      const tbody     = document.getElementById('payrollBody');
+      const searchVal = document.getElementById('searchInput').value.toLowerCase();
+      const statusVal = document.getElementById('statusFilter').value;
+      const periodVal = document.getElementById('periodFilter').value;
+
+      try {
+        const res = await fetch(`${API}/payroll/all`, { headers: hdrs });
+
+        if (res.status === 401) {
+          tbody.innerHTML = `<tr><td colspan="8" style="text-align:center;padding:24px;color:#ef4444;">Session expired — please log in again.</td></tr>`;
+          return;
+        }
+
+        allPaychecks = await res.json();
+
+        const rows = allPaychecks.filter(p => {
+          const matchSearch = String(p.employee_id).includes(searchVal) || searchVal === '';
+          const matchStatus = !statusVal || p.payment_status === statusVal;
+          const matchPeriod = !periodVal || String(p.pay_period_id) === periodVal;
+          return matchSearch && matchStatus && matchPeriod;
+        });
+
+        if (rows.length === 0) {
+          tbody.innerHTML = `<tr><td colspan="8" style="text-align:center;padding:24px;color:#64748b;">No records found.</td></tr>`;
+          return;
+        }
+
+        const badgeClass = s => ({
+          processed: 'badge-processed', pending: 'badge-pending',
+          paid: 'badge-paid', void: 'badge-void'
+        }[s] ?? '');
+
+        const fica = p => ((p.social_security ?? 0) + (p.medicare ?? 0)).toFixed(2);
+
+        tbody.innerHTML = rows.map(p => `
+          <tr>
+            <td><span class="name">Employee #${p.employee_id}</span>
+                <span class="small">Check #${p.check_number ?? p.paycheck_id}</span></td>
+            <td>${periodLabels[p.pay_period_id] ?? `Period #${p.pay_period_id}`}</td>
+            <td class="amount">${fmt(p.gross_pay)}</td>
+            <td>${fmt(p.federal_tax)}</td>
+            <td>${fmt(p.state_tax)}</td>
+            <td>$${fica(p)}</td>
+            <td class="amount">${fmt(p.net_pay)}</td>
+            <td><span class="badge ${badgeClass(p.payment_status)}">${p.payment_status ?? '—'}</span></td>
+          </tr>`).join('');
+      } catch {
+        tbody.innerHTML = `<tr><td colspan="8" style="text-align:center;padding:24px;color:#ef4444;">Failed to load payroll data.</td></tr>`;
+      }
+    }
+
+    // ── Create pay period ─────────────────────────────────────────
+    async function submitPeriod(e) {
+      e.preventDefault();
+      try {
+        const res = await fetch(`${API}/pay-periods/`, {
+          method: 'POST',
+          headers: hdrs,
+          body: JSON.stringify({
+            period_type:       document.getElementById('pp_type').value,
+            period_start_date: document.getElementById('pp_start').value,
+            period_end_date:   document.getElementById('pp_end').value,
+            pay_date:          document.getElementById('pp_pay').value,
+          })
+        });
+        const data = await res.json();
+        if (!res.ok) { showStatus(data.detail ?? 'Failed to create pay period.', 'error'); return; }
+
+        closeModal('periodModal');
+        document.getElementById('periodForm').reset();
+        showStatus(`Pay period created: ${data.period_start_date} – ${data.period_end_date}`, 'success');
+
+        // Refresh selects and table
+        document.getElementById('periodSelect').innerHTML = '<option value="">Select pay period to run…</option>';
+        document.getElementById('periodFilter').innerHTML = '<option value="">All Pay Periods</option>';
+        periodLabels = {};
+        await loadPeriods();
+        await loadPayroll();
+      } catch {
+        showStatus('Could not reach the server.', 'error');
+      }
+    }
+
+    // ── Run payroll ───────────────────────────────────────────────
+    async function runPayroll() {
+      const periodId = document.getElementById('periodSelect').value;
+      if (!periodId) { showStatus('Select a pay period first.', 'error'); return; }
+
+      const btn = document.getElementById('runBtn');
+      btn.disabled = true;
+      btn.textContent = 'Running…';
+      showStatus('Running payroll…', 'info');
+
+      try {
+        const res = await fetch(`${API}/payroll/run/${periodId}`, {
+          method: 'POST',
+          headers: hdrs
+        });
+        const data = await res.json();
+        if (!res.ok) { showStatus(data.detail ?? 'Payroll run failed.', 'error'); return; }
+
+        showStatus(`Payroll complete — ${data.paychecks_created} paycheck(s) generated.`, 'success');
+        await loadPayroll();
+      } catch {
+        showStatus('Could not reach the server.', 'error');
+      } finally {
+        btn.disabled = false;
+        btn.textContent = '▶ Run Payroll';
+      }
+    }
+
+    // ── Filters ───────────────────────────────────────────────────
+    document.getElementById('searchInput').addEventListener('input', loadPayroll);
+    document.getElementById('statusFilter').addEventListener('change', loadPayroll);
+    document.getElementById('periodFilter').addEventListener('change', loadPayroll);
+
+    // ── Init ──────────────────────────────────────────────────────
+    (async () => { await loadPeriods(); await loadPayroll(); })();
   </script>
 </body>
 </html>
