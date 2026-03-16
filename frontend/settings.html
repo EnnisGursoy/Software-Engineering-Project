@@ -182,6 +182,83 @@
       background: #ecfeff;
       color: var(--accent);
     }
+
+    .section-title {
+      font-size: 1rem;
+      font-weight: 700;
+      margin: 24px 0 14px;
+      padding-top: 20px;
+      border-top: 1px solid var(--border);
+      color: var(--text);
+    }
+
+    .form-group {
+      margin-bottom: 12px;
+    }
+
+    .form-group label {
+      display: block;
+      font-size: 0.82rem;
+      font-weight: 600;
+      color: var(--muted);
+      margin-bottom: 4px;
+      text-transform: uppercase;
+      letter-spacing: 0.3px;
+    }
+
+    .form-group input,
+    .form-group select {
+      width: 100%;
+      padding: 9px 11px;
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      font-size: 0.93rem;
+      font-family: inherit;
+      color: var(--text);
+      background: var(--surface);
+      outline: none;
+    }
+
+    .form-group input:focus,
+    .form-group select:focus {
+      border-color: #1d4ed8;
+      box-shadow: 0 0 0 3px rgba(29,78,216,0.12);
+    }
+
+    .form-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 10px;
+    }
+
+    .btn-create {
+      margin-top: 4px;
+      width: 100%;
+      padding: 10px;
+      background: #1d4ed8;
+      color: #fff;
+      border: none;
+      border-radius: 8px;
+      font-size: 0.95rem;
+      font-weight: 600;
+      font-family: inherit;
+      cursor: pointer;
+    }
+
+    .btn-create:hover { background: #1e40af; }
+
+    .status-msg {
+      margin-top: 10px;
+      font-size: 0.85rem;
+      padding: 8px 12px;
+      border-radius: 8px;
+      display: none;
+    }
+
+    .status-msg.success { background: #d1fae5; color: #065f46; display: block; }
+    .status-msg.error   { background: #fee2e2; color: #991b1b; display: block; }
+
+    .admin-only { display: none; }
   </style>
 </head>
 <body>
@@ -195,14 +272,17 @@
         <span></span>
       </button>
 
-      <nav class="menu" id="hrMenu" aria-hidden="true">
+                  <nav class="menu" id="hrMenu" aria-hidden="true">
+        <a href="homepage.html">Home</a>
         <a href="profile.html">Profile</a>
         <a href="employees.html">Employees</a>
         <a href="shifts.html">Shifts</a>
         <a href="payroll.html">Payroll</a>
+        <a href="benefits.html">Benefits</a>
         <a href="taxes.html">Taxes</a>
         <a href="reports.html">Reports</a>
         <a href="settings.html">Settings</a>
+        <a href="logout.html" style="color:#ef4444;">Sign Out</a>
       </nav>
     </div>
   </header>
@@ -217,6 +297,49 @@
           <input type="checkbox" id="darkModeToggle">
           <span class="slider"></span>
         </label>
+      </div>
+
+      <!-- Admin only: Create User -->
+      <div class="admin-only" id="createUserSection">
+        <p class="section-title">Create User Account</p>
+
+        <div class="form-grid">
+          <div class="form-group">
+            <label>First Name</label>
+            <input type="text" id="cu_first_name" placeholder="Jane">
+          </div>
+          <div class="form-group">
+            <label>Last Name</label>
+            <input type="text" id="cu_last_name" placeholder="Doe">
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label>Username</label>
+          <input type="text" id="cu_username" placeholder="jane.doe" autocomplete="off">
+        </div>
+
+        <div class="form-group">
+          <label>Password</label>
+          <input type="password" id="cu_password" autocomplete="new-password">
+        </div>
+
+        <div class="form-group">
+          <label>Role</label>
+          <select id="cu_role">
+            <option value="hr">HR</option>
+            <option value="manager">Manager</option>
+            <option value="admin">Admin</option>
+          </select>
+        </div>
+
+        <div class="form-group" id="departmentGroup" style="display:none;">
+          <label>Department <span style="font-weight:400;color:var(--muted);">(required for Manager)</span></label>
+          <input type="text" id="cu_department" placeholder="e.g. Engineering">
+        </div>
+
+        <button class="btn-create" id="createUserBtn">Create User</button>
+        <div class="status-msg" id="createUserMsg"></div>
       </div>
     </section>
   </main>
@@ -241,6 +364,85 @@
       }
     });
 
+    const API   = 'http://localhost:8000';
+    const role  = localStorage.getItem('user_role');
+    const token = localStorage.getItem('access_token');
+
+    // Show Create User section for admins only
+    if (role === 'admin') {
+      document.getElementById('createUserSection').style.display = 'block';
+    }
+
+    // Show Employee ID field only when role is Manager
+    document.getElementById('cu_role').addEventListener('change', function () {
+      document.getElementById('departmentGroup').style.display =
+        this.value === 'manager' ? 'block' : 'none';
+    });
+
+    document.getElementById('createUserBtn').addEventListener('click', async () => {
+      const msg        = document.getElementById('createUserMsg');
+      const username   = document.getElementById('cu_username').value.trim();
+      const password   = document.getElementById('cu_password').value;
+      const firstName  = document.getElementById('cu_first_name').value.trim();
+      const lastName   = document.getElementById('cu_last_name').value.trim();
+      const userRole        = document.getElementById('cu_role').value;
+      const departmentName  = document.getElementById('cu_department').value.trim();
+
+      msg.className = 'status-msg';
+      msg.textContent = '';
+
+      if (!username || !password) {
+        msg.className = 'status-msg error';
+        msg.textContent = 'Username and password are required.';
+        return;
+      }
+
+      if (userRole === 'manager' && !departmentName) {
+        msg.className = 'status-msg error';
+        msg.textContent = 'Department name is required for a Manager account.';
+        return;
+      }
+
+      try {
+        const res = await fetch(`${API}/auth/create`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${token}`
+          },
+          body: JSON.stringify({
+            username,
+            password,
+            first_name:  firstName   || null,
+            last_name:   lastName    || null,
+            role:            userRole,
+            department_name: departmentName || null
+          })
+        });
+
+        const data = await res.json();
+
+        if (!res.ok) {
+          msg.className = 'status-msg error';
+          msg.textContent = data.detail ?? 'Failed to create user.';
+          return;
+        }
+
+        msg.className = 'status-msg success';
+        msg.textContent = `User "${data.username}" created successfully.`;
+
+        // clear form
+        ['cu_username', 'cu_password', 'cu_first_name', 'cu_last_name', 'cu_department'].forEach(id => {
+          document.getElementById(id).value = '';
+        });
+        document.getElementById('cu_role').value = 'hr';
+        document.getElementById('departmentGroup').style.display = 'none';
+      } catch {
+        msg.className = 'status-msg error';
+        msg.textContent = 'Could not reach the server.';
+      }
+    });
+
     const savedTheme = localStorage.getItem(STORAGE_KEY);
     if (savedTheme === 'enabled') {
       document.body.classList.add('dark');
@@ -259,4 +461,3 @@
   </script>
 </body>
 </html>
-

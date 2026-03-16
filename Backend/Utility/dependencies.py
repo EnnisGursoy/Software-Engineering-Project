@@ -77,3 +77,12 @@ def manager_only(current_user: User = Depends(get_current_user)) -> User:
     if not current_user or current_user.role not in ["manager", "admin", "hr"]:
         raise HTTPException(status_code=403, detail="Manager, Admin, or HR access required")
     return current_user
+
+
+# ---------------------------------------------------------
+# Admin or Manager dependency
+# ---------------------------------------------------------
+def admin_or_manager(current_user: User = Depends(get_current_user)) -> User:
+    if not current_user or current_user.role not in ["admin", "manager"]:
+        raise HTTPException(status_code=403, detail="Admin or Manager access required")
+    return current_user

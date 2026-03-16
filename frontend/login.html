@@ -1,26 +1,764 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-	<meta charset="UTF-8">
-	<meta http-equiv="X-UA-Compatible" content="IE=edge">
-	<meta name="viewport" content="width=device-width, initial-scale=1.0">
-	<title>Login - Payroll System</title>
-	<link rel="stylesheet" href="styles.css">
+  <meta charset="UTF-8" />
+  <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="description" content="Sign in to PayCentral to access payroll, employee records, taxes, reports, and scheduling tools." />
+  <title>Login | PayCentral</title>
+
+  <style>
+    :root {
+      --bg: #eef3f9;
+      --surface: #ffffff;
+      --surface-soft: #f8fbff;
+      --text: #1f2937;
+      --muted: #64748b;
+      --border: #d4dde8;
+      --primary: #1d4ed8;
+      --primary-dark: #1e40af;
+      --primary-light: #dbeafe;
+      --accent: #0f766e;
+      --error: #dc2626;
+      --error-bg: #fee2e2;
+      --success: #166534;
+      --shadow: 0 16px 40px rgba(15, 23, 42, 0.10);
+    }
+
+    body.dark {
+      --bg: #0b1220;
+      --surface: #111827;
+      --surface-soft: #0f172a;
+      --text: #f3f4f6;
+      --muted: #9ca3af;
+      --border: #374151;
+      --primary-light: rgba(59, 130, 246, 0.18);
+      --error-bg: rgba(220, 38, 38, 0.18);
+      --shadow: 0 16px 40px rgba(0, 0, 0, 0.35);
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      min-height: 100vh;
+      font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+      background:
+        radial-gradient(circle at top left, #dbeafe 0%, transparent 35%),
+        radial-gradient(circle at bottom right, #e0f2fe 0%, transparent 30%),
+        linear-gradient(180deg, #eff6ff 0%, #eef3f9 100%);
+      color: var(--text);
+      transition: background 0.2s ease, color 0.2s ease;
+    }
+
+    body.dark {
+      background:
+        radial-gradient(circle at top left, rgba(29, 78, 216, 0.18) 0%, transparent 30%),
+        radial-gradient(circle at bottom right, rgba(15, 118, 110, 0.12) 0%, transparent 26%),
+        linear-gradient(180deg, #0b1220 0%, #111827 100%);
+    }
+
+    a {
+      color: inherit;
+    }
+
+    .page {
+      min-height: 100vh;
+      display: grid;
+      grid-template-columns: 1.05fr 0.95fr;
+    }
+
+    .left-panel {
+      padding: 48px 56px;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      background: transparent;
+    }
+
+    .topbar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 16px;
+    }
+
+    .back-home {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      text-decoration: none;
+      font-size: 0.92rem;
+      font-weight: 600;
+      color: var(--muted);
+      padding: 10px 14px;
+      border-radius: 10px;
+      transition: background 0.15s ease, color 0.15s ease;
+    }
+
+    .back-home:hover {
+      background: var(--primary-light);
+      color: var(--primary);
+    }
+
+    .theme-toggle {
+      border: 1px solid var(--border);
+      background: var(--surface);
+      color: var(--text);
+      padding: 10px 14px;
+      border-radius: 10px;
+      font-size: 0.9rem;
+      cursor: pointer;
+      transition: background 0.15s ease, border-color 0.15s ease, transform 0.15s ease;
+    }
+
+    .theme-toggle:hover {
+      background: var(--surface-soft);
+      transform: translateY(-1px);
+    }
+
+    .brand-block {
+      max-width: 580px;
+      margin-top: 32px;
+    }
+
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      margin-bottom: 24px;
+    }
+
+    .brand-logo {
+      width: 58px;
+      height: 58px;
+      background: var(--primary);
+      border-radius: 16px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      box-shadow: 0 10px 24px rgba(29, 78, 216, 0.22);
+      overflow: hidden;
+    }
+
+    .brand-logo img {
+      width: 100%;
+      height: 100%;
+      object-fit: contain;
+      padding: 8px;
+    }
+
+    .brand-fallback {
+      width: 28px;
+      height: 28px;
+      fill: none;
+      stroke: #fff;
+      stroke-width: 2;
+      stroke-linecap: round;
+      stroke-linejoin: round;
+    }
+
+    .brand-text h1 {
+      font-size: 1.55rem;
+      font-weight: 800;
+      letter-spacing: -0.4px;
+      color: var(--text);
+    }
+
+    .brand-text p {
+      color: var(--muted);
+      font-size: 0.95rem;
+      margin-top: 4px;
+    }
+
+    .headline {
+      margin-bottom: 18px;
+    }
+
+    .headline-badge {
+      display: inline-block;
+      background: rgba(15, 118, 110, 0.10);
+      color: var(--accent);
+      border: 1px solid rgba(15, 118, 110, 0.18);
+      border-radius: 999px;
+      padding: 6px 12px;
+      font-size: 0.78rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.7px;
+      margin-bottom: 18px;
+    }
+
+    .headline h2 {
+      font-size: clamp(2rem, 4vw, 3.2rem);
+      line-height: 1.12;
+      letter-spacing: -0.8px;
+      margin-bottom: 14px;
+      max-width: 540px;
+    }
+
+    .headline h2 span {
+      color: var(--primary);
+    }
+
+    .headline p {
+      font-size: 1.02rem;
+      line-height: 1.75;
+      color: var(--muted);
+      max-width: 520px;
+    }
+
+    .benefits {
+      display: grid;
+      gap: 14px;
+      margin-top: 28px;
+      max-width: 520px;
+    }
+
+    .benefit {
+      display: flex;
+      align-items: flex-start;
+      gap: 12px;
+      background: rgba(255, 255, 255, 0.55);
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      padding: 14px 16px;
+      backdrop-filter: blur(5px);
+    }
+
+    body.dark .benefit {
+      background: rgba(17, 24, 39, 0.72);
+    }
+
+    .benefit-icon {
+      width: 36px;
+      height: 36px;
+      min-width: 36px;
+      border-radius: 10px;
+      display: grid;
+      place-items: center;
+      background: var(--primary-light);
+      color: var(--primary);
+      font-size: 1rem;
+      font-weight: 700;
+    }
+
+    .benefit h3 {
+      font-size: 0.97rem;
+      margin-bottom: 4px;
+    }
+
+    .benefit p {
+      font-size: 0.9rem;
+      color: var(--muted);
+      line-height: 1.6;
+    }
+
+    .left-footer {
+      margin-top: 28px;
+      color: var(--muted);
+      font-size: 0.88rem;
+    }
+
+    .right-panel {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 32px;
+    }
+
+    .card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 22px;
+      padding: 34px 34px 28px;
+      width: 100%;
+      max-width: 430px;
+      box-shadow: var(--shadow);
+    }
+
+    .card-top {
+      margin-bottom: 24px;
+    }
+
+    .card-top h3 {
+      font-size: 1.35rem;
+      font-weight: 800;
+      color: var(--text);
+      margin-bottom: 8px;
+    }
+
+    .card-top p {
+      color: var(--muted);
+      font-size: 0.95rem;
+      line-height: 1.6;
+    }
+
+    .field {
+      margin-bottom: 16px;
+    }
+
+    .field label {
+      display: block;
+      font-size: 0.8rem;
+      font-weight: 700;
+      color: var(--muted);
+      margin-bottom: 7px;
+      text-transform: uppercase;
+      letter-spacing: 0.45px;
+    }
+
+    .input-wrap {
+      position: relative;
+    }
+
+    .field input {
+      width: 100%;
+      padding: 12px 14px;
+      border: 1px solid var(--border);
+      border-radius: 11px;
+      font-size: 0.98rem;
+      font-family: inherit;
+      color: var(--text);
+      background: var(--surface);
+      outline: none;
+      transition: border-color 0.15s ease, box-shadow 0.15s ease, background 0.15s ease;
+    }
+
+    .field input:focus {
+      border-color: var(--primary);
+      box-shadow: 0 0 0 3px rgba(29, 78, 216, 0.14);
+    }
+
+    .password-toggle {
+      position: absolute;
+      right: 10px;
+      top: 50%;
+      transform: translateY(-50%);
+      border: none;
+      background: transparent;
+      color: var(--muted);
+      font-size: 0.85rem;
+      font-weight: 700;
+      cursor: pointer;
+      padding: 6px;
+    }
+
+    .password-toggle:hover {
+      color: var(--primary);
+    }
+
+    .form-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      margin: 6px 0 16px;
+      flex-wrap: wrap;
+    }
+
+    .checkbox-wrap {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      color: var(--muted);
+      font-size: 0.9rem;
+    }
+
+    .checkbox-wrap input {
+      accent-color: var(--primary);
+    }
+
+    .helper-link {
+      text-decoration: none;
+      font-size: 0.9rem;
+      color: var(--primary);
+      font-weight: 600;
+    }
+
+    .helper-link:hover {
+      text-decoration: underline;
+    }
+
+    #loginError {
+      font-size: 0.88rem;
+      color: var(--error);
+      margin-bottom: 14px;
+      display: none;
+      background: var(--error-bg);
+      border: 1px solid rgba(220, 38, 38, 0.16);
+      border-radius: 10px;
+      padding: 10px 12px;
+      line-height: 1.5;
+    }
+
+    .btn-login {
+      width: 100%;
+      padding: 12px;
+      background: var(--primary);
+      color: #fff;
+      border: none;
+      border-radius: 11px;
+      font-size: 1rem;
+      font-weight: 700;
+      font-family: inherit;
+      cursor: pointer;
+      transition: background 0.15s ease, transform 0.15s ease, opacity 0.15s ease;
+      margin-top: 4px;
+    }
+
+    .btn-login:hover {
+      background: var(--primary-dark);
+    }
+
+    .btn-login:active {
+      transform: scale(0.99);
+    }
+
+    .btn-login:disabled {
+      opacity: 0.75;
+      cursor: not-allowed;
+    }
+
+    .security-note {
+      margin-top: 16px;
+      background: var(--surface-soft);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 12px 14px;
+      font-size: 0.88rem;
+      color: var(--muted);
+      line-height: 1.6;
+    }
+
+    .footer-note {
+      margin-top: 20px;
+      font-size: 0.8rem;
+      color: var(--muted);
+      text-align: center;
+      line-height: 1.6;
+    }
+
+    .loading-spinner {
+      width: 16px;
+      height: 16px;
+      border: 2px solid rgba(255, 255, 255, 0.45);
+      border-top-color: #fff;
+      border-radius: 50%;
+      display: inline-block;
+      animation: spin 0.7s linear infinite;
+      vertical-align: middle;
+    }
+
+    @keyframes spin {
+      to {
+        transform: rotate(360deg);
+      }
+    }
+
+    @media (max-width: 980px) {
+      .page {
+        grid-template-columns: 1fr;
+      }
+
+      .left-panel {
+        padding: 28px 22px 10px;
+      }
+
+      .right-panel {
+        padding: 16px 22px 28px;
+      }
+
+      .brand-block {
+        max-width: 100%;
+      }
+
+      .headline h2,
+      .headline p,
+      .benefits {
+        max-width: 100%;
+      }
+
+      .left-footer {
+        margin-top: 20px;
+      }
+    }
+
+    @media (max-width: 520px) {
+      .card {
+        padding: 24px 20px 22px;
+        border-radius: 18px;
+      }
+
+      .topbar {
+        align-items: flex-start;
+      }
+
+      .headline h2 {
+        font-size: 2rem;
+      }
+
+      .form-row {
+        flex-direction: column;
+        align-items: flex-start;
+      }
+    }
+  </style>
 </head>
-<body style="margin:0; height:100vh;">
-	<div style="display:flex; flex-direction:column; justify-content:center; align-items:center; height:100vh; transform:scale(1.5);">
-		<header style="width:100%; text-align:center;">
-			<h1>Payroll System Login</h1>
-		</header>
-		<main style="width:100%; display:flex; flex-direction:column; align-items:center;">
-			<form action="/login" method="post" style="display:flex; flex-direction:column; align-items:center; gap:10px; min-width:220px;">
-				<label for="username">Username:</label>
-				<input type="text" id="username" name="username" required>
-				<label for="password">Password:</label>
-				<input type="password" id="password" name="password" required>
-				<button type="submit">Login</button>
-			</form>
-		</main>
-	</div>
+<body>
+  <div class="page">
+    <section class="left-panel">
+      <div>
+        <div class="topbar">
+          <a href="index.html" class="back-home">← Back to Home</a>
+          <button type="button" class="theme-toggle" id="themeToggle">Toggle Theme</button>
+        </div>
+
+        <div class="brand-block">
+          <div class="brand">
+            <div class="brand-logo">
+              <img src="PAY CENTRAL LOGO.png" alt="PayCentral logo" onerror="this.style.display='none'; this.nextElementSibling.style.display='block';">
+              <svg class="brand-fallback" viewBox="0 0 24 24" style="display:none;">
+                <line x1="12" y1="1" x2="12" y2="23"></line>
+                <path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"></path>
+              </svg>
+            </div>
+
+            <div class="brand-text">
+              <h1>PayCentral</h1>
+              <p>Payroll Management System</p>
+            </div>
+          </div>
+
+          <div class="headline">
+            <div class="headline-badge">Secure Business Access</div>
+            <h2>Manage payroll with a <span>cleaner, faster, and smarter</span> workflow.</h2>
+            <p>
+              Access employee records, payroll processing, taxes, reports, and scheduling tools
+              from one centralized platform built for modern business operations.
+            </p>
+          </div>
+
+          <div class="benefits">
+            <div class="benefit">
+              <div class="benefit-icon">✓</div>
+              <div>
+                <h3>Centralized payroll tools</h3>
+                <p>Keep employee, payroll, and reporting tasks organized in one place.</p>
+              </div>
+            </div>
+
+            <div class="benefit">
+              <div class="benefit-icon">✓</div>
+              <div>
+                <h3>Role-based access</h3>
+                <p>Direct users to the right pages depending on their account permissions.</p>
+              </div>
+            </div>
+
+            <div class="benefit">
+              <div class="benefit-icon">✓</div>
+              <div>
+                <h3>Professional user experience</h3>
+                <p>A more polished login flow that feels like a real payroll system.</p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <p class="left-footer">PayCentral © 2026. Secure payroll access for authorized users.</p>
+    </section>
+
+    <section class="right-panel">
+      <div class="card">
+        <div class="card-top">
+          <h3>Sign in to your account</h3>
+          <p>Enter your credentials below to continue to your dashboard.</p>
+        </div>
+
+        <form id="loginForm">
+          <div class="field">
+            <label for="username">Username</label>
+            <div class="input-wrap">
+              <input
+                type="text"
+                id="username"
+                name="username"
+                placeholder="Enter your username"
+                autocomplete="username"
+                required
+              />
+            </div>
+          </div>
+
+          <div class="field">
+            <label for="password">Password</label>
+            <div class="input-wrap">
+              <input
+                type="password"
+                id="password"
+                name="password"
+                placeholder="Enter your password"
+                autocomplete="current-password"
+                required
+              />
+              <button type="button" class="password-toggle" id="togglePassword">Show</button>
+            </div>
+          </div>
+
+          <div class="form-row">
+            <label class="checkbox-wrap">
+              <input type="checkbox" id="rememberMe" />
+              <span>Remember username</span>
+            </label>
+
+            <a href="#" class="helper-link">Need help?</a>
+          </div>
+
+          <p id="loginError"></p>
+
+          <button type="submit" class="btn-login" id="loginBtn">Sign In</button>
+        </form>
+
+        <div class="security-note">
+          Your session is used to securely access payroll features such as employee data,
+          reports, taxes, and scheduling.
+        </div>
+
+        <p class="footer-note">
+          By signing in, you confirm you are authorized to access this payroll system.
+        </p>
+      </div>
+    </section>
+  </div>
+
+  <script>
+    const body = document.body;
+    const themeToggle = document.getElementById("themeToggle");
+    const loginForm = document.getElementById("loginForm");
+    const loginError = document.getElementById("loginError");
+    const loginBtn = document.getElementById("loginBtn");
+    const usernameInput = document.getElementById("username");
+    const passwordInput = document.getElementById("password");
+    const rememberMe = document.getElementById("rememberMe");
+    const togglePassword = document.getElementById("togglePassword");
+
+    if (localStorage.getItem("payroll_dark_mode") === "enabled") {
+      body.classList.add("dark");
+    }
+
+    const savedUsername = localStorage.getItem("paycentral_saved_username");
+    if (savedUsername) {
+      usernameInput.value = savedUsername;
+      rememberMe.checked = true;
+    }
+
+    themeToggle.addEventListener("click", () => {
+      body.classList.toggle("dark");
+
+      if (body.classList.contains("dark")) {
+        localStorage.setItem("payroll_dark_mode", "enabled");
+      } else {
+        localStorage.setItem("payroll_dark_mode", "disabled");
+      }
+    });
+
+    togglePassword.addEventListener("click", () => {
+      const isPassword = passwordInput.type === "password";
+      passwordInput.type = isPassword ? "text" : "password";
+      togglePassword.textContent = isPassword ? "Hide" : "Show";
+    });
+
+    function parseJwtPayload(token) {
+      try {
+        const base64 = token.split(".")[1].replace(/-/g, "+").replace(/_/g, "/");
+        return JSON.parse(atob(base64));
+      } catch {
+        return null;
+      }
+    }
+
+    function setLoadingState(isLoading) {
+      if (isLoading) {
+        loginBtn.disabled = true;
+        loginBtn.innerHTML = '<span class="loading-spinner"></span> Signing In...';
+      } else {
+        loginBtn.disabled = false;
+        loginBtn.textContent = "Sign In";
+      }
+    }
+
+    loginForm.addEventListener("submit", async (e) => {
+      e.preventDefault();
+      loginError.style.display = "none";
+      loginError.textContent = "";
+
+      const username = usernameInput.value.trim();
+      const password = passwordInput.value;
+
+      if (!username || !password) {
+        loginError.textContent = "Please enter both username and password.";
+        loginError.style.display = "block";
+        return;
+      }
+
+      if (rememberMe.checked) {
+        localStorage.setItem("paycentral_saved_username", username);
+      } else {
+        localStorage.removeItem("paycentral_saved_username");
+      }
+
+      setLoadingState(true);
+
+      const bodyData = new URLSearchParams({
+        username: username,
+        password: password
+      });
+
+      try {
+        const res = await fetch("http://127.0.0.1:8000/auth/login", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/x-www-form-urlencoded"
+          },
+          body: bodyData.toString()
+        });
+
+        let data = {};
+        try {
+          data = await res.json();
+        } catch {
+          data = {};
+        }
+
+        if (!res.ok) {
+          loginError.textContent = data.detail || "Login failed. Please check your credentials and try again.";
+          loginError.style.display = "block";
+          setLoadingState(false);
+          return;
+        }
+
+        const payload = parseJwtPayload(data.access_token);
+        const role = payload?.role || "";
+
+        localStorage.setItem("access_token", data.access_token);
+        localStorage.setItem("user_role", role);
+
+        if (role === "hr" || role === "admin" || role === "manager") {
+          window.location.href = "employees.html";
+        } else {
+          window.location.href = "profile.html";
+        }
+      } catch {
+        loginError.textContent = "Could not reach the server. Please make sure the backend is running.";
+        loginError.style.display = "block";
+        setLoadingState(false);
+      }
+    });
+  </script>
 </body>
 </html>

@@ -1,53 +1,172 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Profile</title>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="description" content="View and manage your PayCentral user profile, account information, and preferences." />
+  <title>Profile | PayCentral</title>
+
   <style>
     :root {
-      --bg: #f6f9fc;
+      --bg: #eef3f9;
       --text: #1f2937;
+      --muted: #64748b;
       --surface: #ffffff;
-      --border: #d1d5db;
+      --surface-soft: #f8fbff;
+      --border: #d4dde8;
       --accent: #0f766e;
+      --accent-hover: #115e59;
+      --primary: #1d4ed8;
+      --primary-dark: #1e40af;
+      --primary-light: #dbeafe;
+      --success-bg: #d1fae5;
+      --success-text: #065f46;
+      --warning-bg: #fef3c7;
+      --warning-text: #92400e;
+      --danger: #dc2626;
+      --shadow: 0 14px 36px rgba(15, 23, 42, 0.08);
     }
 
-    * { box-sizing: border-box; }
+    body.dark {
+      --bg: #0b1220;
+      --text: #f3f4f6;
+      --muted: #9ca3af;
+      --surface: #111827;
+      --surface-soft: #0f172a;
+      --border: #374151;
+      --primary-light: rgba(59, 130, 246, 0.18);
+      --success-bg: rgba(16, 185, 129, 0.16);
+      --success-text: #6ee7b7;
+      --warning-bg: rgba(245, 158, 11, 0.16);
+      --warning-text: #fcd34d;
+      --shadow: 0 16px 40px rgba(0, 0, 0, 0.35);
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    html {
+      scroll-behavior: smooth;
+    }
 
     body {
       margin: 0;
       font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
-      background: var(--bg);
+      background:
+        radial-gradient(circle at top left, #dbeafe 0%, transparent 35%),
+        radial-gradient(circle at top right, #e0f2fe 0%, transparent 28%),
+        linear-gradient(180deg, #eff6ff 0%, var(--bg) 100%);
       color: var(--text);
+      transition: background 0.2s ease, color 0.2s ease;
     }
 
-    header {
+    body.dark {
+      background:
+        radial-gradient(circle at top left, rgba(29, 78, 216, 0.18) 0%, transparent 30%),
+        radial-gradient(circle at top right, rgba(14, 165, 233, 0.10) 0%, transparent 25%),
+        linear-gradient(180deg, #0b1220 0%, #111827 100%);
+    }
+
+    a {
+      color: inherit;
+      text-decoration: none;
+    }
+
+    /* TOPBAR */
+    .topbar {
+      position: sticky;
+      top: 0;
+      z-index: 100;
       display: flex;
       justify-content: space-between;
       align-items: center;
-      padding: 14px 20px;
-      background: #1d4ed8;
-      border-bottom: 1px solid #1e40af;
-      position: relative;
+      padding: 14px 22px;
+      background: rgba(255, 255, 255, 0.88);
+      backdrop-filter: blur(10px);
+      border-bottom: 1px solid var(--border);
+      box-shadow: 0 2px 12px rgba(29, 78, 216, 0.07);
     }
 
-    h1 {
+    body.dark .topbar {
+      background: rgba(17, 24, 39, 0.85);
+    }
+
+    .topbar-left {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+    }
+
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .brand-logo {
+      width: 46px;
+      height: 46px;
+      border-radius: 14px;
+      background: var(--primary);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      overflow: hidden;
+      box-shadow: 0 8px 20px rgba(29, 78, 216, 0.22);
+    }
+
+    .brand-logo img {
+      width: 100%;
+      height: 100%;
+      object-fit: contain;
+      padding: 6px;
+    }
+
+    .brand-fallback {
+      width: 24px;
+      height: 24px;
+      fill: none;
+      stroke: white;
+      stroke-width: 2;
+      stroke-linecap: round;
+      stroke-linejoin: round;
+      display: none;
+    }
+
+    .brand-text h1 {
       margin: 0;
-      font-size: 1.3rem;
-      color: #ffffff;
+      font-size: 1.08rem;
+      line-height: 1.1;
+      letter-spacing: -0.3px;
     }
 
-    main {
-      padding: 24px 20px;
+    .brand-text p {
+      margin: 3px 0 0;
+      color: var(--muted);
+      font-size: 0.82rem;
     }
 
-    .card {
-      background: var(--surface);
+    .topbar-actions {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .top-btn {
       border: 1px solid var(--border);
-      border-radius: 12px;
-      padding: 20px;
-      max-width: 780px;
+      background: var(--surface);
+      color: var(--text);
+      padding: 10px 14px;
+      border-radius: 10px;
+      font-size: 0.9rem;
+      cursor: pointer;
+      transition: 0.15s ease;
+    }
+
+    .top-btn:hover {
+      background: var(--surface-soft);
+      transform: translateY(-1px);
     }
 
     .menu-wrap {
@@ -55,11 +174,11 @@
     }
 
     .menu-btn {
-      width: 42px;
-      height: 42px;
-      border: 1px solid rgba(255, 255, 255, 0.45);
-      border-radius: 8px;
-      background: rgba(255, 255, 255, 0.12);
+      width: 44px;
+      height: 44px;
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      background: var(--surface);
       cursor: pointer;
       display: flex;
       flex-direction: column;
@@ -67,12 +186,18 @@
       align-items: center;
       gap: 5px;
       padding: 0;
+      transition: background 0.15s ease, transform 0.15s ease;
+    }
+
+    .menu-btn:hover {
+      background: var(--surface-soft);
+      transform: translateY(-1px);
     }
 
     .menu-btn span {
       width: 20px;
       height: 2px;
-      background: #ffffff;
+      background: var(--text);
       border-radius: 10px;
       display: block;
     }
@@ -80,12 +205,12 @@
     .menu {
       position: absolute;
       right: 0;
-      top: 50px;
-      min-width: 210px;
+      top: 54px;
+      min-width: 230px;
       background: var(--surface);
       border: 1px solid var(--border);
-      border-radius: 10px;
-      box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+      border-radius: 14px;
+      box-shadow: var(--shadow);
       padding: 8px;
       display: none;
       z-index: 20;
@@ -97,66 +222,562 @@
 
     .menu a {
       display: block;
-      text-decoration: none;
+      padding: 11px 12px;
+      border-radius: 10px;
+      font-size: 0.94rem;
       color: var(--text);
-      padding: 10px 12px;
-      border-radius: 8px;
-      font-size: 0.95rem;
+      transition: background 0.15s ease, color 0.15s ease;
     }
 
     .menu a:hover {
-      background: #ecfeff;
+      background: var(--primary-light);
+      color: var(--primary);
+    }
+
+    .menu a.signout {
+      color: #ef4444;
+      font-weight: 600;
+    }
+
+    /* MAIN */
+    main {
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 28px 20px 40px;
+    }
+
+    .page-header {
+      margin-bottom: 22px;
+    }
+
+    .page-badge {
+      display: inline-block;
+      background: rgba(15, 118, 110, 0.10);
       color: var(--accent);
+      border: 1px solid rgba(15, 118, 110, 0.18);
+      border-radius: 999px;
+      padding: 6px 12px;
+      font-size: 0.78rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.7px;
+      margin-bottom: 12px;
+    }
+
+    .page-header h2 {
+      margin: 0;
+      font-size: clamp(1.7rem, 3vw, 2.2rem);
+      letter-spacing: -0.5px;
+    }
+
+    .page-header p {
+      margin: 8px 0 0;
+      color: var(--muted);
+      line-height: 1.7;
+      max-width: 680px;
+    }
+
+    .layout-grid {
+      display: grid;
+      grid-template-columns: 320px 1fr;
+      gap: 20px;
+      align-items: start;
+    }
+
+    .card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 18px;
+      padding: 22px;
+      box-shadow: var(--shadow);
+    }
+
+    /* LEFT PROFILE CARD */
+    .profile-card {
+      text-align: center;
+    }
+
+    .avatar {
+      width: 96px;
+      height: 96px;
+      border-radius: 50%;
+      background: linear-gradient(135deg, #1d4ed8, #0f766e);
+      color: white;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin: 0 auto 16px;
+      font-size: 2rem;
+      font-weight: 800;
+      letter-spacing: -0.3px;
+    }
+
+    .profile-card h3 {
+      margin: 0;
+      font-size: 1.3rem;
+    }
+
+    .profile-card p {
+      margin: 6px 0;
+      color: var(--muted);
+      line-height: 1.6;
+    }
+
+    .badge {
+      display: inline-block;
+      margin-top: 10px;
+      padding: 6px 12px;
+      border-radius: 999px;
+      background: var(--success-bg);
+      color: var(--success-text);
+      font-size: 0.82rem;
+      font-weight: 700;
+    }
+
+    .mini-stats {
+      margin-top: 20px;
+      display: grid;
+      gap: 12px;
+    }
+
+    .mini-stat {
+      padding: 14px;
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      background: var(--surface-soft);
+      text-align: left;
+    }
+
+    .mini-stat span {
+      display: block;
+      color: var(--muted);
+      font-size: 0.84rem;
+      margin-bottom: 4px;
+    }
+
+    .mini-stat strong {
+      display: block;
+      font-size: 1.08rem;
+      margin-top: 4px;
+    }
+
+    /* RIGHT SIDE */
+    .section-title {
+      margin: 0 0 16px;
+      font-size: 1.08rem;
+      letter-spacing: -0.2px;
+    }
+
+    .info-grid {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(220px, 1fr));
+      gap: 16px;
+      margin-bottom: 24px;
+    }
+
+    .info-box {
+      padding: 16px;
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      background: var(--surface-soft);
+    }
+
+    .info-box span {
+      display: block;
+      font-size: 0.85rem;
+      color: var(--muted);
+      margin-bottom: 6px;
+    }
+
+    .info-box strong {
+      font-size: 1rem;
+    }
+
+    form {
+      margin-top: 8px;
+    }
+
+    .form-grid {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(220px, 1fr));
+      gap: 14px;
+    }
+
+    .form-group.full {
+      grid-column: 1 / -1;
+    }
+
+    label {
+      display: block;
+      font-size: 0.88rem;
+      font-weight: 700;
+      margin-bottom: 6px;
+      color: var(--muted);
+    }
+
+    input,
+    select,
+    textarea {
+      width: 100%;
+      padding: 12px 14px;
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      font-size: 0.95rem;
+      background: var(--surface);
+      color: var(--text);
+      font-family: inherit;
+    }
+
+    input:focus,
+    select:focus,
+    textarea:focus {
+      outline: 2px solid rgba(29, 78, 216, 0.15);
+      border-color: var(--primary);
+    }
+
+    textarea {
+      min-height: 110px;
+      resize: vertical;
+    }
+
+    .form-actions {
+      margin-top: 18px;
+      display: flex;
+      gap: 10px;
+      flex-wrap: wrap;
+    }
+
+    .btn {
+      border: none;
+      border-radius: 10px;
+      padding: 11px 16px;
+      font-size: 0.95rem;
+      cursor: pointer;
+      font-weight: 700;
+      transition: 0.15s ease;
+    }
+
+    .btn:hover {
+      transform: translateY(-1px);
+    }
+
+    .btn-primary {
+      background: var(--primary);
+      color: white;
+    }
+
+    .btn-primary:hover {
+      background: var(--primary-dark);
+    }
+
+    .btn-secondary {
+      background: #e5e7eb;
+      color: #111827;
+    }
+
+    .btn-secondary:hover {
+      background: #d1d5db;
+    }
+
+    body.dark .btn-secondary {
+      background: #1f2937;
+      color: #f3f4f6;
+      border: 1px solid var(--border);
+    }
+
+    .msg {
+      font-size: 0.9rem;
+      margin-top: 12px;
+      min-height: 1.2em;
+    }
+
+    .msg.success {
+      color: #16a34a;
+    }
+
+    .msg.error {
+      color: var(--danger);
+    }
+
+    @media (max-width: 950px) {
+      .layout-grid {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    @media (max-width: 768px) {
+      main {
+        padding: 18px 14px 30px;
+      }
+
+      .info-grid,
+      .form-grid {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    @media (max-width: 700px) {
+      .topbar {
+        padding: 12px 16px;
+      }
+
+      .brand-text p {
+        display: none;
+      }
+
+      .top-btn {
+        padding: 9px 12px;
+        font-size: 0.84rem;
+      }
     }
   </style>
 </head>
 <body>
-  <header>
-    <h1>Profile</h1>
+  <header class="topbar">
+    <div class="topbar-left">
+      <a href="homepage.html" class="brand">
+        <div class="brand-logo">
+          <img src="PAY CENTRAL LOGO.png" alt="PayCentral logo" onerror="this.style.display='none'; this.nextElementSibling.style.display='block';">
+          <svg class="brand-fallback" viewBox="0 0 24 24">
+            <line x1="12" y1="1" x2="12" y2="23"></line>
+            <path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"></path>
+          </svg>
+        </div>
 
-    <div class="menu-wrap">
-      <button class="menu-btn" id="menuBtn" aria-label="Open menu" aria-expanded="false" aria-controls="hrMenu">
-        <span></span>
-        <span></span>
-        <span></span>
-      </button>
+        <div class="brand-text">
+          <h1>PayCentral</h1>
+          <p>User Profile</p>
+        </div>
+      </a>
+    </div>
 
-      <nav class="menu" id="hrMenu" aria-hidden="true">
-        <a href="profile.html">Profile</a>
-        <a href="employees.html">Employees</a>
-        <a href="shifts.html">Shifts</a>
-        <a href="payroll.html">Payroll</a>
-        <a href="taxes.html">Taxes</a>
-        <a href="reports.html">Reports</a>
-        <a href="settings.html">Settings</a>
-      </nav>
+    <div class="topbar-actions">
+      <button class="top-btn" id="themeToggle" type="button">Toggle Theme</button>
+
+      <div class="menu-wrap">
+        <button class="menu-btn" id="menuBtn" aria-label="Open menu" aria-expanded="false" aria-controls="hrMenu">
+          <span></span>
+          <span></span>
+          <span></span>
+        </button>
+
+        <nav class="menu" id="hrMenu" aria-hidden="true">
+          <a href="homepage.html">Home</a>
+          <a href="profile.html">Profile</a>
+          <a href="employees.html">Employees</a>
+          <a href="shifts.html">Shifts</a>
+          <a href="payroll.html">Payroll</a>
+          <a href="benefits.html">Benefits</a>
+          <a href="taxes.html">Taxes</a>
+          <a href="reports.html">Reports</a>
+          <a href="settings.html">Settings</a>
+          <a href="logout.html" class="signout">Sign Out</a>
+        </nav>
+      </div>
     </div>
   </header>
 
   <main>
-    <section class="card">
-      <p>Profile page content goes here.</p>
+    <section class="page-header">
+      <div class="page-badge">Account Overview</div>
+      <h2>Your Profile</h2>
+      <p>
+        Review your account information, role, contact details, and update your profile settings.
+      </p>
+    </section>
+
+    <section class="layout-grid">
+      <aside class="card profile-card">
+        <div class="avatar" id="profileAvatar">JD</div>
+        <h3 id="profileName">John Doe</h3>
+        <p id="profileTitle">HR Manager</p>
+        <p id="profileEmail">john.doe@paycentral.com</p>
+        <div class="badge" id="profileRoleBadge">Active Account</div>
+
+        <div class="mini-stats">
+          <div class="mini-stat">
+            <span>Department</span>
+            <strong id="profileDepartment">Human Resources</strong>
+          </div>
+          <div class="mini-stat">
+            <span>Role</span>
+            <strong id="profileRole">HR</strong>
+          </div>
+          <div class="mini-stat">
+            <span>Status</span>
+            <strong>Online</strong>
+          </div>
+        </div>
+      </aside>
+
+      <section class="card">
+        <h3 class="section-title">Profile Information</h3>
+
+        <div class="info-grid">
+          <div class="info-box">
+            <span>Full Name</span>
+            <strong id="infoFullName">John Doe</strong>
+          </div>
+          <div class="info-box">
+            <span>Email Address</span>
+            <strong id="infoEmail">john.doe@paycentral.com</strong>
+          </div>
+          <div class="info-box">
+            <span>Department</span>
+            <strong id="infoDepartment">Human Resources</strong>
+          </div>
+          <div class="info-box">
+            <span>Job Title</span>
+            <strong id="infoJobTitle">HR Manager</strong>
+          </div>
+        </div>
+
+        <h3 class="section-title">Update Profile</h3>
+
+        <form id="profileForm">
+          <div class="form-grid">
+            <div class="form-group">
+              <label for="firstName">First Name</label>
+              <input type="text" id="firstName" value="John" />
+            </div>
+
+            <div class="form-group">
+              <label for="lastName">Last Name</label>
+              <input type="text" id="lastName" value="Doe" />
+            </div>
+
+            <div class="form-group">
+              <label for="email">Email Address</label>
+              <input type="email" id="email" value="john.doe@paycentral.com" />
+            </div>
+
+            <div class="form-group">
+              <label for="department">Department</label>
+              <input type="text" id="department" value="Human Resources" />
+            </div>
+
+            <div class="form-group">
+              <label for="jobTitle">Job Title</label>
+              <input type="text" id="jobTitle" value="HR Manager" />
+            </div>
+
+            <div class="form-group">
+              <label for="role">Role</label>
+              <select id="role">
+                <option value="Admin">Admin</option>
+                <option value="HR" selected>HR</option>
+                <option value="Manager">Manager</option>
+                <option value="Employee">Employee</option>
+              </select>
+            </div>
+
+            <div class="form-group full">
+              <label for="notes">Notes</label>
+              <textarea id="notes" placeholder="Add profile notes or extra account details..."></textarea>
+            </div>
+          </div>
+
+          <div class="form-actions">
+            <button type="submit" class="btn btn-primary">Save Changes</button>
+            <button type="button" class="btn btn-secondary" id="resetBtn">Reset</button>
+          </div>
+
+          <div class="msg" id="profileMsg"></div>
+        </form>
+      </section>
     </section>
   </main>
 
   <script>
-    const menuBtn = document.getElementById('menuBtn');
-    const hrMenu = document.getElementById('hrMenu');
+    const API = "http://127.0.0.1:8000";
+    const body = document.body;
+    const menuBtn = document.getElementById("menuBtn");
+    const hrMenu = document.getElementById("hrMenu");
+    const themeToggle = document.getElementById("themeToggle");
+    const profileForm = document.getElementById("profileForm");
+    const resetBtn = document.getElementById("resetBtn");
+    const profileMsg = document.getElementById("profileMsg");
 
-    menuBtn.addEventListener('click', () => {
-      const isOpen = hrMenu.classList.toggle('open');
-      menuBtn.setAttribute('aria-expanded', String(isOpen));
-      hrMenu.setAttribute('aria-hidden', String(!isOpen));
+    if (localStorage.getItem("payroll_dark_mode") === "enabled") {
+      document.body.classList.add("dark");
+    }
+
+    function handleUnauthorized(res) {
+      if (res.status === 401) {
+        localStorage.removeItem("access_token");
+        localStorage.removeItem("user_role");
+        window.location.href = "login.html";
+        return true;
+      }
+      return false;
+    }
+
+    menuBtn.addEventListener("click", () => {
+      const isOpen = hrMenu.classList.toggle("open");
+      menuBtn.setAttribute("aria-expanded", String(isOpen));
+      hrMenu.setAttribute("aria-hidden", String(!isOpen));
     });
 
-    document.addEventListener('click', (event) => {
-      if (!event.target.closest('.menu-wrap')) {
-        hrMenu.classList.remove('open');
-        menuBtn.setAttribute('aria-expanded', 'false');
-        hrMenu.setAttribute('aria-hidden', 'true');
+    document.addEventListener("click", (e) => {
+      if (!e.target.closest(".menu-wrap")) {
+        hrMenu.classList.remove("open");
+        menuBtn.setAttribute("aria-expanded", "false");
+        hrMenu.setAttribute("aria-hidden", "true");
       }
     });
+
+    themeToggle.addEventListener("click", () => {
+      body.classList.toggle("dark");
+
+      if (body.classList.contains("dark")) {
+        localStorage.setItem("payroll_dark_mode", "enabled");
+      } else {
+        localStorage.setItem("payroll_dark_mode", "disabled");
+      }
+    });
+
+    function updateProfilePreview() {
+      const firstName = document.getElementById("firstName").value.trim();
+      const lastName = document.getElementById("lastName").value.trim();
+      const email = document.getElementById("email").value.trim();
+      const department = document.getElementById("department").value.trim();
+      const jobTitle = document.getElementById("jobTitle").value.trim();
+      const role = document.getElementById("role").value.trim();
+
+      const fullName = `${firstName} ${lastName}`.trim();
+      const initials = `${firstName.charAt(0) || ""}${lastName.charAt(0) || ""}`.toUpperCase();
+
+      document.getElementById("profileAvatar").textContent = initials || "PC";
+      document.getElementById("profileName").textContent = fullName || "No Name";
+      document.getElementById("profileTitle").textContent = jobTitle || "No Job Title";
+      document.getElementById("profileEmail").textContent = email || "No Email";
+      document.getElementById("profileDepartment").textContent = department || "No Department";
+      document.getElementById("profileRole").textContent = role || "No Role";
+
+      document.getElementById("infoFullName").textContent = fullName || "No Name";
+      document.getElementById("infoEmail").textContent = email || "No Email";
+      document.getElementById("infoDepartment").textContent = department || "No Department";
+      document.getElementById("infoJobTitle").textContent = jobTitle || "No Job Title";
+    }
+
+    profileForm.addEventListener("input", updateProfilePreview);
+
+    profileForm.addEventListener("submit", (e) => {
+      e.preventDefault();
+      updateProfilePreview();
+      profileMsg.textContent = "Profile updated successfully.";
+      profileMsg.className = "msg success";
+    });
+
+    resetBtn.addEventListener("click", () => {
+      profileForm.reset();
+      document.getElementById("role").value = "HR";
+      updateProfilePreview();
+      profileMsg.textContent = "Form reset successfully.";
+      profileMsg.className = "msg success";
+    });
+
+    updateProfilePreview();
   </script>
 </body>
 </html>
-

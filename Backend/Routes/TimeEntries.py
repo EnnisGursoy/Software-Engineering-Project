@@ -1,6 +1,6 @@
 from fastapi import APIRouter, Depends
 from sqlalchemy.orm import Session
-from Backend.Utility.dependencies import get_db, hr_only, manager_only
+from Backend.Utility.dependencies import get_db, hr_only, manager_only, admin_or_manager
 from Backend.Models.User import User
 from Backend.Schemas.TimeEntry import TimeEntryCreate, TimeEntryOut, TimeEntryUpdate, TimeEntryApprove
 from Backend.Services.timeentry_service import (
@@ -44,7 +44,7 @@ async def entries_for_employee(
 @router.post("/create", response_model=TimeEntryOut)
 async def add_entry(
     entry: TimeEntryCreate,
-    user: User = Depends(manager_only),
+    user: User = Depends(admin_or_manager),
     db: Session = Depends(get_db),
 ):
     return create_time_entry(entry, db)
@@ -54,7 +54,7 @@ async def add_entry(
 async def edit_entry(
     entry_id: int,
     data: TimeEntryUpdate,
-    user: User = Depends(manager_only),
+    user: User = Depends(admin_or_manager),
     db: Session = Depends(get_db),
 ):
     return update_time_entry(entry_id, data, db)

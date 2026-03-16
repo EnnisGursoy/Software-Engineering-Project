@@ -6,11 +6,25 @@
   <title>Reports</title>
   <style>
     :root {
-      --bg: #f6f9fc;
+      --bg: #eef3f9;
       --text: #1f2937;
       --surface: #ffffff;
-      --border: #d1d5db;
+      --border: #d4dde8;
       --accent: #0f766e;
+      --primary: #1d4ed8;
+      --primary-dark: #1e40af;
+      --muted: #64748b;
+      --table-border: #dbe5f0;
+    }
+
+    body.dark {
+      --bg: #0b1220;
+      --surface: #111827;
+      --text: #f3f4f6;
+      --muted: #9ca3af;
+      --border: #374151;
+      --accent: #14b8a6;
+      --table-border: #374151;
     }
 
     * { box-sizing: border-box; }
@@ -18,145 +32,491 @@
     body {
       margin: 0;
       font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
-      background: var(--bg);
+      background: radial-gradient(circle at top left, #dbeafe 0%, transparent 35%),
+                  radial-gradient(circle at top right, #e0f2fe 0%, transparent 30%),
+                  var(--bg);
       color: var(--text);
+      transition: background 0.2s ease, color 0.2s ease;
     }
 
     header {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
+      display: flex; justify-content: space-between; align-items: center;
       padding: 14px 20px;
-      background: #1d4ed8;
-      border-bottom: 1px solid #1e40af;
+      background: var(--primary);
+      border-bottom: 1px solid var(--primary-dark);
       position: relative;
     }
 
-    h1 {
-      margin: 0;
-      font-size: 1.3rem;
-      color: #ffffff;
-    }
+    h1 { margin: 0; font-size: 1.3rem; color: #fff; }
 
-    main {
-      padding: 24px 20px;
-    }
-
-    .card {
-      background: var(--surface);
-      border: 1px solid var(--border);
-      border-radius: 12px;
-      padding: 20px;
-      max-width: 780px;
-    }
-
-    .menu-wrap {
-      position: relative;
-    }
+    .menu-wrap { position: relative; }
 
     .menu-btn {
-      width: 42px;
-      height: 42px;
-      border: 1px solid rgba(255, 255, 255, 0.45);
-      border-radius: 8px;
-      background: rgba(255, 255, 255, 0.12);
-      cursor: pointer;
-      display: flex;
-      flex-direction: column;
-      justify-content: center;
-      align-items: center;
-      gap: 5px;
-      padding: 0;
+      width: 42px; height: 42px;
+      border: 1px solid rgba(255,255,255,0.45); border-radius: 8px;
+      background: rgba(255,255,255,0.12); cursor: pointer;
+      display: flex; flex-direction: column;
+      justify-content: center; align-items: center; gap: 5px; padding: 0;
     }
 
-    .menu-btn span {
-      width: 20px;
-      height: 2px;
-      background: #ffffff;
-      border-radius: 10px;
-      display: block;
-    }
+    .menu-btn span { width: 20px; height: 2px; background: #fff; border-radius: 10px; display: block; }
 
     .menu {
-      position: absolute;
-      right: 0;
-      top: 50px;
-      min-width: 210px;
-      background: var(--surface);
-      border: 1px solid var(--border);
-      border-radius: 10px;
-      box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
-      padding: 8px;
-      display: none;
-      z-index: 20;
+      position: absolute; right: 0; top: 50px; min-width: 210px;
+      background: var(--surface); border: 1px solid var(--border);
+      border-radius: 10px; box-shadow: 0 10px 25px rgba(0,0,0,0.1);
+      padding: 8px; display: none; z-index: 20;
     }
 
-    .menu.open {
-      display: block;
-    }
+    .menu.open { display: block; }
 
     .menu a {
-      display: block;
-      text-decoration: none;
-      color: var(--text);
-      padding: 10px 12px;
-      border-radius: 8px;
-      font-size: 0.95rem;
+      display: block; text-decoration: none; color: var(--text);
+      padding: 10px 12px; border-radius: 8px; font-size: 0.95rem;
     }
 
-    .menu a:hover {
-      background: #ecfeff;
-      color: var(--accent);
+    .menu a:hover { background: #ecfeff; color: var(--accent); }
+
+    main { max-width: 1200px; margin: 0 auto; padding: 24px 20px 48px; }
+
+    /* Tabs */
+    .tabs {
+      display: flex; gap: 4px; border-bottom: 2px solid var(--border);
+      margin-bottom: 20px;
     }
+
+    .tab-btn {
+      padding: 9px 18px; border: none; background: none;
+      font-size: 0.95rem; font-weight: 600; font-family: inherit;
+      color: var(--muted); cursor: pointer; border-bottom: 2px solid transparent;
+      margin-bottom: -2px; transition: color 0.15s, border-color 0.15s;
+    }
+
+    .tab-btn.active { color: var(--primary); border-bottom-color: var(--primary); }
+    .tab-btn:hover:not(.active) { color: var(--text); }
+
+    .tab-panel { display: none; }
+    .tab-panel.active { display: block; }
+
+    /* Toolbar inside tab */
+    .report-toolbar {
+      display: flex; gap: 10px; align-items: center;
+      flex-wrap: wrap; margin-bottom: 14px;
+    }
+
+    .report-toolbar select, .report-toolbar input {
+      padding: 7px 11px; border: 1px solid var(--border);
+      border-radius: 8px; font-size: 0.9rem; font-family: inherit;
+      background: var(--surface); color: var(--text);
+    }
+
+    /* Table shell */
+    .table-shell {
+      background: var(--surface); border: 1px solid var(--table-border);
+      border-radius: 12px; padding: 12px;
+      box-shadow: 0 8px 20px rgba(15,23,42,0.06);
+    }
+
+    .table-card { border: 1px solid var(--table-border); border-radius: 10px; overflow-x: auto; }
+
+    table { width: 100%; min-width: 700px; border-collapse: collapse; }
+
+    thead th {
+      font-size: 0.88rem; font-weight: 600; text-align: left;
+      color: #334155; background: #f8fbff;
+      border-bottom: 1px solid var(--table-border); padding: 11px 14px;
+    }
+
+    body.dark thead th { background: #1e293b; color: #cbd5e1; }
+
+    tbody td { padding: 10px 14px; font-size: 0.9rem; color: var(--text); }
+    tbody tr + tr td { border-top: 1px solid var(--table-border); }
+    tbody tr:nth-child(even) td { background: rgba(0,0,0,0.02); }
+
+    tfoot td {
+      padding: 10px 14px; font-size: 0.9rem; font-weight: 700;
+      border-top: 2px solid var(--table-border); color: var(--text);
+    }
+
+    .badge {
+      display: inline-block; padding: 2px 8px; border-radius: 20px;
+      font-size: 0.78rem; font-weight: 600;
+    }
+
+    .badge-paid       { background: #dcfce7; color: #166534; }
+    .badge-pending    { background: #fef9c3; color: #854d0e; }
+    .badge-processed  { background: #dbeafe; color: #1e40af; }
+    .badge-void       { background: #fee2e2; color: #991b1b; }
+    .badge-open       { background: #dbeafe; color: #1e40af; }
+    .badge-closed     { background: #f3f4f6; color: #374151; }
+
+    .empty-state {
+      text-align: center; padding: 40px; color: var(--muted); font-size: 0.95rem;
+    }
+
+    /* Summary cards above Pay Period tab */
+    .summary-cards {
+      display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+      gap: 12px; margin-bottom: 18px;
+    }
+
+    .summary-card {
+      background: var(--surface); border: 1px solid var(--border);
+      border-radius: 10px; padding: 16px 18px;
+    }
+
+    .summary-card .label { font-size: 0.8rem; color: var(--muted); margin-bottom: 4px; }
+    .summary-card .value { font-size: 1.35rem; font-weight: 700; color: var(--text); }
+
+    .admin-only-note {
+      background: #fef9c3; border: 1px solid #fde68a;
+      border-radius: 8px; padding: 10px 14px;
+      font-size: 0.88rem; color: #78350f; margin-bottom: 14px;
+    }
+
+    body.dark .admin-only-note { background: #1c1a07; border-color: #713f12; color: #fde68a; }
   </style>
 </head>
 <body>
   <header>
     <h1>Reports</h1>
-
     <div class="menu-wrap">
       <button class="menu-btn" id="menuBtn" aria-label="Open menu" aria-expanded="false" aria-controls="hrMenu">
-        <span></span>
-        <span></span>
-        <span></span>
+        <span></span><span></span><span></span>
       </button>
-
-      <nav class="menu" id="hrMenu" aria-hidden="true">
+                  <nav class="menu" id="hrMenu" aria-hidden="true">
+        <a href="homepage.html">Home</a>
         <a href="profile.html">Profile</a>
         <a href="employees.html">Employees</a>
         <a href="shifts.html">Shifts</a>
         <a href="payroll.html">Payroll</a>
+        <a href="benefits.html">Benefits</a>
         <a href="taxes.html">Taxes</a>
         <a href="reports.html">Reports</a>
         <a href="settings.html">Settings</a>
+        <a href="logout.html" style="color:#ef4444;">Sign Out</a>
       </nav>
     </div>
   </header>
 
   <main>
-    <section class="card">
-      <p>Reports page content goes here.</p>
-    </section>
+    <div class="tabs">
+      <button class="tab-btn active" data-tab="payroll-summary">Payroll Summary</button>
+      <button class="tab-btn"        data-tab="pay-periods">Pay Period Summary</button>
+      <button class="tab-btn"        data-tab="tax-overview">Tax Overview</button>
+    </div>
+
+    <!-- ── Tab 1: Payroll Summary ── -->
+    <div class="tab-panel active" id="tab-payroll-summary">
+      <div class="report-toolbar">
+        <select id="periodFilter">
+          <option value="">All Pay Periods</option>
+        </select>
+        <select id="statusFilter">
+          <option value="">All Statuses</option>
+          <option value="paid">Paid</option>
+          <option value="pending">Pending</option>
+          <option value="processed">Processed</option>
+          <option value="void">Void</option>
+        </select>
+      </div>
+      <div class="table-shell">
+        <div class="table-card">
+          <table>
+            <thead>
+              <tr>
+                <th>Employee</th>
+                <th>Period</th>
+                <th>Gross Pay</th>
+                <th>Fed Tax</th>
+                <th>State Tax</th>
+                <th>FICA</th>
+                <th>Other Deductions</th>
+                <th>Net Pay</th>
+                <th>Status</th>
+              </tr>
+            </thead>
+            <tbody id="payrollBody"></tbody>
+            <tfoot id="payrollFoot"></tfoot>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <!-- ── Tab 2: Pay Period Summary ── -->
+    <div class="tab-panel" id="tab-pay-periods">
+      <div class="summary-cards" id="periodCards"></div>
+      <div class="table-shell">
+        <div class="table-card">
+          <table>
+            <thead>
+              <tr>
+                <th>Period</th>
+                <th>Type</th>
+                <th>Pay Date</th>
+                <th>Status</th>
+                <th># Paychecks</th>
+                <th>Total Gross</th>
+                <th>Total Taxes</th>
+                <th>Total Net</th>
+              </tr>
+            </thead>
+            <tbody id="periodsBody"></tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <!-- ── Tab 3: Tax Overview ── -->
+    <div class="tab-panel" id="tab-tax-overview">
+      <div class="admin-only-note" id="taxAdminNote" style="display:none;">
+        This report is visible to admins only.
+      </div>
+      <div class="table-shell">
+        <div class="table-card">
+          <table>
+            <thead>
+              <tr>
+                <th>Employee ID</th>
+                <th>Filing Status</th>
+                <th>Fed Allowances</th>
+                <th>State Allowances</th>
+                <th>Add'l Withholding</th>
+                <th>Exempt Federal</th>
+                <th>Exempt State</th>
+                <th>Effective Date</th>
+              </tr>
+            </thead>
+            <tbody id="taxBody"></tbody>
+          </table>
+        </div>
+      </div>
+    </div>
   </main>
 
   <script>
+    if (localStorage.getItem('payroll_dark_mode') === 'enabled') {
+      document.body.classList.add('dark');
+    }
+
+    const API   = 'http://localhost:8000';
+    const token = localStorage.getItem('access_token');
+    const role  = localStorage.getItem('user_role');
+    const hdrs  = { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` };
+    const fmt   = (n) => n != null ? '$' + Number(n).toFixed(2) : '—';
+
+    // ── Menu ─────────────────────────────────────────────────────────────
     const menuBtn = document.getElementById('menuBtn');
-    const hrMenu = document.getElementById('hrMenu');
-
+    const hrMenu  = document.getElementById('hrMenu');
     menuBtn.addEventListener('click', () => {
-      const isOpen = hrMenu.classList.toggle('open');
-      menuBtn.setAttribute('aria-expanded', String(isOpen));
-      hrMenu.setAttribute('aria-hidden', String(!isOpen));
+      const open = hrMenu.classList.toggle('open');
+      menuBtn.setAttribute('aria-expanded', String(open));
+      hrMenu.setAttribute('aria-hidden',   String(!open));
     });
-
-    document.addEventListener('click', (event) => {
-      if (!event.target.closest('.menu-wrap')) {
+    document.addEventListener('click', (e) => {
+      if (!e.target.closest('.menu-wrap')) {
         hrMenu.classList.remove('open');
         menuBtn.setAttribute('aria-expanded', 'false');
         hrMenu.setAttribute('aria-hidden', 'true');
       }
     });
+
+    // ── Tabs ─────────────────────────────────────────────────────────────
+    document.querySelectorAll('.tab-btn').forEach(btn => {
+      btn.addEventListener('click', () => {
+        document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+        document.querySelectorAll('.tab-panel').forEach(p => p.classList.remove('active'));
+        btn.classList.add('active');
+        document.getElementById('tab-' + btn.dataset.tab).classList.add('active');
+      });
+    });
+
+    // ── Status badge helper ───────────────────────────────────────────────
+    function statusBadge(s) {
+      return `<span class="badge badge-${s ?? 'pending'}">${s ?? '—'}</span>`;
+    }
+
+    // ── Empty row helper ─────────────────────────────────────────────────
+    function emptyRow(cols, msg) {
+      return `<tr><td colspan="${cols}" class="empty-state">${msg}</td></tr>`;
+    }
+
+    // ── Tab 1: Payroll Summary ────────────────────────────────────────────
+    let allPaychecks = [];
+    let periodMap    = {};
+
+    async function loadPayrollSummary() {
+      const [pcRes, ppRes] = await Promise.all([
+        fetch(`${API}/payroll/all`,      { headers: hdrs }),
+        fetch(`${API}/pay-periods/all`, { headers: hdrs }),
+      ]);
+
+      if (!pcRes.ok || !ppRes.ok) {
+        document.getElementById('payrollBody').innerHTML = emptyRow(9, 'Failed to load data.');
+        return;
+      }
+
+      allPaychecks = await pcRes.json();
+      const periods = await ppRes.json();
+
+      // populate period filter
+      const sel = document.getElementById('periodFilter');
+      periods.forEach(p => {
+        periodMap[p.pay_period_id] = `${p.period_start_date} – ${p.period_end_date}`;
+        const opt = document.createElement('option');
+        opt.value = p.pay_period_id;
+        opt.textContent = periodMap[p.pay_period_id];
+        sel.appendChild(opt);
+      });
+
+      renderPayrollTable();
+    }
+
+    function renderPayrollTable() {
+      const tbody     = document.getElementById('payrollBody');
+      const tfoot     = document.getElementById('payrollFoot');
+      const periodVal = document.getElementById('periodFilter').value;
+      const statusVal = document.getElementById('statusFilter').value;
+
+      let rows = allPaychecks.filter(p =>
+        (periodVal === '' || String(p.pay_period_id) === periodVal) &&
+        (statusVal === '' || p.payment_status === statusVal)
+      );
+
+      if (rows.length === 0) {
+        tbody.innerHTML = emptyRow(9, 'No records match the selected filters.');
+        tfoot.innerHTML = '';
+        return;
+      }
+
+      let totGross = 0, totFed = 0, totState = 0, totFica = 0, totOther = 0, totNet = 0;
+
+      tbody.innerHTML = rows.map(p => {
+        const fica  = (p.social_security ?? 0) + (p.medicare ?? 0);
+        const other = (p.health_insurance ?? 0) + (p.retirement_401k ?? 0) + (p.other_deductions ?? 0);
+        totGross += p.gross_pay   ?? 0;
+        totFed   += p.federal_tax ?? 0;
+        totState += p.state_tax   ?? 0;
+        totFica  += fica;
+        totOther += other;
+        totNet   += p.net_pay     ?? 0;
+        return `<tr>
+          <td>Employee #${p.employee_id}</td>
+          <td>${periodMap[p.pay_period_id] ?? `Period #${p.pay_period_id}`}</td>
+          <td>${fmt(p.gross_pay)}</td>
+          <td>${fmt(p.federal_tax)}</td>
+          <td>${fmt(p.state_tax)}</td>
+          <td>${fmt(fica)}</td>
+          <td>${fmt(other)}</td>
+          <td>${fmt(p.net_pay)}</td>
+          <td>${statusBadge(p.payment_status)}</td>
+        </tr>`;
+      }).join('');
+
+      tfoot.innerHTML = `<tr>
+        <td colspan="2">Totals (${rows.length} records)</td>
+        <td>${fmt(totGross)}</td>
+        <td>${fmt(totFed)}</td>
+        <td>${fmt(totState)}</td>
+        <td>${fmt(totFica)}</td>
+        <td>${fmt(totOther)}</td>
+        <td>${fmt(totNet)}</td>
+        <td></td>
+      </tr>`;
+    }
+
+    document.getElementById('periodFilter').addEventListener('change', renderPayrollTable);
+    document.getElementById('statusFilter').addEventListener('change', renderPayrollTable);
+
+    // ── Tab 2: Pay Period Summary ─────────────────────────────────────────
+    async function loadPayPeriodSummary() {
+      const [ppRes, pcRes] = await Promise.all([
+        fetch(`${API}/pay-periods/all`, { headers: hdrs }),
+        fetch(`${API}/payroll/all`,     { headers: hdrs }),
+      ]);
+
+      if (!ppRes.ok) {
+        document.getElementById('periodsBody').innerHTML = emptyRow(8, 'Failed to load pay periods.');
+        return;
+      }
+
+      const periods   = await ppRes.json();
+      const paychecks = pcRes.ok ? await pcRes.json() : [];
+
+      // aggregate paychecks by pay_period_id
+      const agg = {};
+      paychecks.filter(p => p.payment_status !== 'void').forEach(p => {
+        if (!agg[p.pay_period_id]) agg[p.pay_period_id] = { count: 0, gross: 0, taxes: 0, net: 0 };
+        agg[p.pay_period_id].count++;
+        agg[p.pay_period_id].gross  += p.gross_pay   ?? 0;
+        agg[p.pay_period_id].taxes  += (p.federal_tax ?? 0) + (p.state_tax ?? 0) + (p.social_security ?? 0) + (p.medicare ?? 0);
+        agg[p.pay_period_id].net    += p.net_pay     ?? 0;
+      });
+
+      // summary cards
+      const totalGross = Object.values(agg).reduce((s, a) => s + a.gross, 0);
+      const totalNet   = Object.values(agg).reduce((s, a) => s + a.net,   0);
+      const openCount  = periods.filter(p => p.status === 'open' || p.status === 'processing').length;
+      document.getElementById('periodCards').innerHTML = `
+        <div class="summary-card"><div class="label">Total Pay Periods</div><div class="value">${periods.length}</div></div>
+        <div class="summary-card"><div class="label">Open / Processing</div><div class="value">${openCount}</div></div>
+        <div class="summary-card"><div class="label">Total Gross (all)</div><div class="value">${fmt(totalGross)}</div></div>
+        <div class="summary-card"><div class="label">Total Net (all)</div><div class="value">${fmt(totalNet)}</div></div>
+      `;
+
+      document.getElementById('periodsBody').innerHTML = periods.map(p => {
+        const a = agg[p.pay_period_id] ?? { count: 0, gross: 0, taxes: 0, net: 0 };
+        return `<tr>
+          <td>${p.period_start_date} – ${p.period_end_date}</td>
+          <td>${p.period_type.replace('_', ' ')}</td>
+          <td>${p.pay_date}</td>
+          <td>${statusBadge(p.status)}</td>
+          <td>${a.count}</td>
+          <td>${fmt(a.gross)}</td>
+          <td>${fmt(a.taxes)}</td>
+          <td>${fmt(a.net)}</td>
+        </tr>`;
+      }).join('') || emptyRow(8, 'No pay periods found.');
+    }
+
+    // ── Tab 3: Tax Overview ───────────────────────────────────────────────
+    async function loadTaxOverview() {
+      const tbody = document.getElementById('taxBody');
+
+      if (role !== 'admin') {
+        document.getElementById('taxAdminNote').style.display = 'block';
+        tbody.innerHTML = emptyRow(8, 'Admin access required to view tax records.');
+        return;
+      }
+
+      const res = await fetch(`${API}/tax/`, { headers: hdrs });
+      if (!res.ok) {
+        tbody.innerHTML = emptyRow(8, 'Failed to load tax data.');
+        return;
+      }
+
+      const taxes = await res.json();
+      if (taxes.length === 0) {
+        tbody.innerHTML = emptyRow(8, 'No tax records found.');
+        return;
+      }
+
+      tbody.innerHTML = taxes.map(t => `<tr>
+        <td>#${t.employee_id}</td>
+        <td>${t.filing_status?.replace('_', ' ') ?? '—'}</td>
+        <td>${t.federal_allowances ?? 0}</td>
+        <td>${t.state_allowances ?? 0}</td>
+        <td>${t.additional_withholding != null ? fmt(t.additional_withholding) : '—'}</td>
+        <td>${t.exempt_federal ? 'Yes' : 'No'}</td>
+        <td>${t.exempt_state  ? 'Yes' : 'No'}</td>
+        <td>${t.effective_date ?? '—'}</td>
+      </tr>`).join('');
+    }
+
+    // ── Init ─────────────────────────────────────────────────────────────
+    loadPayrollSummary();
+    loadPayPeriodSummary();
+    loadTaxOverview();
   </script>
 </body>
 </html>
-

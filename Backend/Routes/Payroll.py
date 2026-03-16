@@ -1,12 +1,13 @@
 from fastapi import APIRouter, Depends
 from sqlalchemy.orm import Session
-from Backend.Utility.dependencies import get_db, hr_only, manager_only
+from Backend.Utility.dependencies import get_db, hr_only, manager_only, admin_or_manager
 from Backend.Models.User import User
 from Backend.Schemas.Paycheck import PaycheckCreate, PaycheckOut, PaycheckStatusUpdate
 from Backend.Services.paycheck_service import (
     create_paycheck,
     run_payroll,
     calculate_paycheck,
+    get_all_paychecks,
     get_paychecks_by_employee,
     get_paychecks_by_period,
     get_all_pay_periods,
@@ -14,6 +15,14 @@ from Backend.Services.paycheck_service import (
 )
 
 router = APIRouter()
+
+
+@router.get("/all", response_model=list[PaycheckOut])
+async def list_all_paychecks(
+    user: User = Depends(hr_only),
+    db: Session = Depends(get_db),
+):
+    return get_all_paychecks(db)
 
 
 @router.get("/periods")
@@ -55,7 +64,7 @@ async def preview_paycheck(
 @router.post("/run/{pay_period_id}")
 async def process_payroll(
     pay_period_id: int,
-    user: User = Depends(hr_only),
+    user: User = Depends(admin_or_manager),
     db: Session = Depends(get_db),
 ):
     return run_payroll(pay_period_id, db)
@@ -64,7 +73,7 @@ async def process_payroll(
 @router.post("/create", response_model=PaycheckOut)
 async def add_paycheck(
     paycheck: PaycheckCreate,
-    user: User = Depends(hr_only),
+    user: User = Depends(admin_or_manager),
     db: Session = Depends(get_db),
 ):
     return create_paycheck(paycheck, db)
@@ -74,7 +83,7 @@ async def add_paycheck(
 async def set_paycheck_status(
     paycheck_id: int,
     data: PaycheckStatusUpdate,
-    user: User = Depends(hr_only),
+    user: User = Depends(admin_or_manager),
     db: Session = Depends(get_db),
 ):
     return update_paycheck_status(paycheck_id, data, db)

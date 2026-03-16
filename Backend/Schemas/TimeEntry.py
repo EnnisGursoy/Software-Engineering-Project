@@ -1,7 +1,6 @@
-from pydantic import BaseModel
+from pydantic import BaseModel, ConfigDict
 from datetime import date, time
 from typing import Optional
-from decimal import Decimal
 
 
 class TimeEntryCreate(BaseModel):
@@ -28,8 +27,7 @@ class TimeEntryOut(BaseModel):
     approved: Optional[bool]
     approved_by: Optional[int]
 
-    class Config:
-        orm_mode = True
+    model_config = ConfigDict(from_attributes=True)
 
 
 class TimeEntryApprove(BaseModel):

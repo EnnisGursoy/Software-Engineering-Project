@@ -1,4 +1,4 @@
-from pydantic import BaseModel
+from pydantic import BaseModel, ConfigDict
 from datetime import date
 from typing import Optional
 
@@ -17,6 +17,7 @@ class EmployeeCreate(BaseModel):
     hire_date: date                           
     ssn: str                                  
     employment_status: Optional[str] = "active"
+    department_name: Optional[str] = None
 
 
 class EmployeeOut(BaseModel):
@@ -28,10 +29,10 @@ class EmployeeOut(BaseModel):
     address: Optional[str]
     city: Optional[str]
     state: Optional[str]
-    zip_code: Optional[str]   
+    zip_code: Optional[str]
+    department_id: Optional[int] = None
 
-    class Config:
-        orm_mode = True
+    model_config = ConfigDict(from_attributes=True)
 
 
 
@@ -44,7 +45,7 @@ class EmployeeUpdate(BaseModel):
     city: Optional[str] = None
     state: Optional[str] = None
     zip_code: Optional[str] = None
+    department_id: Optional[int] = None
 
-    class Config:
-        orm_mode = True
+    model_config = ConfigDict(from_attributes=True)
 

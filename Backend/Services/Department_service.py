@@ -2,6 +2,7 @@ from sqlalchemy.orm import Session
 from fastapi import HTTPException
 from Backend.Models.department import Department
 from Backend.Models.Employee import Employee
+from Backend.Models.Positions import Positions
 from Backend.Schemas.department import DepartmentCreate, DepartmentUpdate
 
 
@@ -38,6 +39,35 @@ def get_department_by_manager_id (data : int , db : Session):
         return manager_department
     
 
+def delete_department(department_id: int, db: Session):
+    department = db.query(Department).filter(Department.department_id == department_id).first()
+    if not department:
+        raise HTTPException(status_code=404, detail="Department not found")
+
+    # Nullify department_id on positions before deleting to avoid FK constraint error
+    db.query(Positions).filter(Positions.department_id == department_id).update({"department_id": None})
+
+    db.delete(department)
+    db.commit()
+    return {"message": "Department permanently deleted"}
+
+
+def get_my_department(user, db: Session):
+    if not user.department_id:
+        raise HTTPException(
+            status_code=400,
+            detail="Your account is not assigned to a department. Ask an admin to update your account."
+        )
+
+    department = db.query(Department).filter(
+        Department.department_id == user.department_id
+    ).first()
+    if not department:
+        raise HTTPException(status_code=404, detail="Your assigned department no longer exists")
+
+    return department
+
+
 def assign_manager(manager_id: int, department_id: int, data: DepartmentUpdate, db: Session):
     # Check department exists
     department = db.query(Department).filter(Department.department_id == department_id).first()
@@ -49,7 +79,7 @@ def assign_manager(manager_id: int, department_id: int, data: DepartmentUpdate, 
     if not manager:
         raise HTTPException(status_code=404, detail="Manager not found")
 
-    update_data = data.dict(exclude_unset=True)
+    update_data = data.model_dump(exclude_unset=True)
     for key, value in update_data.items():
         setattr(department, key, value)
 
@@ -61,7 +91,6 @@ def assign_manager(manager_id: int, department_id: int, data: DepartmentUpdate, 
 
     return department
        
-
 
 
 
