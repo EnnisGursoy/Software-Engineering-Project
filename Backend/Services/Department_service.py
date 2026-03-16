@@ -1,6 +1,6 @@
 from sqlalchemy.orm import Session
 from fastapi import HTTPException
-from Backend.Models.Department import Department
+from Backend.Models.department import Department
 from Backend.Models.Employee import Employee
 from Backend.Models.Positions import Positions
 from Backend.Schemas.department import DepartmentCreate, DepartmentUpdate
