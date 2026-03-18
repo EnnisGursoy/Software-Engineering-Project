@@ -3,8 +3,7 @@ from Backend.Database.connection import Base
 from datetime import datetime
 
 class Employee(Base):
-    __tablename__ = "employees"
-
+    __tablename__ = "employees" 
     employee_id = Column(Integer, primary_key=True, index=True, autoincrement=True)
     first_name = Column(String(50), nullable=False)
     last_name = Column(String(50), nullable=False, unique=True)

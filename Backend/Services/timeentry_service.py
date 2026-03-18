@@ -4,6 +4,7 @@ from datetime import datetime, timedelta
 from Backend.Models.Time_entries import TimeEntries
 from Backend.Models.Employee import Employee
 from Backend.Schemas.TimeEntry import TimeEntryCreate, TimeEntryUpdate, TimeEntryApprove
+from Backend.Models.User import User
 
 
 def _calc_hours(clock_in, clock_out):
@@ -56,14 +57,21 @@ def update_time_entry(entry_id: int, data: TimeEntryUpdate, db: Session):
     return entry
 
 
-def approve_time_entry(entry_id: int, data: TimeEntryApprove, db: Session):
+def approve_time_entry(entry_id: int, data: TimeEntryApprove, db: Session, user: User):
     entry = db.query(TimeEntries).filter(TimeEntries.entry_id == entry_id).first()
-    if not entry: raise HTTPException(status_code=404, detail='Time entry not found')
-    if not db.query(Employee).filter(Employee.employee_id == data.approved_by).first():
-        raise HTTPException(status_code=404, detail='Approver employee not found')
-    entry.approved = data.approved
-    entry.approved_by = data.approved_by
-    db.commit(); db.refresh(entry)
+    if not entry:
+        raise HTTPException(status_code=404, detail="Time entry not found")
+
+    # Find the employee record for the logged-in HR/admin user
+    approver = db.query(Employee).filter(Employee.user_id == user.id).first()
+    if not approver:
+        raise HTTPException(status_code=404, detail="Approver employee not found")
+
+    entry.approved = True
+    entry.approved_by = approver.employee_id
+
+    db.commit()
+    db.refresh(entry)
     return entry
 
 

@@ -413,13 +413,13 @@
     }
 
     async function approveEntry(id) {
-      const res = await fetch(`${API}/timeentries/${id}/approve`, {
-        method: 'PATCH',
-        headers,
-        body: JSON.stringify({ approved: true, approved_by: parseInt(jwtPayload.sub) || 0 })
-      });
-      if (res.ok) loadEntries();
-    }
+  const res = await fetch(`${API}/timeentries/${id}/approve`, {
+    method: 'PATCH',
+    headers,
+    body: JSON.stringify({ approved: true })
+  });
+  if (res.ok) loadEntries();
+}
 
     async function deleteEntry(id) {
       if (!confirm('Delete this entry?')) return;
