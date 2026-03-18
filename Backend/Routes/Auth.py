@@ -1,9 +1,10 @@
-from fastapi import APIRouter, Depends, HTTPException
+from fastapi import APIRouter, Depends, HTTPException, Request
 from sqlalchemy.orm import Session
 from fastapi.security import OAuth2PasswordRequestForm
 from Backend.Utility.dependencies import get_db, admin_only, get_current_user
 from Backend.Models.User import User
 from Backend.Models.Department import Department
+from Backend.Models.LoginLog import LoginLog
 from Backend.Schemas.User import UserCreate, UserOut, ChangePassword, UpdateProfile
 from Backend.Utility.security import hash_password, verify_password, create_access_token
 from pydantic import BaseModel
@@ -12,6 +13,11 @@ from pydantic import BaseModel
 class Token(BaseModel):
     access_token: str
     token_type: str
+
+
+class ResetPassword(BaseModel):
+    username: str
+    new_password: str
 
 
 
@@ -31,8 +37,14 @@ def authenticate(username: str, password: str, db: Session):
     return existing_user
 
 
+@router.get("/setup-status")
+async def setup_status(db: Session = Depends(get_db)):
+    return {"needs_setup": db.query(User).count() == 0}
+
+
 @router.post("/login", response_model=Token)
 async def auth_login(
+    request: Request,
     form_data: OAuth2PasswordRequestForm = Depends(),
     db: Session = Depends(get_db)
 ):
@@ -41,6 +53,10 @@ async def auth_login(
         password=form_data.password,
         db=db
     )
+
+    ip = request.client.host if request.client else None
+    db.add(LoginLog(username=form_data.username, ip_address=ip, success=user is not None))
+    db.commit()
 
     if not user:
         raise HTTPException(status_code=401, detail="Incorrect username or password")
@@ -152,3 +168,35 @@ async def change_password(
     db.commit()
 
     return {"detail": "Password updated successfully"}
+
+
+@router.post("/reset-password")
+async def admin_reset_password(
+    body: ResetPassword,
+    db: Session = Depends(get_db),
+    _: User = Depends(admin_only),
+):
+    user = db.query(User).filter(User.username == body.username).first()
+    if not user:
+        raise HTTPException(status_code=404, detail="User not found")
+    user.password_hash = hash_password(body.new_password)
+    db.commit()
+    return {"detail": f"Password reset for '{body.username}'"}
+
+
+@router.get("/logs")
+async def get_login_logs(
+    db: Session = Depends(get_db),
+    _: User = Depends(admin_only),
+):
+    logs = db.query(LoginLog).order_by(LoginLog.attempted_at.desc()).limit(200).all()
+    return [
+        {
+            "log_id":      l.log_id,
+            "username":    l.username,
+            "ip_address":  l.ip_address,
+            "success":     l.success,
+            "attempted_at": str(l.attempted_at),
+        }
+        for l in logs
+    ]

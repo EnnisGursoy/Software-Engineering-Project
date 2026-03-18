@@ -709,26 +709,26 @@
     <section class="stats" aria-label="Key metrics">
       <article class="stat">
         <span class="label">Active Employees</span>
-        <div class="value">124</div>
+        <div class="value" id="statActiveEmployees">—</div>
         <small>Total employees currently in the system</small>
       </article>
 
       <article class="stat success">
-        <span class="label">Payroll Ready</span>
-        <div class="value">118</div>
-        <small>Records verified and ready for processing</small>
+        <span class="label">Paychecks Paid</span>
+        <div class="value" id="statPayrollReady">—</div>
+        <small>Paychecks with paid status</small>
       </article>
 
       <article class="stat warning">
-        <span class="label">Pending Leave Requests</span>
-        <div class="value">6</div>
-        <small>Requests waiting for approval or follow-up</small>
+        <span class="label">Pending Time Entries</span>
+        <div class="value" id="statPendingEntries">—</div>
+        <small>Time entries awaiting approval</small>
       </article>
 
       <article class="stat danger">
-        <span class="label">Compliance Alerts</span>
-        <div class="value">2</div>
-        <small>Items requiring review before payroll closes</small>
+        <span class="label">Open Pay Periods</span>
+        <div class="value" id="statOpenPeriods">—</div>
+        <small>Pay periods not yet closed</small>
       </article>
     </section>
 
@@ -745,42 +745,16 @@
           <table>
             <thead>
               <tr>
-                <th>Run ID</th>
-                <th>Department</th>
+                <th>Paycheck ID</th>
+                <th>Employee</th>
                 <th>Pay Period</th>
+                <th>Gross Pay</th>
+                <th>Net Pay</th>
                 <th>Status</th>
-                <th>Processed By</th>
               </tr>
             </thead>
-            <tbody>
-              <tr>
-                <td>PR-24051</td>
-                <td>Operations</td>
-                <td>Mar 1 – Mar 15</td>
-                <td><span class="status ready">Ready</span></td>
-                <td>J. Rivera</td>
-              </tr>
-              <tr>
-                <td>PR-24052</td>
-                <td>Customer Support</td>
-                <td>Mar 1 – Mar 15</td>
-                <td><span class="status pending">Pending</span></td>
-                <td>M. Torres</td>
-              </tr>
-              <tr>
-                <td>PR-24053</td>
-                <td>Finance</td>
-                <td>Mar 1 – Mar 15</td>
-                <td><span class="status issue">Issue</span></td>
-                <td>A. Patel</td>
-              </tr>
-              <tr>
-                <td>PR-24054</td>
-                <td>Human Resources</td>
-                <td>Mar 1 – Mar 15</td>
-                <td><span class="status ready">Ready</span></td>
-                <td>E. Diaz</td>
-              </tr>
+            <tbody id="payrollTableBody">
+              <tr><td colspan="6" style="text-align:center;padding:20px;color:#64748b;">Loading...</td></tr>
             </tbody>
           </table>
         </div>
@@ -794,23 +768,8 @@
           </div>
         </div>
 
-        <ul class="list">
-          <li>
-            <strong>Approve pending leave requests</strong>
-            <span>Review 6 submitted employee requests before end of day.</span>
-          </li>
-          <li>
-            <strong>Verify payroll exceptions</strong>
-            <span>2 payroll records contain missing or flagged data.</span>
-          </li>
-          <li>
-            <strong>Review tax update notices</strong>
-            <span>Confirm current deduction rules for the new pay cycle.</span>
-          </li>
-          <li>
-            <strong>Complete benefits audit</strong>
-            <span>Check pending enrollment adjustments for this month.</span>
-          </li>
+        <ul class="list" id="actionList">
+          <li><span style="color:#64748b;">Loading...</span></li>
         </ul>
       </aside>
     </section>
@@ -821,23 +780,20 @@
   </main>
 
   <script>
-    const menuBtn = document.getElementById("menuBtn");
-    const hrMenu = document.getElementById("hrMenu");
+    const menuBtn    = document.getElementById("menuBtn");
+    const hrMenu     = document.getElementById("hrMenu");
     const themeToggle = document.getElementById("themeToggle");
-    const body = document.body;
+    const body       = document.body;
+    const API        = 'http://localhost:8000';
+    const token      = localStorage.getItem('access_token');
+    const hdrs       = { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` };
+    const fmt        = n => n != null ? '$' + Number(n).toFixed(2) : '—';
 
-    if (localStorage.getItem("payroll_dark_mode") === "enabled") {
-      body.classList.add("dark");
-    }
+    if (localStorage.getItem("payroll_dark_mode") === "enabled") body.classList.add("dark");
 
     themeToggle.addEventListener("click", () => {
       body.classList.toggle("dark");
-
-      if (body.classList.contains("dark")) {
-        localStorage.setItem("payroll_dark_mode", "enabled");
-      } else {
-        localStorage.setItem("payroll_dark_mode", "disabled");
-      }
+      localStorage.setItem("payroll_dark_mode", body.classList.contains("dark") ? "enabled" : "disabled");
     });
 
     menuBtn.addEventListener("click", () => {
@@ -853,6 +809,90 @@
         hrMenu.setAttribute("aria-hidden", "true");
       }
     });
+
+    // ── Load dashboard data ───────────────────────────────────────
+    async function loadDashboard() {
+      const role = localStorage.getItem('user_role');
+
+      // Managers are scoped to their department — fetch /auth/me first to get dept id
+      let empUrl = `${API}/employee/all`;
+      if (role === 'manager') {
+        try {
+          const meRes = await fetch(`${API}/auth/me`, { headers: hdrs });
+          if (meRes.ok) {
+            const me = await meRes.json();
+            if (me.department_id) empUrl = `${API}/employee/by-department/${me.department_id}`;
+          }
+        } catch (_) {}
+      }
+
+      const [empRes, payRes, periodRes, entryRes] = await Promise.allSettled([
+        fetch(empUrl,                     { headers: hdrs }),
+        fetch(`${API}/payroll/all`,       { headers: hdrs }),
+        fetch(`${API}/payperiods/all`,    { headers: hdrs }),
+        fetch(`${API}/timeentries/all`,   { headers: hdrs }),
+      ]);
+
+      const employees  = empRes.status    === 'fulfilled' && empRes.value.ok    ? await empRes.value.json()    : [];
+      const paychecks  = payRes.status    === 'fulfilled' && payRes.value.ok    ? await payRes.value.json()    : [];
+      const periods    = periodRes.status === 'fulfilled' && periodRes.value.ok ? await periodRes.value.json() : [];
+      const entries    = entryRes.status  === 'fulfilled' && entryRes.value.ok  ? await entryRes.value.json()  : [];
+
+      // ── Stat cards ────────────────────────────────────────────
+      const activeEmp     = employees.filter(e => e.employment_status === 'active').length;
+      const paidChecks    = paychecks.filter(p => p.payment_status === 'paid').length;
+      const pendingTime   = entries.filter(e => !e.approved).length;
+      const openPeriods   = periods.filter(p => p.status === 'open' || p.status === 'processing').length;
+
+      document.getElementById('statActiveEmployees').textContent = activeEmp;
+      document.getElementById('statPayrollReady').textContent    = paidChecks;
+      document.getElementById('statPendingEntries').textContent  = pendingTime;
+      document.getElementById('statOpenPeriods').textContent     = openPeriods;
+
+      // ── Payroll table ─────────────────────────────────────────
+      const periodMap = Object.fromEntries(periods.map(p => [p.pay_period_id, `${p.period_start_date} – ${p.period_end_date}`]));
+      const tbody = document.getElementById('payrollTableBody');
+      const recent = [...paychecks].reverse().slice(0, 6);
+
+      if (!recent.length) {
+        tbody.innerHTML = `<tr><td colspan="6" style="text-align:center;padding:20px;color:#64748b;">No payroll records yet.</td></tr>`;
+      } else {
+        tbody.innerHTML = recent.map(p => {
+          const statusCls = p.payment_status === 'paid' ? 'ready' : p.payment_status === 'pending' ? 'pending' : 'issue';
+          return `<tr>
+            <td>#${p.paycheck_id}</td>
+            <td>Employee #${p.employee_id}</td>
+            <td>${periodMap[p.pay_period_id] ?? `Period #${p.pay_period_id}`}</td>
+            <td>${fmt(p.gross_pay)}</td>
+            <td>${fmt(p.net_pay)}</td>
+            <td><span class="status ${statusCls}">${p.payment_status ?? '—'}</span></td>
+          </tr>`;
+        }).join('');
+      }
+
+      // ── Action items ──────────────────────────────────────────
+      const actions = [];
+      if (pendingTime > 0)
+        actions.push({ title: `${pendingTime} time entr${pendingTime === 1 ? 'y' : 'ies'} awaiting approval`, desc: 'Go to Shifts to review and approve.' });
+      if (openPeriods > 0)
+        actions.push({ title: `${openPeriods} open pay period${openPeriods === 1 ? '' : 's'}`, desc: 'Run payroll or close periods in Payroll.' });
+      if (employees.length === 0)
+        actions.push({ title: 'No employees added yet', desc: 'Add your first employee in the Employees page.' });
+      if (paychecks.length === 0 && employees.length > 0)
+        actions.push({ title: 'No paychecks generated yet', desc: 'Create a pay period and run payroll.' });
+      if (!actions.length)
+        actions.push({ title: 'All caught up!', desc: 'No outstanding items right now.' });
+
+      document.getElementById('actionList').innerHTML = actions.map(a =>
+        `<li><strong>${a.title}</strong><span>${a.desc}</span></li>`
+      ).join('');
+    }
+
+    if (token) {
+      loadDashboard();
+    } else {
+      window.location.href = 'login.html';
+    }
   </script>
 </body>
 </html>

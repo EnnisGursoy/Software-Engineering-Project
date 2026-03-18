@@ -39,7 +39,7 @@ async def get_one(
 @router.post("/create", response_model=PositionOut)
 async def create(
     data: PositionCreate,
-    user: User = Depends(hr_only),
+    user: User = Depends(manager_only),
     db: Session = Depends(get_db),
 ):
     return create_position(data, db)
@@ -49,7 +49,7 @@ async def create(
 async def update(
     position_id: int,
     data: PositionUpdate,
-    user: User = Depends(hr_only),
+    user: User = Depends(manager_only),
     db: Session = Depends(get_db),
 ):
     return update_position(position_id, data, db)
@@ -58,7 +58,7 @@ async def update(
 @router.delete("/{position_id}")
 async def delete(
     position_id: int,
-    user: User = Depends(hr_only),
+    user: User = Depends(manager_only),
     db: Session = Depends(get_db),
 ):
     return delete_position(position_id, db)
@@ -67,7 +67,7 @@ async def delete(
 @router.post("/assign", response_model=EmployeePositionOut)
 async def assign_to_employee(
     data: EmployeePositionCreate,
-    user: User = Depends(hr_only),
+    user: User = Depends(manager_only),
     db: Session = Depends(get_db),
 ):
     return assign_position_to_employee(data, db)

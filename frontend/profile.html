@@ -762,22 +762,60 @@
 
     profileForm.addEventListener("input", updateProfilePreview);
 
-    profileForm.addEventListener("submit", (e) => {
+    // ── Load real user data on page load ─────────────────────────
+    async function loadProfile() {
+      try {
+        const token = localStorage.getItem('access_token');
+        const res = await fetch(`${API}/auth/me`, {
+          headers: { 'Authorization': `Bearer ${token}` }
+        });
+        if (handleUnauthorized(res)) return;
+        if (!res.ok) return;
+        const user = await res.json();
+        document.getElementById('firstName').value = user.first_name ?? '';
+        document.getElementById('lastName').value  = user.last_name  ?? '';
+        document.getElementById('role').value      = user.role       ?? '';
+        updateProfilePreview();
+      } catch {}
+    }
+
+    profileForm.addEventListener("submit", async (e) => {
       e.preventDefault();
-      updateProfilePreview();
-      profileMsg.textContent = "Profile updated successfully.";
-      profileMsg.className = "msg success";
+      profileMsg.textContent = '';
+      profileMsg.className = 'msg';
+      try {
+        const token = localStorage.getItem('access_token');
+        const res = await fetch(`${API}/auth/me`, {
+          method: 'PATCH',
+          headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
+          body: JSON.stringify({
+            first_name: document.getElementById('firstName').value.trim() || null,
+            last_name:  document.getElementById('lastName').value.trim()  || null,
+          })
+        });
+        if (handleUnauthorized(res)) return;
+        const data = await res.json();
+        if (!res.ok) {
+          profileMsg.textContent = data.detail ?? 'Failed to update profile.';
+          profileMsg.className = 'msg error';
+          return;
+        }
+        updateProfilePreview();
+        profileMsg.textContent = 'Profile updated successfully.';
+        profileMsg.className = 'msg success';
+      } catch {
+        profileMsg.textContent = 'Could not reach the server.';
+        profileMsg.className = 'msg error';
+      }
     });
 
     resetBtn.addEventListener("click", () => {
-      profileForm.reset();
-      document.getElementById("role").value = "HR";
-      updateProfilePreview();
-      profileMsg.textContent = "Form reset successfully.";
+      loadProfile();
+      profileMsg.textContent = "Profile reloaded from server.";
       profileMsg.className = "msg success";
     });
 
-    updateProfilePreview();
+    loadProfile();
   </script>
 </body>
 </html>

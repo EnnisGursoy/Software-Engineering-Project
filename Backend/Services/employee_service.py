@@ -58,10 +58,9 @@ def create_employee(data: EmployeeCreate, db: Session):
             Department.department_name == data.department_name
         ).first()
         if not dept:
-            raise HTTPException(
-                status_code=404,
-                detail=f"Department '{data.department_name}' not found"
-            )
+            dept = Department(department_name=data.department_name)
+            db.add(dept)
+            db.flush()
         department_id = dept.department_id
 
     employee = Employee(

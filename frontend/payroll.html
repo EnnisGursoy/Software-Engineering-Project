@@ -325,6 +325,7 @@
               <th>FICA</th>
               <th>Net Pay</th>
               <th>Status</th>
+              <th>Actions</th>
             </tr>
           </thead>
           <tbody id="payrollBody">
@@ -401,6 +402,7 @@
     const fmt = n => n != null ? '$' + Number(n).toFixed(2) : '—';
 
     let allPaychecks = [];
+    let allEmployees = [];
     let periodLabels = {};   // id → "start – end"
 
     // ── Status bar ────────────────────────────────────────────────
@@ -415,10 +417,23 @@
     function openModal(id)  { document.getElementById(id).classList.add('open'); }
     function closeModal(id) { document.getElementById(id).classList.remove('open'); }
 
+    // ── Load employees → build name map ──────────────────────────
+    async function loadEmployees() {
+      try {
+        const res = await fetch(`${API}/employee/all`, { headers: hdrs });
+        if (res.ok) allEmployees = await res.json();
+      } catch (_) {}
+    }
+
+    function empName(id) {
+      const e = allEmployees.find(e => e.employee_id === id);
+      return e ? `${e.first_name} ${e.last_name}` : `Employee #${id}`;
+    }
+
     // ── Load pay periods → populate selects ───────────────────────
     async function loadPeriods() {
       try {
-        const res = await fetch(`${API}/pay-periods/all`, { headers: hdrs });
+        const res = await fetch(`${API}/payperiods/all`, { headers: hdrs });
         if (!res.ok) return;
         const periods = await res.json();
 
@@ -480,7 +495,7 @@
 
         tbody.innerHTML = rows.map(p => `
           <tr>
-            <td><span class="name">Employee #${p.employee_id}</span>
+            <td><span class="name">${empName(p.employee_id)}</span>
                 <span class="small">Check #${p.check_number ?? p.paycheck_id}</span></td>
             <td>${periodLabels[p.pay_period_id] ?? `Period #${p.pay_period_id}`}</td>
             <td class="amount">${fmt(p.gross_pay)}</td>
@@ -489,6 +504,9 @@
             <td>$${fica(p)}</td>
             <td class="amount">${fmt(p.net_pay)}</td>
             <td><span class="badge ${badgeClass(p.payment_status)}">${p.payment_status ?? '—'}</span></td>
+            <td>${p.payment_status !== 'paid' && p.payment_status !== 'void'
+              ? `<button onclick="markPaid(${p.paycheck_id})" style="padding:5px 10px;font-size:0.8rem;border:none;border-radius:6px;background:#15803d;color:#fff;cursor:pointer;font-weight:600;">Mark Paid</button>`
+              : '—'}</td>
           </tr>`).join('');
       } catch {
         tbody.innerHTML = `<tr><td colspan="8" style="text-align:center;padding:24px;color:#ef4444;">Failed to load payroll data.</td></tr>`;
@@ -499,7 +517,7 @@
     async function submitPeriod(e) {
       e.preventDefault();
       try {
-        const res = await fetch(`${API}/pay-periods/`, {
+        const res = await fetch(`${API}/payperiods/create`, {
           method: 'POST',
           headers: hdrs,
           body: JSON.stringify({
@@ -545,7 +563,14 @@
         const data = await res.json();
         if (!res.ok) { showStatus(data.detail ?? 'Payroll run failed.', 'error'); return; }
 
-        showStatus(`Payroll complete — ${data.paychecks_created} paycheck(s) generated.`, 'success');
+        if (data.paychecks_created === 0) {
+          showStatus('No paychecks generated — make sure active employees have a position assigned with a salary or hourly rate.', 'error');
+        } else {
+          const activeCount = allEmployees.filter(e => e.employment_status === 'active').length;
+          const skipped = activeCount - data.paychecks_created;
+          const skipNote = skipped > 0 ? ` (${skipped} employee${skipped > 1 ? 's' : ''} skipped — no position assigned)` : '';
+          showStatus(`Payroll complete — ${data.paychecks_created} paycheck(s) generated.${skipNote}`, 'success');
+        }
         await loadPayroll();
       } catch {
         showStatus('Could not reach the server.', 'error');
@@ -555,13 +580,27 @@
       }
     }
 
+    // ── Mark paycheck as paid ─────────────────────────────────────
+    async function markPaid(paycheckId) {
+      try {
+        const res = await fetch(`${API}/payroll/${paycheckId}/status`, {
+          method: 'PATCH',
+          headers: hdrs,
+          body: JSON.stringify({ payment_status: 'paid', payment_date: new Date().toISOString().split('T')[0] })
+        });
+        if (!res.ok) { const d = await res.json(); showStatus(d.detail ?? 'Failed to update status.', 'error'); return; }
+        showStatus('Paycheck marked as paid.', 'success');
+        await loadPayroll();
+      } catch { showStatus('Could not reach the server.', 'error'); }
+    }
+
     // ── Filters ───────────────────────────────────────────────────
     document.getElementById('searchInput').addEventListener('input', loadPayroll);
     document.getElementById('statusFilter').addEventListener('change', loadPayroll);
     document.getElementById('periodFilter').addEventListener('change', loadPayroll);
 
     // ── Init ──────────────────────────────────────────────────────
-    (async () => { await loadPeriods(); await loadPayroll(); })();
+    (async () => { await loadEmployees(); await loadPeriods(); await loadPayroll(); })();
   </script>
 </body>
 </html>

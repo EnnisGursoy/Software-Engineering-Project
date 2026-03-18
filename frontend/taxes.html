@@ -279,13 +279,13 @@
           <div class="section-title">Gross Income</div>
           <div class="section-hint">Add, modify, and delete income items for the selected employee.</div>
         </div>
-        <button class="btn primary small" onclick="openDlg('dlgIncAdd')">+ Add Income</button>
+        <a href="employees.html" class="btn small">Manage in Positions →</a>
       </div>
       <div class="table-shell">
         <div class="table-card">
           <table>
             <thead>
-              <tr><th>Type</th><th>Description</th><th>Hours</th><th>Rate</th><th>Amount</th><th>Taxable</th><th>Frequency</th><th style="text-align:right">Actions</th></tr>
+              <tr><th>Type</th><th>Position ID</th><th>Pay Frequency</th><th>Salary</th><th>Hourly Rate</th><th>Status</th></tr>
             </thead>
             <tbody id="incTable"></tbody>
           </table>
@@ -297,16 +297,16 @@
     <div class="tax-section">
       <div class="section-header">
         <div>
-          <div class="section-title">Tax &amp; Deductions</div>
-          <div class="section-hint">Add, modify, and delete deductions for the selected employee.</div>
+          <div class="section-title">Tax Withholding</div>
+          <div class="section-hint">Manage federal/state withholding settings for the selected employee.</div>
         </div>
-        <button class="btn primary small" onclick="openDlg('dlgDedAdd')">+ Add Deduction</button>
+        <button class="btn primary small" onclick="openTaxAdd()">+ Add Tax Info</button>
       </div>
       <div class="table-shell">
         <div class="table-card">
           <table>
             <thead>
-              <tr><th>Category</th><th>Name</th><th>Method</th><th>Pre/Post Tax</th><th>Amount / %</th><th>Frequency</th><th style="text-align:right">Actions</th></tr>
+              <tr><th>Filing Status</th><th>Fed. Allow.</th><th>State Allow.</th><th>Add'l Withholding</th><th>Exempt Fed.</th><th>Exempt State</th><th>Effective Date</th><th style="text-align:right">Actions</th></tr>
             </thead>
             <tbody id="dedTable"></tbody>
           </table>
@@ -349,120 +349,77 @@
 <!--  DEDUCTION DIALOGS  -->
 <dialog id="dlgDedAdd">
   <div class="dlg-head">
-    <div><h3>Add Deduction</h3><p id="dlgDedAddSub">For selected employee</p></div>
+    <div><h3>Add Tax Withholding</h3><p id="dlgDedAddSub">For selected employee</p></div>
     <button class="btn ghost" onclick="document.getElementById('dlgDedAdd').close()" style="padding:4px 10px;">✕</button>
   </div>
   <div class="dlg-body">
     <div class="form-grid">
-      <div class="field"><label>Category</label>
-        <select class="fselect" id="dAdd_cat">
-          <option>Tax</option><option>Retirement</option><option>Insurance</option><option>Garnishment</option><option>Other</option>
+      <div class="field"><label>Filing Status</label>
+        <select class="fselect" id="dAdd_status">
+          <option value="single">Single</option>
+          <option value="married">Married</option>
+          <option value="head_of_household">Head of Household</option>
         </select>
       </div>
-      <div class="field"><label>Name</label><input class="finput" id="dAdd_name" type="text" placeholder="e.g. Federal withholding"></div>
-      <div class="field"><label>Method</label>
-        <select class="fselect" id="dAdd_method"><option>Flat</option><option>Percent</option></select>
+      <div class="field"><label>Effective Date</label>
+        <input class="finput" id="dAdd_date" type="date">
       </div>
-      <div class="field"><label>Amount / %</label><input class="finput" id="dAdd_amount" type="text" placeholder="$0.00 or 0%"></div>
-      <div class="field"><label>Pre/Post Tax</label>
-        <select class="fselect" id="dAdd_tax"><option>Pre-tax</option><option selected>Post-tax</option></select>
+      <div class="field"><label>Federal Allowances</label>
+        <input class="finput" id="dAdd_fedAllow" type="number" min="0" value="0">
       </div>
-      <div class="field"><label>Frequency</label>
-        <select class="fselect" id="dAdd_freq"><option selected>Per paycheck</option><option>One-time</option><option>Monthly</option></select>
+      <div class="field"><label>State Allowances</label>
+        <input class="finput" id="dAdd_stateAllow" type="number" min="0" value="0">
+      </div>
+      <div class="field"><label>Additional Withholding ($)</label>
+        <input class="finput" id="dAdd_addWith" type="number" min="0" step="0.01" value="0">
+      </div>
+      <div class="field" style="display:flex;align-items:center;gap:16px;padding-top:22px;">
+        <label class="check"><input type="checkbox" id="dAdd_exemptFed"> Exempt Federal</label>
+        <label class="check"><input type="checkbox" id="dAdd_exemptState"> Exempt State</label>
       </div>
     </div>
   </div>
   <div class="dlg-actions">
     <button class="btn ghost" onclick="document.getElementById('dlgDedAdd').close()">Cancel</button>
-    <button class="btn primary" onclick="saveDed()">Add Deduction</button>
+    <button class="btn primary" onclick="saveDed()">Add Tax Info</button>
   </div>
 </dialog>
 
 <dialog id="dlgDedEdit">
   <div class="dlg-head">
-    <div><h3>Edit Deduction</h3><p id="dlgDedEditSub">For selected employee</p></div>
+    <div><h3>Edit Tax Withholding</h3><p id="dlgDedEditSub">For selected employee</p></div>
     <button class="btn ghost" onclick="document.getElementById('dlgDedEdit').close()" style="padding:4px 10px;">✕</button>
   </div>
   <div class="dlg-body">
     <div class="form-grid">
-      <div class="field"><label>Category</label>
-        <select class="fselect" id="dEdit_cat">
-          <option>Tax</option><option>Retirement</option><option>Insurance</option><option>Garnishment</option><option>Other</option>
+      <div class="field"><label>Filing Status</label>
+        <select class="fselect" id="dEdit_status">
+          <option value="single">Single</option>
+          <option value="married">Married</option>
+          <option value="head_of_household">Head of Household</option>
         </select>
       </div>
-      <div class="field"><label>Name</label><input class="finput" id="dEdit_name" type="text"></div>
-      <div class="field"><label>Method</label>
-        <select class="fselect" id="dEdit_method"><option>Flat</option><option>Percent</option></select>
+      <div class="field"><label>Effective Date</label>
+        <input class="finput" id="dEdit_date" type="date">
       </div>
-      <div class="field"><label>Amount / %</label><input class="finput" id="dEdit_amount" type="text"></div>
-      <div class="field"><label>Pre/Post Tax</label>
-        <select class="fselect" id="dEdit_tax"><option>Pre-tax</option><option>Post-tax</option></select>
+      <div class="field"><label>Federal Allowances</label>
+        <input class="finput" id="dEdit_fedAllow" type="number" min="0">
       </div>
-      <div class="field"><label>Frequency</label>
-        <select class="fselect" id="dEdit_freq"><option>Per paycheck</option><option>One-time</option><option>Monthly</option></select>
+      <div class="field"><label>State Allowances</label>
+        <input class="finput" id="dEdit_stateAllow" type="number" min="0">
+      </div>
+      <div class="field"><label>Additional Withholding ($)</label>
+        <input class="finput" id="dEdit_addWith" type="number" min="0" step="0.01">
+      </div>
+      <div class="field" style="display:flex;align-items:center;gap:16px;padding-top:22px;">
+        <label class="check"><input type="checkbox" id="dEdit_exemptFed"> Exempt Federal</label>
+        <label class="check"><input type="checkbox" id="dEdit_exemptState"> Exempt State</label>
       </div>
     </div>
   </div>
   <div class="dlg-actions">
     <button class="btn ghost" onclick="document.getElementById('dlgDedEdit').close()">Cancel</button>
     <button class="btn primary" onclick="updateDed()">Save Changes</button>
-  </div>
-</dialog>
-
-<!-- INCOME DIALOGS -->
-<dialog id="dlgIncAdd">
-  <div class="dlg-head">
-    <div><h3>Add Gross Income</h3><p id="dlgIncAddSub">For selected employee</p></div>
-    <button class="btn ghost" onclick="document.getElementById('dlgIncAdd').close()" style="padding:4px 10px;">✕</button>
-  </div>
-  <div class="dlg-body">
-    <div class="form-grid">
-      <div class="field"><label>Type</label>
-        <select class="fselect" id="iAdd_type"><option>Hourly</option><option>Salary</option><option>Overtime</option><option>Bonus</option><option>Commission</option><option>Other</option></select>
-      </div>
-      <div class="field"><label>Description</label><input class="finput" id="iAdd_desc" type="text" placeholder="e.g. Regular hours"></div>
-      <div class="field"><label>Hours</label><input class="finput" id="iAdd_hours" type="number" step="0.01" placeholder="0"></div>
-      <div class="field"><label>Rate</label><input class="finput" id="iAdd_rate" type="text" placeholder="$0.00"></div>
-      <div class="field"><label>Amount</label><input class="finput" id="iAdd_amount" type="text" placeholder="$0.00"></div>
-      <div class="field"><label>Frequency</label>
-        <select class="fselect" id="iAdd_freq"><option selected>Per paycheck</option><option>One-time</option><option>Monthly</option></select>
-      </div>
-      <div class="field span-2">
-        <label class="check"><input type="checkbox" id="iAdd_taxable" checked> Taxable income</label>
-      </div>
-    </div>
-  </div>
-  <div class="dlg-actions">
-    <button class="btn ghost" onclick="document.getElementById('dlgIncAdd').close()">Cancel</button>
-    <button class="btn primary" onclick="saveInc()">Add Income</button>
-  </div>
-</dialog>
-
-<dialog id="dlgIncEdit">
-  <div class="dlg-head">
-    <div><h3>Edit Gross Income</h3><p id="dlgIncEditSub">For selected employee</p></div>
-    <button class="btn ghost" onclick="document.getElementById('dlgIncEdit').close()" style="padding:4px 10px;">✕</button>
-  </div>
-  <div class="dlg-body">
-    <div class="form-grid">
-      <div class="field"><label>Type</label>
-        <select class="fselect" id="iEdit_type"><option>Hourly</option><option>Salary</option><option>Overtime</option><option>Bonus</option><option>Commission</option><option>Other</option></select>
-      </div>
-      <div class="field"><label>Description</label><input class="finput" id="iEdit_desc" type="text"></div>
-      <div class="field"><label>Hours</label><input class="finput" id="iEdit_hours" type="number" step="0.01"></div>
-      <div class="field"><label>Rate</label><input class="finput" id="iEdit_rate" type="text"></div>
-      <div class="field"><label>Amount</label><input class="finput" id="iEdit_amount" type="text"></div>
-      <div class="field"><label>Frequency</label>
-        <select class="fselect" id="iEdit_freq"><option>Per paycheck</option><option>One-time</option><option>Monthly</option></select>
-      </div>
-      <div class="field span-2">
-        <label class="check"><input type="checkbox" id="iEdit_taxable"> Taxable income</label>
-      </div>
-    </div>
-  </div>
-  <div class="dlg-actions">
-    <button class="btn ghost" onclick="document.getElementById('dlgIncEdit').close()">Cancel</button>
-    <button class="btn primary" onclick="updateInc()">Save Changes</button>
   </div>
 </dialog>
 
@@ -482,25 +439,11 @@
 </dialog>
 
 <script>
-  // =============================================================
-  // API CONFIGURATION
-  // Change these base URLs to match your backend server.
-  // =============================================================
-  const API_BASE     = 'http://localhost:8000';
-  const API_EMP      = API_BASE + '/employees';     // GET /employees              -> list all employees
-  const API_INCOME   = API_BASE + '/income';        // GET    /income/{emp_id}     -> list income for employee
-                                                    // POST   /income/             -> create income item
-                                                    // PATCH  /income/{id}         -> update income item
-                                                    // DELETE /income/{id}         -> delete income item
-  const API_DED      = API_BASE + '/deductions';    // GET    /deductions/{emp_id} -> list deductions for employee
-                                                    // POST   /deductions/         -> create deduction
-                                                    // PATCH  /deductions/{id}     -> update deduction
-                                                    // DELETE /deductions/{id}     -> delete deduction
-  const API_BENEFITS = API_BASE + '/enrollments';   // GET /enrollments/{emp_id}?status=Active -> benefits (read-only)
+  const API_BASE = 'http://localhost:8000';
+  const API_EMP  = API_BASE + '/employee';
+  const API_TAX  = API_BASE + '/tax';
+  const API_POS  = API_BASE + '/positions';
 
-  // =============================================================
-  // AUTH — reads JWT token set during login
-  // =============================================================
   function authHeaders() {
     const token = localStorage.getItem('access_token');
     const h = { 'Content-Type': 'application/json' };
@@ -508,9 +451,6 @@
     return h;
   }
 
-  // =============================================================
-  // ERROR BANNER — non-blocking, dismissible
-  // =============================================================
   function showError(msg) {
     console.error(msg);
     let banner = document.getElementById('apiBanner');
@@ -523,27 +463,21 @@
     banner.innerHTML = '&#9888; ' + msg + ' <button onclick="this.parentElement.remove()" style="background:none;border:none;cursor:pointer;font-size:1rem;color:#991b1b;">&#x2715;</button>';
   }
 
-  // =============================================================
-  // STATE
-  // =============================================================
-  let currentEmp = '';
-  let editingId  = null;
-  let pendingDeleteSection = null;
+  let currentEmp    = '';
+  let editingId     = null;
   let pendingDeleteId = null;
   let allEmpOptions = [];
+  let taxRecords    = [];
 
-  // =============================================================
-  // EMPLOYEES  — fetched from API on page load
-  // =============================================================
+  // ── EMPLOYEES ──────────────────────────────────────────────────
   async function initEmployees() {
     try {
-      const res = await fetch(API_EMP, { headers: authHeaders() });
+      const res = await fetch(`${API_EMP}/all`, { headers: authHeaders() });
       if (!res.ok) throw new Error('Failed to load employees (' + res.status + ')');
       const data = await res.json();
-      // Expects array of { id, name } — adjust field names to match your API response
       const list = data.map(e => ({
-        id:   String(e.id ?? e.employee_id),
-        name: e.name ?? (e.first_name + ' ' + e.last_name),
+        id:   String(e.employee_id),
+        name: (e.first_name + ' ' + e.last_name).trim(),
       }));
       const sel = document.getElementById('empSelect');
       sel.innerHTML = list.map(e =>
@@ -559,13 +493,10 @@
 
   async function loadEmployeeData(empId) {
     document.getElementById('empSummary').textContent = empId;
-    await Promise.all([
-      loadIncome(empId),
-      loadDeductions(empId),
-      loadBenefits(empId),
-    ]);
+    await Promise.all([loadIncome(empId), loadDeductions(empId)]);
+    loadBenefits();
     const label = allEmpOptions.find(o => o.value === empId)?.label || empId;
-    ['dlgDedAdd','dlgDedEdit','dlgIncAdd','dlgIncEdit'].forEach(dlgId => {
+    ['dlgDedAdd', 'dlgDedEdit'].forEach(dlgId => {
       const el = document.querySelector('#' + dlgId + ' .dlg-head p');
       if (el) el.textContent = 'Employee: ' + label;
     });
@@ -576,251 +507,177 @@
     loadEmployeeData(currentEmp);
   }
 
-  // =============================================================
-  // GROSS INCOME  — full CRUD
-  // =============================================================
+  // ── GROSS INCOME — read-only from Positions ────────────────────
   async function loadIncome(empId) {
     const tb = document.getElementById('incTable');
-    tb.innerHTML = emptyRow(8, 'Loading...');
+    tb.innerHTML = emptyRow(6, 'Loading...');
     try {
-      const res = await fetch(`${API_INCOME}/${empId}`, { headers: authHeaders() });
+      const res = await fetch(`${API_POS}/employee/${empId}`, { headers: authHeaders() });
       if (!res.ok) throw new Error(res.status);
       renderInc(await res.json());
     } catch (err) {
-      tb.innerHTML = emptyRow(8, 'Failed to load income items. ' + err.message);
+      tb.innerHTML = emptyRow(6, 'Could not load position data. ' + err.message);
     }
   }
 
   function renderInc(rows) {
     const tb = document.getElementById('incTable');
-    if (!rows.length) { tb.innerHTML = emptyRow(8, 'No income items added yet.'); return; }
-    tb.innerHTML = rows.map(r => `<tr>
-      <td>${r.type ?? r.income_type ?? ''}</td>
-      <td style="font-weight:600;color:#0f172a;">${r.desc ?? r.description ?? ''}</td>
-      <td>${r.hours ?? '&mdash;'}</td>
-      <td>${r.rate ?? '&mdash;'}</td>
-      <td class="amount">${r.amount ?? ''}</td>
-      <td>${r.taxable ? '&#10003; Yes' : '&mdash;'}</td>
-      <td>${r.freq ?? r.frequency ?? ''}</td>
-      <td><div class="tbl-actions">
-        <button class="icon-btn" title="Edit" onclick="editInc(${r.id})">&#9998;</button>
-        <button class="icon-btn del" title="Delete" onclick="askDelete('income',${r.id},'${(r.desc??r.description??'').replace(/'/g,"\\'")}')">&#128465;</button>
-      </div></td>
-    </tr>`).join('');
+    if (!rows.length) {
+      tb.innerHTML = emptyRow(6, 'No position assigned yet. Assign one on the Employees page.');
+      return;
+    }
+    tb.innerHTML = rows.map(r => {
+      const type   = r.current_hourly_rate > 0 ? 'Hourly' : 'Salary';
+      const salary = r.current_salary       ? '$' + Number(r.current_salary).toFixed(2)       : '—';
+      const hourly = r.current_hourly_rate  ? '$' + Number(r.current_hourly_rate).toFixed(2)  : '—';
+      const badge  = r.is_current
+        ? '<span style="font-size:0.75rem;border-radius:999px;padding:3px 10px;background:#ecfdf5;color:#065f46;border:1px solid #a7f3d0;">Current</span>'
+        : '<span style="font-size:0.75rem;border-radius:999px;padding:3px 10px;background:#f1f5f9;color:#475569;border:1px solid #e2e8f0;">Past</span>';
+      return `<tr>
+        <td>${type}</td>
+        <td>${r.position_id}</td>
+        <td>${r.pay_frequency ?? '—'}</td>
+        <td class="amount">${salary}</td>
+        <td class="amount">${hourly}</td>
+        <td>${badge}</td>
+      </tr>`;
+    }).join('');
   }
 
-  async function saveInc() {
-    const body = {
-      employee_id: currentEmp,
-      income_type: document.getElementById('iAdd_type').value,
-      description: document.getElementById('iAdd_desc').value || 'Untitled',
-      hours:       parseFloat(document.getElementById('iAdd_hours').value) || null,
-      rate:        document.getElementById('iAdd_rate').value  || null,
-      amount:      document.getElementById('iAdd_amount').value || '0.00',
-      frequency:   document.getElementById('iAdd_freq').value,
-      taxable:     document.getElementById('iAdd_taxable').checked,
-    };
-    try {
-      const res = await fetch(API_INCOME + '/', {
-        method: 'POST', headers: authHeaders(), body: JSON.stringify(body)
-      });
-      if (!res.ok) throw new Error(await res.text());
-      document.getElementById('dlgIncAdd').close();
-      ['iAdd_desc','iAdd_hours','iAdd_rate','iAdd_amount'].forEach(id => document.getElementById(id).value = '');
-      await loadIncome(currentEmp);
-    } catch (err) { showError('Could not save income item: ' + err.message); }
-  }
-
-  async function editInc(id) {
-    try {
-      const res = await fetch(`${API_INCOME}/${id}`, { headers: authHeaders() });
-      if (!res.ok) throw new Error(res.status);
-      const r = await res.json();
-      editingId = id;
-      document.getElementById('iEdit_type').value     = r.type ?? r.income_type ?? '';
-      document.getElementById('iEdit_desc').value     = r.desc ?? r.description ?? '';
-      document.getElementById('iEdit_hours').value    = r.hours ?? '';
-      document.getElementById('iEdit_rate').value     = r.rate  ?? '';
-      document.getElementById('iEdit_amount').value   = r.amount ?? '';
-      document.getElementById('iEdit_freq').value     = r.freq ?? r.frequency ?? 'Per paycheck';
-      document.getElementById('iEdit_taxable').checked = !!r.taxable;
-      openDlg('dlgIncEdit');
-    } catch (err) { showError('Could not load income item: ' + err.message); }
-  }
-
-  async function updateInc() {
-    const body = {
-      income_type: document.getElementById('iEdit_type').value,
-      description: document.getElementById('iEdit_desc').value,
-      hours:       parseFloat(document.getElementById('iEdit_hours').value) || null,
-      rate:        document.getElementById('iEdit_rate').value  || null,
-      amount:      document.getElementById('iEdit_amount').value,
-      frequency:   document.getElementById('iEdit_freq').value,
-      taxable:     document.getElementById('iEdit_taxable').checked,
-    };
-    try {
-      const res = await fetch(`${API_INCOME}/${editingId}`, {
-        method: 'PATCH', headers: authHeaders(), body: JSON.stringify(body)
-      });
-      if (!res.ok) throw new Error(await res.text());
-      document.getElementById('dlgIncEdit').close();
-      await loadIncome(currentEmp);
-    } catch (err) { showError('Could not update income item: ' + err.message); }
-  }
-
-  // =============================================================
-  // TAX & DEDUCTIONS  — full CRUD
-  // =============================================================
+  // ── TAX WITHHOLDING — full CRUD ────────────────────────────────
   async function loadDeductions(empId) {
     const tb = document.getElementById('dedTable');
-    tb.innerHTML = emptyRow(7, 'Loading...');
+    tb.innerHTML = emptyRow(8, 'Loading...');
     try {
-      const res = await fetch(`${API_DED}/${empId}`, { headers: authHeaders() });
+      const res = await fetch(`${API_TAX}/employee/${empId}`, { headers: authHeaders() });
       if (!res.ok) throw new Error(res.status);
-      renderDed(await res.json());
+      taxRecords = await res.json();
+      renderDed(taxRecords);
     } catch (err) {
-      tb.innerHTML = emptyRow(7, 'Failed to load deductions. ' + err.message);
+      taxRecords = [];
+      tb.innerHTML = emptyRow(8, 'Failed to load tax information. ' + err.message);
     }
   }
 
   function renderDed(rows) {
     const tb = document.getElementById('dedTable');
-    if (!rows.length) { tb.innerHTML = emptyRow(7, 'No deductions added yet.'); return; }
+    if (!rows.length) {
+      tb.innerHTML = emptyRow(8, 'No tax withholding record. Click "+ Add Tax Info" to create one.');
+      return;
+    }
     tb.innerHTML = rows.map(r => `<tr>
-      <td>${r.cat ?? r.category ?? ''}</td>
-      <td style="font-weight:600;color:#0f172a;">${r.name ?? ''}</td>
-      <td>${r.method ?? ''}</td>
-      <td>${r.tax ?? r.pre_post_tax ?? ''}</td>
-      <td class="amount">${r.amount ?? ''}</td>
-      <td>${r.freq ?? r.frequency ?? ''}</td>
+      <td style="font-weight:600;color:#0f172a;">${fmtStatus(r.filing_status)}</td>
+      <td>${r.federal_allowances ?? 0}</td>
+      <td>${r.state_allowances ?? 0}</td>
+      <td class="amount">${r.additional_withholding != null ? '$' + Number(r.additional_withholding).toFixed(2) : '—'}</td>
+      <td>${r.exempt_federal ? '&#10003; Yes' : 'No'}</td>
+      <td>${r.exempt_state   ? '&#10003; Yes' : 'No'}</td>
+      <td>${r.effective_date ?? '—'}</td>
       <td><div class="tbl-actions">
-        <button class="icon-btn" title="Edit" onclick="editDed(${r.id})">&#9998;</button>
-        <button class="icon-btn del" title="Delete" onclick="askDelete('deductions',${r.id},'${(r.name??'').replace(/'/g,"\\'")}')">&#128465;</button>
+        <button class="icon-btn" title="Edit" onclick="editDed(${r.tax_id})">&#9998;</button>
+        <button class="icon-btn del" title="Delete" onclick="askDelete(${r.tax_id}, '${fmtStatus(r.filing_status)} record')">&#128465;</button>
       </div></td>
     </tr>`).join('');
   }
 
+  function fmtStatus(s) {
+    return { single: 'Single', married: 'Married', head_of_household: 'Head of Household' }[s] ?? s ?? '—';
+  }
+
+  function openTaxAdd() {
+    document.getElementById('dAdd_status').value        = 'single';
+    document.getElementById('dAdd_fedAllow').value      = '0';
+    document.getElementById('dAdd_stateAllow').value    = '0';
+    document.getElementById('dAdd_addWith').value       = '0';
+    document.getElementById('dAdd_exemptFed').checked   = false;
+    document.getElementById('dAdd_exemptState').checked = false;
+    document.getElementById('dAdd_date').value          = '';
+    openDlg('dlgDedAdd');
+  }
+
   async function saveDed() {
     const body = {
-      employee_id:  currentEmp,
-      category:     document.getElementById('dAdd_cat').value,
-      name:         document.getElementById('dAdd_name').value || 'Untitled',
-      method:       document.getElementById('dAdd_method').value,
-      amount:       document.getElementById('dAdd_amount').value || '0.00',
-      pre_post_tax: document.getElementById('dAdd_tax').value,
-      frequency:    document.getElementById('dAdd_freq').value,
+      employee_id:            parseInt(currentEmp),
+      filing_status:          document.getElementById('dAdd_status').value,
+      federal_allowances:     parseInt(document.getElementById('dAdd_fedAllow').value)   || 0,
+      state_allowances:       parseInt(document.getElementById('dAdd_stateAllow').value) || 0,
+      additional_withholding: parseFloat(document.getElementById('dAdd_addWith').value)  || 0,
+      exempt_federal:         document.getElementById('dAdd_exemptFed').checked,
+      exempt_state:           document.getElementById('dAdd_exemptState').checked,
+      effective_date:         document.getElementById('dAdd_date').value || null,
     };
     try {
-      const res = await fetch(API_DED + '/', {
+      const res = await fetch(`${API_TAX}/create`, {
         method: 'POST', headers: authHeaders(), body: JSON.stringify(body)
       });
       if (!res.ok) throw new Error(await res.text());
       document.getElementById('dlgDedAdd').close();
-      document.getElementById('dAdd_name').value   = '';
-      document.getElementById('dAdd_amount').value = '';
       await loadDeductions(currentEmp);
-    } catch (err) { showError('Could not save deduction: ' + err.message); }
+    } catch (err) { showError('Could not save tax record: ' + err.message); }
   }
 
-  async function editDed(id) {
-    try {
-      const res = await fetch(`${API_DED}/${id}`, { headers: authHeaders() });
-      if (!res.ok) throw new Error(res.status);
-      const r = await res.json();
-      editingId = id;
-      document.getElementById('dEdit_cat').value    = r.cat ?? r.category ?? '';
-      document.getElementById('dEdit_name').value   = r.name ?? '';
-      document.getElementById('dEdit_method').value = r.method ?? 'Flat';
-      document.getElementById('dEdit_amount').value = r.amount ?? '';
-      document.getElementById('dEdit_tax').value    = r.tax ?? r.pre_post_tax ?? 'Post-tax';
-      document.getElementById('dEdit_freq').value   = r.freq ?? r.frequency ?? 'Per paycheck';
-      openDlg('dlgDedEdit');
-    } catch (err) { showError('Could not load deduction: ' + err.message); }
+  function editDed(taxId) {
+    const r = taxRecords.find(x => x.tax_id === taxId);
+    if (!r) return;
+    editingId = taxId;
+    document.getElementById('dEdit_status').value        = r.filing_status ?? 'single';
+    document.getElementById('dEdit_fedAllow').value      = r.federal_allowances ?? 0;
+    document.getElementById('dEdit_stateAllow').value    = r.state_allowances ?? 0;
+    document.getElementById('dEdit_addWith').value       = r.additional_withholding ?? 0;
+    document.getElementById('dEdit_exemptFed').checked   = !!r.exempt_federal;
+    document.getElementById('dEdit_exemptState').checked = !!r.exempt_state;
+    document.getElementById('dEdit_date').value          = r.effective_date ?? '';
+    openDlg('dlgDedEdit');
   }
 
   async function updateDed() {
     const body = {
-      category:     document.getElementById('dEdit_cat').value,
-      name:         document.getElementById('dEdit_name').value,
-      method:       document.getElementById('dEdit_method').value,
-      amount:       document.getElementById('dEdit_amount').value,
-      pre_post_tax: document.getElementById('dEdit_tax').value,
-      frequency:    document.getElementById('dEdit_freq').value,
+      filing_status:          document.getElementById('dEdit_status').value,
+      federal_allowances:     parseInt(document.getElementById('dEdit_fedAllow').value)   || 0,
+      state_allowances:       parseInt(document.getElementById('dEdit_stateAllow').value) || 0,
+      additional_withholding: parseFloat(document.getElementById('dEdit_addWith').value)  || 0,
+      exempt_federal:         document.getElementById('dEdit_exemptFed').checked,
+      exempt_state:           document.getElementById('dEdit_exemptState').checked,
+      effective_date:         document.getElementById('dEdit_date').value || null,
     };
     try {
-      const res = await fetch(`${API_DED}/${editingId}`, {
+      const res = await fetch(`${API_TAX}/${editingId}`, {
         method: 'PATCH', headers: authHeaders(), body: JSON.stringify(body)
       });
       if (!res.ok) throw new Error(await res.text());
       document.getElementById('dlgDedEdit').close();
       await loadDeductions(currentEmp);
-    } catch (err) { showError('Could not update deduction: ' + err.message); }
+    } catch (err) { showError('Could not update tax record: ' + err.message); }
   }
 
-  // =============================================================
-  // NET PAY BENEFITS  — read-only, fetched from benefits API
-  // =============================================================
-  async function loadBenefits(empId) {
-    const tb = document.getElementById('benTable');
-    tb.innerHTML = emptyRow(8, 'Loading...');
-    try {
-      const res = await fetch(`${API_BENEFITS}/${empId}?status=Active`, { headers: authHeaders() });
-      if (!res.ok) throw new Error(res.status);
-      renderBen(await res.json());
-    } catch (err) {
-      tb.innerHTML = emptyRow(8, 'Failed to load benefits. ' + err.message);
-    }
+  // ── BENEFITS — no backend yet ──────────────────────────────────
+  function loadBenefits() {
+    document.getElementById('benTable').innerHTML =
+      `<tr class="empty-row"><td colspan="8">No active benefit enrollments for this employee. <a href="benefits.html" style="color:var(--primary);">Add them on the Benefits page &rarr;</a></td></tr>`;
   }
 
-  function renderBen(rows) {
-    const tb = document.getElementById('benTable');
-    if (!rows.length) {
-      tb.innerHTML = `<tr class="empty-row"><td colspan="8">No active benefit enrollments for this employee. <a href="benefits.html" style="color:var(--primary);">Add them on the Benefits page &rarr;</a></td></tr>`;
-      return;
-    }
-    tb.innerHTML = rows.map(r => `<tr>
-      <td style="font-weight:600;color:#0f172a;">${r.plan ?? r.plan_name ?? ''}</td>
-      <td>${r.type ?? r.benefit_type ?? ''}</td>
-      <td>${r.provider ?? ''}</td>
-      <td>${r.pre_post_tax ?? '&mdash;'}</td>
-      <td style="font-family:monospace;font-size:0.88rem;">${r.empCost ?? r.employee_cost ?? ''}</td>
-      <td style="font-family:monospace;font-size:0.88rem;">${r.erCost ?? r.employer_cost ?? ''}</td>
-      <td>${r.start ?? r.effective_date ?? ''}</td>
-      <td><span style="font-size:0.75rem;border-radius:999px;padding:3px 10px;background:#ecfdf5;color:#065f46;border:1px solid #a7f3d0;">${r.status ?? ''}</span></td>
-    </tr>`).join('');
-  }
-
-  // =============================================================
-  // DELETE  — shared confirm dialog, calls correct endpoint
-  // =============================================================
-  function askDelete(section, id, label) {
-    pendingDeleteSection = section;
+  // ── DELETE ─────────────────────────────────────────────────────
+  function askDelete(id, label) {
     pendingDeleteId = id;
     document.getElementById('deleteLabel').textContent = label;
     openDlg('dlgDelete');
   }
 
   document.getElementById('confirmDeleteBtn').addEventListener('click', async () => {
-    if (!pendingDeleteSection || !pendingDeleteId) return;
-    const url = pendingDeleteSection === 'income'
-      ? `${API_INCOME}/${pendingDeleteId}`
-      : `${API_DED}/${pendingDeleteId}`;
+    if (!pendingDeleteId) return;
     try {
-      const res = await fetch(url, { method: 'DELETE', headers: authHeaders() });
+      const res = await fetch(`${API_TAX}/${pendingDeleteId}`, { method: 'DELETE', headers: authHeaders() });
       if (!res.ok) throw new Error(await res.text());
       document.getElementById('dlgDelete').close();
-      if (pendingDeleteSection === 'income') await loadIncome(currentEmp);
-      else await loadDeductions(currentEmp);
+      await loadDeductions(currentEmp);
     } catch (err) {
-      showError('Could not delete item: ' + err.message);
+      showError('Could not delete record: ' + err.message);
       document.getElementById('dlgDelete').close();
     }
-    pendingDeleteSection = pendingDeleteId = null;
+    pendingDeleteId = null;
   });
 
-  // =============================================================
-  // EMPLOYEE SEARCH  (client-side filter on the dropdown)
-  // =============================================================
+  // ── EMPLOYEE SEARCH ────────────────────────────────────────────
   function filterEmpList() {
     const q   = document.getElementById('empSearch').value.toLowerCase();
     const sel = document.getElementById('empSelect');
@@ -836,18 +693,11 @@
     }
   }
 
-  // =============================================================
-  // UTILITY
-  // =============================================================
-  function openDlg(id) { document.getElementById(id).showModal(); }
+  // ── UTILITY ────────────────────────────────────────────────────
+  function openDlg(id)         { document.getElementById(id).showModal(); }
+  function emptyRow(cols, msg) { return `<tr class="empty-row"><td colspan="${cols}">${msg}</td></tr>`; }
 
-  function emptyRow(cols, msg) {
-    return `<tr class="empty-row"><td colspan="${cols}">${msg}</td></tr>`;
-  }
-
-  // =============================================================
-  // SUBNAV
-  // =============================================================
+  // ── SUBNAV ─────────────────────────────────────────────────────
   const subLinks  = Array.from(document.querySelectorAll('.subnav a[data-panel]'));
   const subPanels = Array.from(document.querySelectorAll('.panel[data-panel]'));
   function setPanel(name) {
@@ -859,9 +709,7 @@
   const hash = (location.hash || '').replace('#', '');
   if (hash) setPanel(hash);
 
-  // =============================================================
-  // HAMBURGER MENU
-  // =============================================================
+  // ── HAMBURGER ──────────────────────────────────────────────────
   const menuBtn = document.getElementById('menuBtn');
   const hrMenu  = document.getElementById('hrMenu');
   menuBtn.addEventListener('click', () => {
@@ -877,14 +725,11 @@
     }
   });
 
-  // =============================================================
-  // INIT
-  // =============================================================
+  // ── INIT ───────────────────────────────────────────────────────
   if (localStorage.getItem('payroll_dark_mode') === 'enabled') {
     document.body.classList.add('dark');
   }
   initEmployees();
-
 </script>
 </body>
 </html>

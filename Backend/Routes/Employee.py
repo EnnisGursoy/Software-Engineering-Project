@@ -13,7 +13,7 @@ async def get_by_department(department_id: int, user: User = Depends(manager_onl
 
 
 @router.get('/all')
-async def get_all(user : User = Depends(hr_only), db : Session = Depends(get_db)):
+async def get_all(user : User = Depends(manager_only), db : Session = Depends(get_db)):
    all_employees = show_all_employees(db)
    return all_employees
 

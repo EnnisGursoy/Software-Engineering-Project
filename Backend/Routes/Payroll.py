@@ -19,7 +19,7 @@ router = APIRouter()
 
 @router.get("/all", response_model=list[PaycheckOut])
 async def list_all_paychecks(
-    user: User = Depends(hr_only),
+    user: User = Depends(manager_only),
     db: Session = Depends(get_db),
 ):
     return get_all_paychecks(db)

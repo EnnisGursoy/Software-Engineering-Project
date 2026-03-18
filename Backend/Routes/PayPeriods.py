@@ -34,7 +34,7 @@ async def get_one(
 @router.post("/create", response_model=PayPeriodOut)
 async def create(
     data: PayPeriodCreate,
-    user: User = Depends(hr_only),
+    user: User = Depends(manager_only),
     db: Session = Depends(get_db),
 ):
     return create_pay_period(data, db)

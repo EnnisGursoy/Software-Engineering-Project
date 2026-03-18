@@ -764,39 +764,14 @@
       </div>
     </section>
 
-    <section class="controls">
+    <section class="controls" style="grid-template-columns:1fr;">
       <div class="card search-box">
         <h3 class="section-title">Search Employees</h3>
         <input
           type="text"
           id="searchInput"
-          placeholder="Search by name, department, title, or email..."
+          placeholder="Search by name, email, or status..."
         />
-      </div>
-
-      <div class="card">
-        <h3 class="section-title">Quick Add Employee</h3>
-        <form id="employeeForm">
-          <div class="form-grid">
-            <input type="text" id="firstName" placeholder="First Name" required />
-            <input type="text" id="lastName" placeholder="Last Name" required />
-            <input type="email" id="email" placeholder="Email Address" required />
-            <input type="text" id="jobTitle" placeholder="Job Title" required />
-            <input type="text" id="department" placeholder="Department" required />
-            <input type="number" id="payRate" placeholder="Hourly Rate" min="0" step="0.01" required />
-            <select id="status" required>
-              <option value="">Select Status</option>
-              <option value="Active">Active</option>
-              <option value="On Leave">On Leave</option>
-              <option value="Terminated">Terminated</option>
-            </select>
-          </div>
-
-          <div class="form-actions">
-            <button type="submit" class="btn btn-primary">Save Employee</button>
-            <button type="reset" class="btn btn-secondary">Clear</button>
-          </div>
-        </form>
       </div>
     </section>
 
@@ -821,64 +796,7 @@
               <th>Actions</th>
             </tr>
           </thead>
-          <tbody id="employeeTableBody">
-            <tr>
-              <td>Maria Torres</td>
-              <td>maria.torres@paycentral.com</td>
-              <td>Human Resources</td>
-              <td>HR Manager</td>
-              <td>$34.50/hr</td>
-              <td><span class="badge badge-active">Active</span></td>
-              <td>
-                <div class="actions">
-                  <button class="btn btn-secondary btn-sm" type="button" onclick="openEditModal('Maria','Torres','maria.torres@paycentral.com','Human Resources','HR Manager','34.50','Active')">Edit</button>
-                  <button class="btn btn-danger btn-sm" type="button" onclick="showStatus('Employee record flagged for removal review.', 'info')">Remove</button>
-                </div>
-              </td>
-            </tr>
-            <tr>
-              <td>James Rivera</td>
-              <td>james.rivera@paycentral.com</td>
-              <td>Operations</td>
-              <td>Operations Supervisor</td>
-              <td>$29.00/hr</td>
-              <td><span class="badge badge-active">Active</span></td>
-              <td>
-                <div class="actions">
-                  <button class="btn btn-secondary btn-sm" type="button" onclick="openEditModal('James','Rivera','james.rivera@paycentral.com','Operations','Operations Supervisor','29.00','Active')">Edit</button>
-                  <button class="btn btn-danger btn-sm" type="button" onclick="showStatus('Employee record flagged for removal review.', 'info')">Remove</button>
-                </div>
-              </td>
-            </tr>
-            <tr>
-              <td>Ashley Patel</td>
-              <td>ashley.patel@paycentral.com</td>
-              <td>Finance</td>
-              <td>Payroll Specialist</td>
-              <td>$31.25/hr</td>
-              <td><span class="badge badge-on-leave">On Leave</span></td>
-              <td>
-                <div class="actions">
-                  <button class="btn btn-secondary btn-sm" type="button" onclick="openEditModal('Ashley','Patel','ashley.patel@paycentral.com','Finance','Payroll Specialist','31.25','On Leave')">Edit</button>
-                  <button class="btn btn-danger btn-sm" type="button" onclick="showStatus('Employee record flagged for removal review.', 'info')">Remove</button>
-                </div>
-              </td>
-            </tr>
-            <tr>
-              <td>Daniel Kim</td>
-              <td>daniel.kim@paycentral.com</td>
-              <td>IT</td>
-              <td>Systems Analyst</td>
-              <td>$36.00/hr</td>
-              <td><span class="badge badge-terminated">Terminated</span></td>
-              <td>
-                <div class="actions">
-                  <button class="btn btn-secondary btn-sm" type="button" onclick="openEditModal('Daniel','Kim','daniel.kim@paycentral.com','IT','Systems Analyst','36.00','Terminated')">Edit</button>
-                  <button class="btn btn-danger btn-sm" type="button" onclick="showStatus('Employee record flagged for removal review.', 'info')">Remove</button>
-                </div>
-              </td>
-            </tr>
-          </tbody>
+          <tbody id="employeeTableBody"></tbody>
         </table>
       </div>
       <div class="empty-state" id="emptyState" style="display:none;">
@@ -967,6 +885,7 @@
       <h3>Edit Employee</h3>
 
       <form id="editForm" onsubmit="submitEdit(event)">
+        <input type="hidden" id="edit_employee_id" />
         <div class="form-grid">
           <div class="form-group">
             <label for="edit_first_name">First Name</label>
@@ -1068,35 +987,179 @@
       document.getElementById(id).classList.remove("open");
     }
 
-    function submitAdd(event) {
+    const API   = 'http://localhost:8000';
+    const token = localStorage.getItem('access_token');
+    const role  = localStorage.getItem('user_role');
+    const authHdrs = { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` };
+
+    // ── Load employees from backend ───────────────────────────────
+    async function loadEmployees() {
+      const tbody = document.getElementById("employeeTableBody");
+      tbody.innerHTML = `<tr><td colspan="7" style="text-align:center;padding:20px;color:#64748b;">Loading...</td></tr>`;
+      try {
+        let url = `${API}/employee/all`;
+
+        if (role === 'manager') {
+          const meRes = await fetch(`${API}/auth/me`, { headers: authHdrs });
+          if (meRes.status === 401) { window.location.href = 'login.html'; return; }
+          const me = await meRes.json();
+          if (me.department_id) {
+            url = `${API}/employee/by-department/${me.department_id}`;
+          }
+        }
+
+        const res = await fetch(url, { headers: authHdrs });
+        if (res.status === 401) { window.location.href = 'login.html'; return; }
+        if (!res.ok) throw new Error(res.status);
+        const employees = await res.json();
+
+        // update stat cards
+        const active = employees.filter(e => e.employment_status === 'active').length;
+        const depts  = new Set(employees.map(e => e.department_id).filter(Boolean)).size;
+        document.getElementById('totalEmployees').textContent  = employees.length;
+        document.getElementById('activeEmployees').textContent = active;
+        document.getElementById('totalDepartments').textContent = depts;
+        document.getElementById('avgPayRate').textContent      = '—';
+
+        if (!employees.length) {
+          tbody.innerHTML = `<tr><td colspan="7" style="text-align:center;padding:20px;color:#64748b;">No employees found. Click "+ Add Employee" to get started.</td></tr>`;
+          return;
+        }
+        tbody.innerHTML = employees.map(e => {
+          const name      = `${e.first_name} ${e.last_name}`;
+          const status    = e.employment_status ?? 'active';
+          const badgeClass = status === 'active' ? 'badge-active' : status === 'on_leave' ? 'badge-on-leave' : 'badge-terminated';
+          const safeFirst = e.first_name.replace(/'/g, "\\'");
+          const safeLast  = e.last_name.replace(/'/g, "\\'");
+          const safeEmail = (e.email ?? '').replace(/'/g, "\\'");
+          const safePhone = (e.phone ?? '').replace(/'/g, "\\'");
+          return `<tr>
+            <td style="font-weight:600;">${name}</td>
+            <td>${e.email ?? '—'}</td>
+            <td>${e.department_id ?? '—'}</td>
+            <td>${e.phone ?? '—'}</td>
+            <td>—</td>
+            <td><span class="badge ${badgeClass}">${status.replace('_', ' ')}</span></td>
+            <td>
+              <div class="actions">
+                <button class="btn btn-secondary btn-sm" type="button"
+                  onclick="openEditModal(${e.employee_id},'${safeFirst}','${safeLast}','${safeEmail}','${safePhone}')">Edit</button>
+                <button class="btn btn-sm" type="button" style="background:#eff6ff;color:#1d4ed8;border:1px solid #bfdbfe;"
+                  onclick="window.location.href='positions.html?employee_id=${e.employee_id}&name=${encodeURIComponent(`${safeFirst} ${safeLast}`).replace(/`/g,'')}'" >Position</button>
+                <button class="btn btn-danger btn-sm" type="button"
+                  onclick="removeEmployee(${e.employee_id}, '${safeFirst} ${safeLast}')">Remove</button>
+                ${role === 'admin' ? `<button class="btn btn-sm" type="button" style="background:#450a0a;color:#fca5a5;border:1px solid #7f1d1d;"
+                  onclick="hardDeleteEmployee(${e.employee_id}, '${safeFirst} ${safeLast}')">Hard Delete</button>` : ''}
+              </div>
+            </td>
+          </tr>`;
+        }).join('');
+      } catch (err) {
+        tbody.innerHTML = `<tr><td colspan="7" style="text-align:center;padding:20px;color:#ef4444;">Failed to load employees. Make sure you are logged in.</td></tr>`;
+      }
+    }
+
+    // ── Add employee ──────────────────────────────────────────────
+    async function submitAdd(event) {
       event.preventDefault();
-      closeModal("addModal");
-      showStatus("Employee created successfully.", "success");
-      document.getElementById("addForm").reset();
+      const statusMap = { 'Active': 'active', 'On Leave': 'on_leave', 'Terminated': 'terminated' };
+      const body = {
+        first_name:        document.getElementById('add_first_name').value.trim(),
+        last_name:         document.getElementById('add_last_name').value.trim(),
+        email:             document.getElementById('add_email').value.trim(),
+        phone:             document.getElementById('add_phone').value.trim()        || null,
+        ssn:               document.getElementById('add_ssn').value.trim(),
+        hire_date:         document.getElementById('add_hire_date').value,
+        date_of_birth:     document.getElementById('add_dob').value                || null,
+        address:           document.getElementById('add_address').value.trim()     || null,
+        city:              document.getElementById('add_city').value.trim()         || null,
+        state:             document.getElementById('add_state').value.trim()        || null,
+        zip_code:          document.getElementById('add_zip').value.trim()          || null,
+        employment_status: statusMap[document.getElementById('add_status').value] ?? 'active',
+        department_name:   document.getElementById('add_department').value.trim()  || null,
+      };
+      try {
+        const res = await fetch(`${API}/employee/sign_up`, {
+          method: 'POST', headers: authHdrs, body: JSON.stringify(body)
+        });
+        const data = await res.json();
+        if (!res.ok) { showStatus(data.detail ?? 'Failed to create employee.', 'error'); return; }
+        closeModal('addModal');
+        document.getElementById('addForm').reset();
+        showStatus(`Employee "${data.first_name} ${data.last_name}" created successfully.`, 'success');
+        loadEmployees();
+      } catch {
+        showStatus('Could not reach the server.', 'error');
+      }
     }
 
-    function openEditModal(first, last, email, department, title, payRate, status) {
-      document.getElementById("edit_first_name").value = first;
-      document.getElementById("edit_last_name").value = last;
-      document.getElementById("edit_email").value = email;
-      document.getElementById("edit_department").value = department;
-      document.getElementById("edit_job_title").value = title;
-      document.getElementById("edit_pay_rate").value = payRate;
-      document.getElementById("edit_status").value = status;
-      openModal("editModal");
+    // ── Edit employee ─────────────────────────────────────────────
+    function openEditModal(id, first, last, email, phone) {
+      document.getElementById('edit_employee_id').value  = id;
+      document.getElementById('edit_first_name').value   = first;
+      document.getElementById('edit_last_name').value    = last;
+      document.getElementById('edit_email').value        = email;
+      document.getElementById('edit_job_title').value    = '';
+      document.getElementById('edit_pay_rate').value     = '';
+      document.getElementById('edit_status').value       = 'Active';
+      openModal('editModal');
     }
 
-    function submitEdit(event) {
+    async function submitEdit(event) {
       event.preventDefault();
-      closeModal("editModal");
-      showStatus("Employee record updated successfully.", "success");
+      const id = document.getElementById('edit_employee_id').value;
+      const body = {
+        first_name: document.getElementById('edit_first_name').value.trim() || null,
+        last_name:  document.getElementById('edit_last_name').value.trim()  || null,
+        email:      document.getElementById('edit_email').value.trim()       || null,
+      };
+      try {
+        const res = await fetch(`${API}/employee/${id}/update`, {
+          method: 'PATCH', headers: authHdrs, body: JSON.stringify(body)
+        });
+        const data = await res.json();
+        if (!res.ok) { showStatus(data.detail ?? 'Failed to update employee.', 'error'); return; }
+        closeModal('editModal');
+        showStatus('Employee record updated successfully.', 'success');
+        loadEmployees();
+      } catch {
+        showStatus('Could not reach the server.', 'error');
+      }
     }
 
-    document.getElementById("employeeForm").addEventListener("submit", function (e) {
-      e.preventDefault();
-      showStatus("Employee saved successfully.", "success");
-      this.reset();
-    });
+    // ── Remove employee (soft delete) ─────────────────────────────
+    async function removeEmployee(id, name) {
+      if (!confirm(`Deactivate ${name}?`)) return;
+      try {
+        const res = await fetch(`${API}/employee/${id}/delete`, { method: 'DELETE', headers: authHdrs });
+        if (!res.ok) { showStatus('Failed to remove employee.', 'error'); return; }
+        showStatus(`${name} has been deactivated.`, 'success');
+        loadEmployees();
+      } catch {
+        showStatus('Could not reach the server.', 'error');
+      }
+    }
+
+    // ── Hard delete employee (admin only — permanent) ──────────────
+    async function hardDeleteEmployee(id, name) {
+      const input = prompt(`This will permanently delete ${name} and ALL their records (paychecks, time entries, tax info, positions).\n\nType the employee's full name to confirm:`);
+      if (input === null) return;
+      if (input.trim().toLowerCase() !== name.toLowerCase()) {
+        showStatus('Name did not match — hard delete cancelled.', 'error');
+        return;
+      }
+      try {
+        const res = await fetch(`${API}/employee/${id}/hard-delete`, { method: 'DELETE', headers: authHdrs });
+        const data = await res.json();
+        if (!res.ok) { showStatus(data.detail ?? 'Hard delete failed.', 'error'); return; }
+        showStatus(`${name} has been permanently deleted.`, 'success');
+        loadEmployees();
+      } catch {
+        showStatus('Could not reach the server.', 'error');
+      }
+    }
+
+    loadEmployees();
 
     searchInput.addEventListener("input", function () {
       const term = this.value.toLowerCase().trim();

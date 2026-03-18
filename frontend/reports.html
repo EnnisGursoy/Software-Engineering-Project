@@ -17,6 +17,16 @@
       --table-border: #dbe5f0;
     }
 
+    @media print {
+      header, .menu-wrap, .tabs, .report-toolbar, .admin-only-note { display: none !important; }
+      body { background: #fff; }
+      .tab-panel { display: block !important; }
+      .table-shell { box-shadow: none; border: 1px solid #ccc; }
+      .print-title { display: block !important; font-size: 1.1rem; font-weight: 700; margin-bottom: 12px; }
+    }
+
+    .print-title { display: none; }
+
     body.dark {
       --bg: #0b1220;
       --surface: #111827;
@@ -208,6 +218,7 @@
 
     <!-- ── Tab 1: Payroll Summary ── -->
     <div class="tab-panel active" id="tab-payroll-summary">
+      <div class="print-title">Pay Central — Payroll Summary Report</div>
       <div class="report-toolbar">
         <select id="periodFilter">
           <option value="">All Pay Periods</option>
@@ -219,6 +230,7 @@
           <option value="processed">Processed</option>
           <option value="void">Void</option>
         </select>
+        <button onclick="window.print()" style="margin-left:auto;padding:7px 14px;background:#1d4ed8;color:#fff;border:none;border-radius:8px;font-size:0.88rem;font-family:inherit;cursor:pointer;">&#x1F4C4; Export PDF</button>
       </div>
       <div class="table-shell">
         <div class="table-card">
@@ -348,7 +360,7 @@
     async function loadPayrollSummary() {
       const [pcRes, ppRes] = await Promise.all([
         fetch(`${API}/payroll/all`,      { headers: hdrs }),
-        fetch(`${API}/pay-periods/all`, { headers: hdrs }),
+        fetch(`${API}/payperiods/all`, { headers: hdrs }),
       ]);
 
       if (!pcRes.ok || !ppRes.ok) {
@@ -431,7 +443,7 @@
     // ── Tab 2: Pay Period Summary ─────────────────────────────────────────
     async function loadPayPeriodSummary() {
       const [ppRes, pcRes] = await Promise.all([
-        fetch(`${API}/pay-periods/all`, { headers: hdrs }),
+        fetch(`${API}/payperiods/all`, { headers: hdrs }),
         fetch(`${API}/payroll/all`,     { headers: hdrs }),
       ]);
 

@@ -1,0 +1,502 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Positions | PayCentral</title>
+  <style>
+    :root {
+      --bg: #eef3f9; --text: #1f2937; --surface: #ffffff; --border: #d4dde8;
+      --primary: #1d4ed8; --primary-dark: #1e40af; --muted: #64748b;
+      --shadow: 0 14px 36px rgba(15,23,42,0.08);
+    }
+    * { box-sizing: border-box; }
+    body { margin: 0; font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+      background: radial-gradient(circle at top left, #dbeafe 0%, transparent 35%), var(--bg);
+      color: var(--text); }
+    a { color: inherit; text-decoration: none; }
+
+    .topbar {
+      position: sticky; top: 0; z-index: 100;
+      display: flex; justify-content: space-between; align-items: center;
+      padding: 14px 22px; background: rgba(255,255,255,0.9);
+      backdrop-filter: blur(10px); border-bottom: 1px solid var(--border);
+      box-shadow: 0 2px 12px rgba(29,78,216,0.07);
+    }
+    .brand { display: flex; align-items: center; gap: 12px; }
+    .brand-logo { width: 46px; height: 46px; border-radius: 14px; background: var(--primary);
+      display: flex; align-items: center; justify-content: center; overflow: hidden; }
+    .brand-logo img { width: 100%; height: 100%; object-fit: contain; padding: 6px; }
+    .brand-text h1 { margin: 0; font-size: 1.08rem; }
+    .brand-text p  { margin: 3px 0 0; color: var(--muted); font-size: 0.82rem; }
+    .topbar-actions { display: flex; align-items: center; gap: 10px; }
+    .menu-wrap { position: relative; }
+    .menu-btn { width: 44px; height: 44px; border: 1px solid var(--border); border-radius: 10px;
+      background: var(--surface); cursor: pointer; display: flex; flex-direction: column;
+      justify-content: center; align-items: center; gap: 5px; padding: 0; }
+    .menu-btn span { width: 20px; height: 2px; background: var(--text); border-radius: 10px; display: block; }
+    .menu { position: absolute; right: 0; top: 54px; min-width: 230px; background: var(--surface);
+      border: 1px solid var(--border); border-radius: 14px; box-shadow: var(--shadow);
+      padding: 8px; display: none; z-index: 20; }
+    .menu.open { display: block; }
+    .menu a { display: block; padding: 11px 12px; border-radius: 10px; font-size: 0.94rem; color: var(--text); }
+    .menu a:hover { background: #dbeafe; color: var(--primary); }
+    .menu a.signout { color: #ef4444; font-weight: 600; }
+
+    main { max-width: 1100px; margin: 0 auto; padding: 28px 20px 40px; }
+
+    .page-header { display: flex; justify-content: space-between; align-items: flex-start;
+      gap: 18px; margin-bottom: 24px; flex-wrap: wrap; }
+    .page-header h2 { margin: 0 0 6px; font-size: 1.8rem; letter-spacing: -0.4px; }
+    .page-header p  { margin: 0; color: var(--muted); }
+    .back-link { font-size: 0.88rem; color: var(--primary); font-weight: 600; cursor: pointer; }
+    .back-link:hover { text-decoration: underline; }
+
+    .card { background: var(--surface); border: 1px solid var(--border);
+      border-radius: 18px; padding: 22px; box-shadow: var(--shadow); margin-bottom: 20px; }
+    .card-title { margin: 0 0 16px; font-size: 1.05rem; font-weight: 700; }
+
+    .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+    .field { display: flex; flex-direction: column; gap: 5px; }
+    .field.span-2 { grid-column: 1/-1; }
+    .field label { font-size: 0.8rem; font-weight: 700; color: var(--muted);
+      text-transform: uppercase; letter-spacing: 0.35px; }
+    .field input, .field select {
+      padding: 10px 12px; border: 1px solid var(--border); border-radius: 10px;
+      font-size: 0.93rem; font-family: inherit; background: var(--surface);
+      color: var(--text); outline: none; }
+    .field input:focus, .field select:focus { border-color: var(--primary); box-shadow: 0 0 0 3px rgba(29,78,216,0.12); }
+
+    .btn { padding: 10px 16px; border: none; border-radius: 10px; cursor: pointer;
+      font-size: 0.92rem; font-weight: 700; font-family: inherit; transition: 0.15s ease; }
+    .btn:hover { transform: translateY(-1px); }
+    .btn-primary { background: var(--primary); color: #fff; }
+    .btn-primary:hover { background: var(--primary-dark); }
+    .btn-secondary { background: #e5e7eb; color: var(--text); }
+    .btn-danger { background: #fee2e2; color: #991b1b; border: 1px solid #fecaca; }
+    .form-actions { display: flex; gap: 10px; justify-content: flex-end; margin-top: 16px; }
+
+    .table-wrap { overflow-x: auto; border: 1px solid var(--border); border-radius: 12px; }
+    table { width: 100%; border-collapse: collapse; min-width: 600px; font-size: 0.92rem; }
+    thead th { background: #f8fafc; padding: 11px 14px; text-align: left;
+      border-bottom: 1px solid var(--border); font-size: 0.8rem;
+      text-transform: uppercase; letter-spacing: 0.4px; color: #475569; }
+    tbody td { padding: 11px 14px; border-bottom: 1px solid rgba(203,213,225,0.6); }
+    tbody tr:last-child td { border-bottom: none; }
+    tbody tr:hover td { background: #f8fbff; }
+
+    .badge { display: inline-block; padding: 3px 10px; border-radius: 999px;
+      font-size: 0.76rem; font-weight: 700; border: 1px solid transparent; }
+    .badge-ft  { background: #d1fae5; color: #065f46; border-color: #a7f3d0; }
+    .badge-pt  { background: #fef3c7; color: #92400e; border-color: #fcd34d; }
+    .badge-con { background: #ede9fe; color: #5b21b6; border-color: #c4b5fd; }
+
+    #statusMsg { padding: 11px 14px; border-radius: 10px; font-size: 0.92rem;
+      margin-bottom: 14px; display: none; border: 1px solid transparent; }
+    #statusMsg.success { background: #d1fae5; color: #065f46; border-color: #a7f3d0; display: block; }
+    #statusMsg.error   { background: #fee2e2; color: #991b1b; border-color: #fecaca; display: block; }
+
+    .section-tabs { display: flex; gap: 4px; border-bottom: 2px solid var(--border); margin-bottom: 20px; }
+    .tab { padding: 9px 16px; border: none; background: none; font-size: 0.95rem;
+      font-weight: 600; font-family: inherit; color: var(--muted); cursor: pointer;
+      border-bottom: 2px solid transparent; margin-bottom: -2px; }
+    .tab.active { color: var(--primary); border-bottom-color: var(--primary); }
+    .tab-panel { display: none; }
+    .tab-panel.active { display: block; }
+  </style>
+</head>
+<body>
+
+<header class="topbar">
+  <a href="employees.html" class="brand">
+    <div class="brand-logo">
+      <img src="PAY CENTRAL LOGO.png" alt="PayCentral" onerror="this.style.display='none'">
+    </div>
+    <div class="brand-text">
+      <h1>PayCentral</h1>
+      <p>Positions</p>
+    </div>
+  </a>
+  <div class="topbar-actions">
+    <div class="menu-wrap">
+      <button class="menu-btn" id="menuBtn" aria-label="Open menu">
+        <span></span><span></span><span></span>
+      </button>
+      <nav class="menu" id="hrMenu">
+        <a href="homepage.html">Home</a>
+        <a href="profile.html">Profile</a>
+        <a href="employees.html">Employees</a>
+        <a href="shifts.html">Shifts</a>
+        <a href="payroll.html">Payroll</a>
+        <a href="benefits.html">Benefits</a>
+        <a href="taxes.html">Taxes</a>
+        <a href="reports.html">Reports</a>
+        <a href="settings.html">Settings</a>
+        <a href="logout.html" class="signout">Sign Out</a>
+      </nav>
+    </div>
+  </div>
+</header>
+
+<main>
+  <div id="statusMsg"></div>
+
+  <div class="page-header">
+    <div>
+      <span class="back-link" onclick="history.back()">← Back to Employees</span>
+      <h2 id="pageTitle">Positions</h2>
+      <p id="pageSubtitle">Manage position catalog and employee assignments.</p>
+    </div>
+    <div style="display:flex;gap:10px;flex-wrap:wrap;">
+      <button class="btn btn-primary" onclick="showTab('assign')">+ Assign Position</button>
+      <button class="btn btn-secondary" onclick="showTab('catalog')">Manage Catalog</button>
+    </div>
+  </div>
+
+  <div class="section-tabs">
+    <button class="tab active" data-tab="assign"  onclick="showTab('assign')">Employee Assignment</button>
+    <button class="tab"        data-tab="catalog" onclick="showTab('catalog')">Position Catalog</button>
+  </div>
+
+  <!-- TAB 1: Assign position to employee -->
+  <div class="tab-panel active" id="tab-assign">
+
+    <div class="card">
+      <p class="card-title">Assign Position to Employee</p>
+      <div class="grid-2">
+        <div class="field">
+          <label>Employee</label>
+          <select id="assign_emp"></select>
+        </div>
+        <div class="field">
+          <label>Position</label>
+          <select id="assign_pos" onchange="autofillFromPosition(this.value)"></select>
+        </div>
+        <div class="field">
+          <label>Current Salary</label>
+          <input id="assign_salary" type="number" step="0.01" placeholder="0.00">
+        </div>
+        <div class="field">
+          <label>Hourly Rate</label>
+          <input id="assign_hourly" type="number" step="0.01" placeholder="0.00">
+        </div>
+        <div class="field">
+          <label>Pay Frequency</label>
+          <select id="assign_freq">
+            <option value="weekly">Weekly</option>
+            <option value="bi_weekly" selected>Bi-Weekly</option>
+            <option value="semi_monthly">Semi-Monthly</option>
+            <option value="monthly">Monthly</option>
+          </select>
+        </div>
+        <div class="field">
+          <label>Start Date</label>
+          <input id="assign_start" type="date">
+        </div>
+      </div>
+      <div class="form-actions">
+        <button class="btn btn-primary" onclick="assignPosition()">Assign Position</button>
+      </div>
+    </div>
+
+    <div class="card">
+      <p class="card-title" id="assignTableTitle">All Employee Position Assignments</p>
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th>Employee</th>
+              <th>Position</th>
+              <th>Salary</th>
+              <th>Hourly Rate</th>
+              <th>Pay Frequency</th>
+              <th>Start Date</th>
+              <th>Current</th>
+            </tr>
+          </thead>
+          <tbody id="assignTable">
+            <tr><td colspan="7" style="text-align:center;padding:20px;color:#64748b;">Loading...</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <!-- TAB 2: Position catalog -->
+  <div class="tab-panel" id="tab-catalog">
+
+    <div class="card">
+      <p class="card-title">Add New Position</p>
+      <div class="grid-2">
+        <div class="field">
+          <label>Position Title</label>
+          <input id="pos_title" type="text" placeholder="e.g. Software Engineer">
+        </div>
+        <div class="field">
+          <label>Employment Type</label>
+          <select id="pos_type">
+            <option value="full_time">Full Time</option>
+            <option value="part_time">Part Time</option>
+            <option value="contract">Contract</option>
+          </select>
+        </div>
+        <div class="field">
+          <label>Base Salary</label>
+          <input id="pos_salary" type="number" step="0.01" placeholder="0.00">
+        </div>
+        <div class="field">
+          <label>Hourly Rate</label>
+          <input id="pos_hourly" type="number" step="0.01" placeholder="0.00">
+        </div>
+      </div>
+      <div class="form-actions">
+        <button class="btn btn-primary" onclick="createPosition()">Add Position</button>
+      </div>
+    </div>
+
+    <div class="card">
+      <p class="card-title">Position Catalog</p>
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th>Title</th>
+              <th>Type</th>
+              <th>Base Salary</th>
+              <th>Hourly Rate</th>
+              <th>Actions</th>
+            </tr>
+          </thead>
+          <tbody id="catalogTable">
+            <tr><td colspan="5" style="text-align:center;padding:20px;color:#64748b;">Loading...</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+</main>
+
+<script>
+  const API      = 'http://localhost:8000';
+  const token    = localStorage.getItem('access_token');
+  const hdrs     = { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` };
+  const fmt      = n => n != null ? '$' + Number(n).toFixed(2) : '—';
+
+  // Read query params — if coming from employees page with a specific employee
+  const params     = new URLSearchParams(location.search);
+  const preEmpId   = params.get('employee_id');
+  const preEmpName = params.get('name');
+
+  if (preEmpName) {
+    document.getElementById('pageTitle').textContent     = `Positions — ${decodeURIComponent(preEmpName)}`;
+    document.getElementById('pageSubtitle').textContent  = `Manage position assignments for this employee.`;
+    document.getElementById('assignTableTitle').textContent = `Position History`;
+  }
+
+  // ── Tabs ──
+  function showTab(name) {
+    document.querySelectorAll('.tab-panel').forEach(p => p.classList.remove('active'));
+    document.querySelectorAll('.tab').forEach(t => t.classList.toggle('active', t.dataset.tab === name));
+    document.getElementById('tab-' + name).classList.add('active');
+  }
+
+  // ── Status ──
+  function showStatus(msg, type) {
+    const el = document.getElementById('statusMsg');
+    el.textContent = msg;
+    el.className = type;
+    setTimeout(() => { el.className = ''; el.style.display = 'none'; }, 3500);
+  }
+
+  // ── Menu ──
+  const menuBtn = document.getElementById('menuBtn');
+  const hrMenu  = document.getElementById('hrMenu');
+  menuBtn.addEventListener('click', () => hrMenu.classList.toggle('open'));
+  document.addEventListener('click', e => { if (!e.target.closest('.menu-wrap')) hrMenu.classList.remove('open'); });
+
+  // ── State ──
+  let allPositions = [];
+  let allEmployees = [];
+
+  // ── Auto-fill salary/rate when a position is selected ──
+  function autofillFromPosition(posId) {
+    const pos = allPositions.find(p => String(p.position_id) === String(posId));
+    if (!pos) return;
+    if (pos.base_salary)  document.getElementById('assign_salary').value = pos.base_salary;
+    if (pos.hourly_rate)  document.getElementById('assign_hourly').value = pos.hourly_rate;
+  }
+
+  // ── Load employees ──
+  async function loadEmployees() {
+    const role = localStorage.getItem('user_role');
+    let empUrl = `${API}/employee/all`;
+
+    if (role === 'manager') {
+      try {
+        const meRes = await fetch(`${API}/auth/me`, { headers: hdrs });
+        if (meRes.ok) {
+          const me = await meRes.json();
+          if (me.department_id) empUrl = `${API}/employee/by-department/${me.department_id}`;
+        }
+      } catch (_) {}
+    }
+
+    const res = await fetch(empUrl, { headers: hdrs });
+    if (!res.ok) return;
+    allEmployees = await res.json();
+    const opts = allEmployees.map(e =>
+      `<option value="${e.employee_id}" ${String(e.employee_id) === preEmpId ? 'selected' : ''}>${e.first_name} ${e.last_name} (#${e.employee_id})</option>`
+    ).join('');
+    document.getElementById('assign_emp').innerHTML = '<option value="">— Select employee —</option>' + opts;
+  }
+
+  const DEFAULT_POSITIONS = [
+    { position_title: 'Software Engineer',     employment_type: 'full_time',  base_salary: 85000, hourly_rate: 0 },
+    { position_title: 'HR Specialist',          employment_type: 'full_time',  base_salary: 60000, hourly_rate: 0 },
+    { position_title: 'Department Manager',     employment_type: 'full_time',  base_salary: 95000, hourly_rate: 0 },
+    { position_title: 'Payroll Administrator',  employment_type: 'full_time',  base_salary: 65000, hourly_rate: 0 },
+    { position_title: 'Data Analyst',           employment_type: 'full_time',  base_salary: 75000, hourly_rate: 0 },
+    { position_title: 'Part-Time Associate',    employment_type: 'part_time',  base_salary: 0,     hourly_rate: 18 },
+    { position_title: 'IT Support Technician',  employment_type: 'full_time',  base_salary: 55000, hourly_rate: 0 },
+    { position_title: 'Contractor',             employment_type: 'contract',   base_salary: 0,     hourly_rate: 45 },
+  ];
+
+  // ── Load position catalog ──
+  async function loadPositions() {
+    const res = await fetch(`${API}/positions/all`, { headers: hdrs });
+    if (!res.ok) { document.getElementById('catalogTable').innerHTML = `<tr><td colspan="5" style="text-align:center;padding:20px;color:#ef4444;">Failed to load positions.</td></tr>`; return; }
+    allPositions = await res.json();
+
+    // Auto-seed default positions if catalog is empty
+    if (allPositions.length === 0) {
+      await Promise.all(DEFAULT_POSITIONS.map(p =>
+        fetch(`${API}/positions/create`, { method: 'POST', headers: hdrs, body: JSON.stringify(p) })
+      ));
+      const seeded = await fetch(`${API}/positions/all`, { headers: hdrs });
+      if (seeded.ok) allPositions = await seeded.json();
+    }
+
+    const posOpts = allPositions.map(p => `<option value="${p.position_id}">${p.position_title}</option>`).join('');
+    document.getElementById('assign_pos').innerHTML = '<option value="">— Select position —</option>' + posOpts;
+    renderCatalog();
+  }
+
+  function renderCatalog() {
+    const tbody = document.getElementById('catalogTable');
+    if (!allPositions.length) {
+      tbody.innerHTML = `<tr><td colspan="5" style="text-align:center;padding:20px;color:#64748b;">No positions yet. Add one above.</td></tr>`;
+      return;
+    }
+    const typeBadge = t => t === 'full_time' ? 'badge-ft' : t === 'part_time' ? 'badge-pt' : 'badge-con';
+    tbody.innerHTML = allPositions.map(p => `<tr>
+      <td style="font-weight:600;">${p.position_title}</td>
+      <td><span class="badge ${typeBadge(p.employment_type)}">${p.employment_type.replace('_',' ')}</span></td>
+      <td>${fmt(p.base_salary)}</td>
+      <td>${fmt(p.hourly_rate)}</td>
+      <td>
+        <button class="btn btn-danger" style="padding:5px 10px;font-size:0.8rem;" onclick="deletePosition(${p.position_id})">Delete</button>
+      </td>
+    </tr>`).join('');
+  }
+
+  // ── Create position ──
+  async function createPosition() {
+    const body = {
+      position_title:  document.getElementById('pos_title').value.trim(),
+      employment_type: document.getElementById('pos_type').value,
+      base_salary:     parseFloat(document.getElementById('pos_salary').value) || 0,
+      hourly_rate:     parseFloat(document.getElementById('pos_hourly').value) || 0,
+    };
+    if (!body.position_title) { showStatus('Position title is required.', 'error'); return; }
+    const res = await fetch(`${API}/positions/create`, { method: 'POST', headers: hdrs, body: JSON.stringify(body) });
+    const data = await res.json();
+    if (!res.ok) { showStatus(data.detail ?? 'Failed to create position.', 'error'); return; }
+    showStatus(`Position "${data.position_title}" created.`, 'success');
+    ['pos_title','pos_salary','pos_hourly'].forEach(id => document.getElementById(id).value = '');
+    await loadPositions();
+  }
+
+  // ── Delete position ──
+  async function deletePosition(id) {
+    if (!confirm('Delete this position?')) return;
+    const res = await fetch(`${API}/positions/${id}`, { method: 'DELETE', headers: hdrs });
+    if (!res.ok) { showStatus('Failed to delete position.', 'error'); return; }
+    showStatus('Position deleted.', 'success');
+    await loadPositions();
+  }
+
+  // ── Load assignments ──
+  // Pass a specific employeeId to focus on one employee, otherwise shows all
+  async function loadAssignments(focusEmpId) {
+    const tbody = document.getElementById('assignTable');
+    const targetId = focusEmpId ?? preEmpId;
+
+    if (targetId) {
+      const res = await fetch(`${API}/positions/employee/${targetId}`, { headers: hdrs });
+      if (!res.ok) {
+        tbody.innerHTML = `<tr><td colspan="7" style="text-align:center;padding:20px;color:#ef4444;">Could not load assignments.</td></tr>`;
+        return;
+      }
+      renderAssignments(await res.json());
+    } else {
+      // No specific employee — show all
+      if (!allEmployees.length) {
+        tbody.innerHTML = `<tr><td colspan="7" style="text-align:center;padding:20px;color:#64748b;">No employees found.</td></tr>`;
+        return;
+      }
+      const results = await Promise.all(
+        allEmployees.map(e => fetch(`${API}/positions/employee/${e.employee_id}`, { headers: hdrs }).then(r => r.ok ? r.json() : []))
+      );
+      renderAssignments(results.flat());
+    }
+  }
+
+  function renderAssignments(list) {
+    const tbody = document.getElementById('assignTable');
+    const posMap = Object.fromEntries(allPositions.map(p => [p.position_id, p.position_title]));
+    const empMap = Object.fromEntries(allEmployees.map(e => [e.employee_id, `${e.first_name} ${e.last_name}`]));
+    if (!list.length) {
+      tbody.innerHTML = `<tr><td colspan="7" style="text-align:center;padding:20px;color:#64748b;">No assignments yet.</td></tr>`;
+      return;
+    }
+    tbody.innerHTML = list.map(a => `<tr>
+      <td>${empMap[a.employee_id] ?? '#' + a.employee_id}</td>
+      <td>${posMap[a.position_id] ?? '#' + a.position_id}</td>
+      <td>${fmt(a.current_salary)}</td>
+      <td>${fmt(a.current_hourly_rate)}</td>
+      <td>${a.pay_frequency.replace('_',' ')}</td>
+      <td>${a.start_date ?? '—'}</td>
+      <td>${a.is_current ? '<span style="color:#065f46;font-weight:700;">✓ Current</span>' : '<span style="color:#9ca3af;">Past</span>'}</td>
+    </tr>`).join('');
+  }
+
+  // ── Assign position ──
+  async function assignPosition() {
+    const empId = parseInt(document.getElementById('assign_emp').value);
+    const posId = parseInt(document.getElementById('assign_pos').value);
+    if (!empId || !posId) { showStatus('Select both an employee and a position.', 'error'); return; }
+    const body = {
+      employee_id:          empId,
+      position_id:          posId,
+      current_salary:       parseFloat(document.getElementById('assign_salary').value) || 0,
+      current_hourly_rate:  parseFloat(document.getElementById('assign_hourly').value) || 0,
+      pay_frequency:        document.getElementById('assign_freq').value,
+      start_date:           document.getElementById('assign_start').value || null,
+    };
+    const res = await fetch(`${API}/positions/assign`, { method: 'POST', headers: hdrs, body: JSON.stringify(body) });
+    const data = await res.json();
+    if (!res.ok) { showStatus(data.detail ?? 'Failed to assign position.', 'error'); return; }
+    showStatus('Position assigned successfully.', 'success');
+    ['assign_salary','assign_hourly','assign_start'].forEach(id => document.getElementById(id).value = '');
+    await loadAssignments(empId);
+  }
+
+  // ── Init ──
+  (async () => {
+    await loadEmployees();
+    await loadPositions();
+    await loadAssignments();
+  })();
+</script>
+</body>
+</html>

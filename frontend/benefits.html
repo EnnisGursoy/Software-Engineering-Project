@@ -246,11 +246,11 @@
       </div>
       <select class="filter" id="enrollTypeFilter" onchange="filterEnrollments()">
         <option value="">All Types</option>
-        <option>Medical</option>
+        <option>Health</option>
         <option>Dental</option>
         <option>Vision</option>
-        <option>401(k)</option>
-        <option>Life Insurance</option>
+        <option>Life</option>
+        <option>Retirement</option>
         <option>Other</option>
       </select>
       <select class="filter" id="enrollStatusFilter" onchange="filterEnrollments()">
@@ -301,11 +301,11 @@
       </div>
       <select class="filter" id="planTypeFilter" onchange="filterPlans()">
         <option value="">All Types</option>
-        <option>Medical</option>
+        <option>Health</option>
         <option>Dental</option>
         <option>Vision</option>
-        <option>401(k)</option>
-        <option>Life Insurance</option>
+        <option>Life</option>
+        <option>Retirement</option>
         <option>Other</option>
       </select>
       <button class="btn primary ml-auto" onclick="openDlg('dlgPlanAdd')">+ Add Plan</button>
@@ -333,8 +333,8 @@
       <div class="field"><label>Benefit Type</label>
         <select class="fselect" id="eAdd_type" onchange="populatePlanDropdown('eAdd_type','eAdd_plan')">
           <option value="">— Select type —</option>
-          <option>Medical</option><option>Dental</option><option>Vision</option>
-          <option>401(k)</option><option>Life Insurance</option><option>Other</option>
+          <option>Health</option><option>Dental</option><option>Vision</option>
+          <option>Life</option><option>Retirement</option><option>Other</option>
         </select>
       </div>
       <div class="field"><label>Plan</label>
@@ -384,8 +384,8 @@
       </div>
       <div class="field"><label>Benefit Type</label>
         <select class="fselect" id="eEdit_type">
-          <option>Medical</option><option>Dental</option><option>Vision</option>
-          <option>401(k)</option><option>Life Insurance</option><option>Other</option>
+          <option>Health</option><option>Dental</option><option>Vision</option>
+          <option>Life</option><option>Retirement</option><option>Other</option>
         </select>
       </div>
       <div class="field"><label>Plan Name</label>
@@ -436,8 +436,8 @@
       </div>
       <div class="field"><label>Type</label>
         <select class="fselect" id="pAdd_type">
-          <option>Medical</option><option>Dental</option><option>Vision</option>
-          <option>401(k)</option><option>Life Insurance</option><option>Other</option>
+          <option>Health</option><option>Dental</option><option>Vision</option>
+          <option>Life</option><option>Retirement</option><option>Other</option>
         </select>
       </div>
       <div class="field"><label>Provider</label>
@@ -478,8 +478,8 @@
       </div>
       <div class="field"><label>Type</label>
         <select class="fselect" id="pEdit_type">
-          <option>Medical</option><option>Dental</option><option>Vision</option>
-          <option>401(k)</option><option>Life Insurance</option><option>Other</option>
+          <option>Health</option><option>Dental</option><option>Vision</option>
+          <option>Life</option><option>Retirement</option><option>Other</option>
         </select>
       </div>
       <div class="field"><label>Provider</label>
@@ -525,119 +525,125 @@
 
 
 <script>
+  const API     = 'http://localhost:8000';
+  const token   = localStorage.getItem('access_token');
+  const authHdrs = { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` };
+
   // ── UTILITY ──
-  function nextId(arr) { return arr.length ? Math.max(...arr.map(x => x.id)) + 1 : 1; }
   function openDlg(id) { document.getElementById(id).showModal(); }
-
-  // ── EMPLOYEE LIST ── !!!!!!!!!!!!!!!!!!!!!!!!!!
-  // TODO: replace this array with a fetch() call for employees API
-  // Each object needs at minimum: { id, name }!!!!!!!!!!!!!!!!!!!!!!!!!
-  const EMPLOYEES = [
-    { id:'EMP001', name:'Employee 1' },
-    { id:'EMP002', name:'Employee 2' },
-    { id:'EMP003', name:'Employee 3' },
-    { id:'EMP004', name:'Employee 4' },
-    { id:'EMP005', name:'Employee 5' },
-    { id:'EMP006', name:'Employee 6' },
-    { id:'EMP007', name:'Employee 7' },
-  ];
-
-  // Build empLabels map and populate all employee dropdowns from EMPLOYEES
-  const empLabels = {};
-  function initEmployees() {
-    EMPLOYEES.forEach(e => { empLabels[e.id] = e.name; });
-    const empOptions = EMPLOYEES.map(e =>
-      `<option value="${e.id}">${e.name} (${e.id})</option>`
-    ).join('');
-    document.getElementById('eAdd_emp').innerHTML =
-      '<option value="">— Select employee —</option>' + empOptions;
-    document.getElementById('eEdit_emp').innerHTML = empOptions;
-  }
-
   function statusBadge(s) {
     const cls = s === 'Active' ? 'badge-active' : s === 'Pending' ? 'badge-pending' : 'badge-inactive';
     return `<span class="badge ${cls}">${s}</span>`;
   }
-
   function emptyRow(cols, msg) {
     return `<tr><td colspan="${cols}" style="text-align:center;color:var(--muted);font-style:italic;padding:32px 14px;">${msg}</td></tr>`;
   }
+  function showError(msg) {
+    console.error(msg);
+    let b = document.getElementById('apiBanner');
+    if (!b) {
+      b = document.createElement('div');
+      b.id = 'apiBanner';
+      b.style.cssText = 'position:fixed;top:0;left:0;right:0;background:#fef2f2;color:#991b1b;padding:10px 20px;font-size:0.85rem;z-index:9999;border-bottom:1px solid #fecaca;display:flex;justify-content:space-between;align-items:center;';
+      document.body.prepend(b);
+    }
+    b.innerHTML = '&#9888; ' + msg + ' <button onclick="this.parentElement.remove()" style="background:none;border:none;cursor:pointer;font-size:1rem;color:#991b1b;">&#x2715;</button>';
+  }
 
-  // ── DATA ──
-  let enrollments = [];
-  let plans = [];
+  // ── STATE ──
+  let plans           = [];
+  let empLabels       = {};
   let editingEnrollId = null;
   let editingPlanId   = null;
   let pendingDeleteType = null;
   let pendingDeleteId   = null;
 
-  // ── PERSISTENCE (localStorage bridge to reports.html)
-  function saveToStorage() {
-    try { localStorage.setItem('hr_enrollments', JSON.stringify(enrollments)); } catch {}
-  }
+  // ── DUMMY saveToStorage kept as no-op (no longer used) ──
+  function saveToStorage() {}
+  function loadFromStorage() {}
 
-  function loadFromStorage() {
+  // ── EMPLOYEES ─────────────────────────────────────────────────
+  async function initEmployees() {
     try {
-      const saved = JSON.parse(localStorage.getItem('hr_enrollments') || '[]');
-      if (Array.isArray(saved)) enrollments = saved;
-    } catch {}
+      const res = await fetch(`${API}/employee/all`, { headers: authHdrs });
+      if (!res.ok) throw new Error(res.status);
+      const data = await res.json();
+      data.forEach(e => { empLabels[e.employee_id] = `${e.first_name} ${e.last_name}`; });
+      const empOptions = data.map(e =>
+        `<option value="${e.employee_id}">${e.first_name} ${e.last_name} (${e.employee_id})</option>`
+      ).join('');
+      document.getElementById('eAdd_emp').innerHTML = '<option value="">— Select employee —</option>' + empOptions;
+      document.getElementById('eEdit_emp').innerHTML = empOptions;
+    } catch (err) { showError('Could not load employees: ' + err.message); }
   }
 
-  // ── PLAN CATALOG ──
-  function savePlan() {
-    plans.push({
-      id:       nextId(plans),
-      name:     document.getElementById('pAdd_name').value     || 'Untitled Plan',
-      type:     document.getElementById('pAdd_type').value,
-      provider: document.getElementById('pAdd_provider').value || '—',
-      empCost:  document.getElementById('pAdd_empCost').value  || '$0.00',
-      erCost:   document.getElementById('pAdd_erCost').value   || '$0.00',
-      coverage: document.getElementById('pAdd_coverage').value,
-      notes:    document.getElementById('pAdd_notes').value,
-    });
-    document.getElementById('dlgPlanAdd').close();
-    ['pAdd_name','pAdd_provider','pAdd_empCost','pAdd_erCost','pAdd_notes']
-      .forEach(id => document.getElementById(id).value = '');
-    renderPlans();
+  // ── PLANS ─────────────────────────────────────────────────────
+  async function loadPlans() {
+    try {
+      const res = await fetch(`${API}/benefits/plans/all`, { headers: authHdrs });
+      if (!res.ok) throw new Error(res.status);
+      plans = await res.json();
+      renderPlans();
+    } catch (err) { showError('Could not load plans: ' + err.message); }
+  }
+
+  async function savePlan() {
+    const body = {
+      plan_name:     document.getElementById('pAdd_name').value     || 'Untitled Plan',
+      plan_type:     document.getElementById('pAdd_type').value,
+      provider:      document.getElementById('pAdd_provider').value || null,
+      employee_cost: parseFloat(document.getElementById('pAdd_empCost').value) || 0,
+      employer_cost: parseFloat(document.getElementById('pAdd_erCost').value)  || 0,
+      coverage_level: document.getElementById('pAdd_coverage').value || null,
+      notes:         document.getElementById('pAdd_notes').value     || null,
+    };
+    try {
+      const res = await fetch(`${API}/benefits/plans/create`, { method: 'POST', headers: authHdrs, body: JSON.stringify(body) });
+      if (!res.ok) throw new Error(await res.text());
+      document.getElementById('dlgPlanAdd').close();
+      ['pAdd_name','pAdd_provider','pAdd_empCost','pAdd_erCost','pAdd_notes'].forEach(id => document.getElementById(id).value = '');
+      await loadPlans();
+    } catch (err) { showError('Could not save plan: ' + err.message); }
   }
 
   function editPlan(id) {
-    const p = plans.find(x => x.id === id);
+    const p = plans.find(x => x.plan_id === id);
     if (!p) return;
     editingPlanId = id;
-    document.getElementById('pEdit_name').value     = p.name;
-    document.getElementById('pEdit_type').value     = p.type;
-    document.getElementById('pEdit_provider').value = p.provider;
-    document.getElementById('pEdit_empCost').value  = p.empCost;
-    document.getElementById('pEdit_erCost').value   = p.erCost;
-    document.getElementById('pEdit_coverage').value = p.coverage;
-    document.getElementById('pEdit_notes').value    = p.notes;
+    document.getElementById('pEdit_name').value     = p.plan_name;
+    document.getElementById('pEdit_type').value     = p.plan_type;
+    document.getElementById('pEdit_provider').value = p.provider    ?? '';
+    document.getElementById('pEdit_empCost').value  = p.employee_cost ?? '';
+    document.getElementById('pEdit_erCost').value   = p.employer_cost ?? '';
+    document.getElementById('pEdit_coverage').value = p.coverage_level ?? '';
+    document.getElementById('pEdit_notes').value    = p.notes       ?? '';
     openDlg('dlgPlanEdit');
   }
 
-  function updatePlan() {
-    const i = plans.findIndex(x => x.id === editingPlanId);
-    if (i < 0) return;
-    plans[i] = {
-      id:       editingPlanId,
-      name:     document.getElementById('pEdit_name').value,
-      type:     document.getElementById('pEdit_type').value,
-      provider: document.getElementById('pEdit_provider').value,
-      empCost:  document.getElementById('pEdit_empCost').value,
-      erCost:   document.getElementById('pEdit_erCost').value,
-      coverage: document.getElementById('pEdit_coverage').value,
-      notes:    document.getElementById('pEdit_notes').value,
+  async function updatePlan() {
+    const body = {
+      plan_name:     document.getElementById('pEdit_name').value     || null,
+      plan_type:     document.getElementById('pEdit_type').value     || null,
+      provider:      document.getElementById('pEdit_provider').value || null,
+      employee_cost: parseFloat(document.getElementById('pEdit_empCost').value) || 0,
+      employer_cost: parseFloat(document.getElementById('pEdit_erCost').value)  || 0,
+      coverage_level: document.getElementById('pEdit_coverage').value || null,
+      notes:         document.getElementById('pEdit_notes').value     || null,
     };
-    document.getElementById('dlgPlanEdit').close();
-    renderPlans();
+    try {
+      const res = await fetch(`${API}/benefits/plans/${editingPlanId}`, { method: 'PATCH', headers: authHdrs, body: JSON.stringify(body) });
+      if (!res.ok) throw new Error(await res.text());
+      document.getElementById('dlgPlanEdit').close();
+      await loadPlans();
+    } catch (err) { showError('Could not update plan: ' + err.message); }
   }
 
-  function renderPlans(data) {
+  function renderPlans() {
     const q    = document.getElementById('planSearch').value.toLowerCase();
     const type = document.getElementById('planTypeFilter').value;
     const filtered = plans.filter(p =>
-      (!q    || p.name.toLowerCase().includes(q) || p.provider.toLowerCase().includes(q)) &&
-      (!type || p.type === type)
+      (!q    || p.plan_name.toLowerCase().includes(q) || (p.provider ?? '').toLowerCase().includes(q)) &&
+      (!type || p.plan_type === type)
     );
     const grid = document.getElementById('planGrid');
     if (!filtered.length) {
@@ -648,121 +654,127 @@
       <div class="plan-card">
         <div class="plan-card-head">
           <div>
-            <div class="plan-name">${p.name}</div>
-            <div class="plan-provider">${p.provider}</div>
+            <div class="plan-name">${p.plan_name}</div>
+            <div class="plan-provider">${p.provider ?? '—'}</div>
           </div>
-          <span class="badge badge-type">${p.type}</span>
+          <span class="badge badge-type">${p.plan_type}</span>
         </div>
-        <div class="plan-cost">Coverage: ${p.coverage}</div>
-        <div class="plan-cost">Employee: <span>${p.empCost}</span> &nbsp;|&nbsp; Employer: <span>${p.erCost}</span></div>
+        <div class="plan-cost">Coverage: ${p.coverage_level ?? '—'}</div>
+        <div class="plan-cost">Employee: <span>$${Number(p.employee_cost ?? 0).toFixed(2)}</span> &nbsp;|&nbsp; Employer: <span>$${Number(p.employer_cost ?? 0).toFixed(2)}</span></div>
         ${p.notes ? `<div style="font-size:0.8rem;color:var(--muted);line-height:1.4;">${p.notes}</div>` : ''}
         <div class="plan-actions">
-          <button class="btn small" onclick="editPlan(${p.id})">✏️ Edit</button>
-          <button class="btn small danger-btn" onclick="askDelete('plan',${p.id},'${p.name.replace(/'/g,"\\'")}')">🗑️ Delete</button>
+          <button class="btn small" onclick="editPlan(${p.plan_id})">✏️ Edit</button>
+          <button class="btn small danger-btn" onclick="askDelete('plan',${p.plan_id},'${p.plan_name.replace(/'/g,"\\'")}')">🗑️ Delete</button>
         </div>
       </div>`).join('');
   }
 
   function filterPlans() { renderPlans(); }
 
-  // populate plan dropdown in enrollment form by type
   function populatePlanDropdown(typeSelectId, planSelectId) {
     const type = document.getElementById(typeSelectId).value;
     const sel  = document.getElementById(planSelectId);
-    const matching = plans.filter(p => p.type === type);
+    const matching = plans.filter(p => p.plan_type === type);
     if (!matching.length) {
       sel.innerHTML = `<option value="">— No plans of this type —</option>`;
     } else {
-      sel.innerHTML = matching.map(p =>
-        `<option value="${p.id}">${p.name} (${p.provider})</option>`
-      ).join('');
-      // auto-fill costs from plan
+      sel.innerHTML = matching.map(p => `<option value="${p.plan_id}">${p.plan_name} (${p.provider ?? '—'})</option>`).join('');
       const first = matching[0];
       const empCostEl = document.getElementById('eAdd_empCost');
       const erCostEl  = document.getElementById('eAdd_erCost');
-      if (empCostEl && !empCostEl.value) empCostEl.value = first.empCost;
-      if (erCostEl  && !erCostEl.value)  erCostEl.value  = first.erCost;
+      if (empCostEl && !empCostEl.value) empCostEl.value = first.employee_cost ?? '';
+      if (erCostEl  && !erCostEl.value)  erCostEl.value  = first.employer_cost ?? '';
     }
   }
 
-  // ── ENROLLMENTS ──
-  function saveEnrollment() {
-    const typeVal = document.getElementById('eAdd_type').value;
-    const planSel = document.getElementById('eAdd_plan');
-    // resolve plan name & provider from catalog or free text
-    const planId  = parseInt(planSel.value);
-    const plan    = plans.find(p => p.id === planId);
-    enrollments.push({
-      id:       nextId(enrollments),
-      emp:      document.getElementById('eAdd_emp').value    || 'EMP001',
-      type:     typeVal,
-      plan:     plan ? plan.name : (planSel.options[planSel.selectedIndex]?.text || '—'),
-      provider: plan ? plan.provider : '—',
-      empCost:  document.getElementById('eAdd_empCost').value || '$0.00',
-      erCost:   document.getElementById('eAdd_erCost').value  || '$0.00',
-      start:    document.getElementById('eAdd_start').value   || '—',
-      end:      document.getElementById('eAdd_end').value     || '—',
-      status:   document.getElementById('eAdd_status').value,
-      notes:    document.getElementById('eAdd_notes').value,
-    });
-    document.getElementById('dlgEnrollAdd').close();
-    ['eAdd_empCost','eAdd_erCost','eAdd_start','eAdd_end','eAdd_notes']
-      .forEach(id => document.getElementById(id).value = '');
-    document.getElementById('eAdd_emp').value    = '';
-    document.getElementById('eAdd_type').value   = '';
-    document.getElementById('eAdd_plan').innerHTML = '<option value="">— Select type first —</option>';
-    saveToStorage();
-    renderEnrollments();
+  // ── ENROLLMENTS ───────────────────────────────────────────────
+  let enrollments = [];
+
+  async function loadEnrollments() {
+    const tb = document.getElementById('enrollTable');
+    tb.innerHTML = emptyRow(10, 'Loading...');
+    try {
+      const res = await fetch(`${API}/benefits/enrollments/all`, { headers: authHdrs });
+      if (!res.ok) throw new Error(res.status);
+      enrollments = await res.json();
+      renderEnrollments();
+    } catch (err) {
+      tb.innerHTML = emptyRow(10, 'Failed to load enrollments.');
+      showError('Could not load enrollments: ' + err.message);
+    }
+  }
+
+  async function saveEnrollment() {
+    const body = {
+      employee_id:   parseInt(document.getElementById('eAdd_emp').value),
+      plan_id:       parseInt(document.getElementById('eAdd_plan').value),
+      status:        document.getElementById('eAdd_status').value,
+      start_date:    document.getElementById('eAdd_start').value  || null,
+      end_date:      document.getElementById('eAdd_end').value    || null,
+      employee_cost: parseFloat(document.getElementById('eAdd_empCost').value) || null,
+      employer_cost: parseFloat(document.getElementById('eAdd_erCost').value)  || null,
+      notes:         document.getElementById('eAdd_notes').value  || null,
+    };
+    if (!body.employee_id || !body.plan_id) { showError('Please select an employee and a plan.'); return; }
+    try {
+      const res = await fetch(`${API}/benefits/enrollments/create`, { method: 'POST', headers: authHdrs, body: JSON.stringify(body) });
+      if (!res.ok) throw new Error(await res.text());
+      document.getElementById('dlgEnrollAdd').close();
+      ['eAdd_empCost','eAdd_erCost','eAdd_start','eAdd_end','eAdd_notes'].forEach(id => document.getElementById(id).value = '');
+      document.getElementById('eAdd_emp').value = '';
+      document.getElementById('eAdd_plan').innerHTML = '<option value="">— Select type first —</option>';
+      await loadEnrollments();
+    } catch (err) { showError('Could not save enrollment: ' + err.message); }
   }
 
   function editEnrollment(id) {
-    const e = enrollments.find(x => x.id === id);
+    const e = enrollments.find(x => x.enrollment_id === id);
     if (!e) return;
     editingEnrollId = id;
-    document.getElementById('eEdit_emp').value      = e.emp;
-    document.getElementById('eEdit_type').value     = e.type;
-    document.getElementById('eEdit_plan').value     = e.plan;
-    document.getElementById('eEdit_provider').value = e.provider;
-    document.getElementById('eEdit_status').value   = e.status;
-    document.getElementById('eEdit_empCost').value  = e.empCost;
-    document.getElementById('eEdit_erCost').value   = e.erCost;
-    document.getElementById('eEdit_start').value    = e.start === '—' ? '' : e.start;
-    document.getElementById('eEdit_end').value      = e.end   === '—' ? '' : e.end;
-    document.getElementById('eEdit_notes').value    = e.notes;
+    document.getElementById('eEdit_emp').value     = e.employee_id;
+    document.getElementById('eEdit_status').value  = e.status;
+    document.getElementById('eEdit_empCost').value = e.employee_cost ?? '';
+    document.getElementById('eEdit_erCost').value  = e.employer_cost ?? '';
+    document.getElementById('eEdit_start').value   = e.start_date ?? '';
+    document.getElementById('eEdit_end').value     = e.end_date   ?? '';
+    document.getElementById('eEdit_notes').value   = e.notes      ?? '';
+    const plan = plans.find(p => p.plan_id === e.plan_id);
+    document.getElementById('eEdit_plan').value     = plan ? plan.plan_name : e.plan_id;
+    document.getElementById('eEdit_provider').value = plan ? (plan.provider ?? '—') : '—';
     openDlg('dlgEnrollEdit');
   }
 
-  function updateEnrollment() {
-    const i = enrollments.findIndex(x => x.id === editingEnrollId);
-    if (i < 0) return;
-    enrollments[i] = {
-      id:       editingEnrollId,
-      emp:      document.getElementById('eEdit_emp').value,
-      type:     document.getElementById('eEdit_type').value,
-      plan:     document.getElementById('eEdit_plan').value,
-      provider: document.getElementById('eEdit_provider').value,
-      status:   document.getElementById('eEdit_status').value,
-      empCost:  document.getElementById('eEdit_empCost').value,
-      erCost:   document.getElementById('eEdit_erCost').value,
-      start:    document.getElementById('eEdit_start').value || '—',
-      end:      document.getElementById('eEdit_end').value   || '—',
-      notes:    document.getElementById('eEdit_notes').value,
+  async function updateEnrollment() {
+    const body = {
+      status:        document.getElementById('eEdit_status').value,
+      start_date:    document.getElementById('eEdit_start').value  || null,
+      end_date:      document.getElementById('eEdit_end').value    || null,
+      employee_cost: parseFloat(document.getElementById('eEdit_empCost').value) || null,
+      employer_cost: parseFloat(document.getElementById('eEdit_erCost').value)  || null,
+      notes:         document.getElementById('eEdit_notes').value  || null,
     };
-    document.getElementById('dlgEnrollEdit').close();
-    saveToStorage();
-    renderEnrollments();
+    try {
+      const res = await fetch(`${API}/benefits/enrollments/${editingEnrollId}`, { method: 'PATCH', headers: authHdrs, body: JSON.stringify(body) });
+      if (!res.ok) throw new Error(await res.text());
+      document.getElementById('dlgEnrollEdit').close();
+      await loadEnrollments();
+    } catch (err) { showError('Could not update enrollment: ' + err.message); }
   }
 
   function renderEnrollments() {
     const q      = document.getElementById('enrollSearch').value.toLowerCase();
     const type   = document.getElementById('enrollTypeFilter').value;
     const status = document.getElementById('enrollStatusFilter').value;
+    const planMap = Object.fromEntries(plans.map(p => [p.plan_id, p]));
 
-    const filtered = enrollments.filter(e =>
-      (!q      || empLabels[e.emp].toLowerCase().includes(q) || e.plan.toLowerCase().includes(q) || e.provider.toLowerCase().includes(q)) &&
-      (!type   || e.type   === type) &&
-      (!status || e.status === status)
-    );
+    const filtered = enrollments.filter(e => {
+      const plan = planMap[e.plan_id];
+      const empName  = (empLabels[e.employee_id] ?? '').toLowerCase();
+      const planName = (plan?.plan_name ?? '').toLowerCase();
+      return (!q || empName.includes(q) || planName.includes(q)) &&
+             (!type   || plan?.plan_type === type) &&
+             (!status || e.status === status);
+    });
 
     const tb = document.getElementById('enrollTable');
     document.getElementById('enrollCount').textContent = filtered.length + ' enrollment' + (filtered.length !== 1 ? 's' : '');
@@ -772,20 +784,22 @@
       return;
     }
 
-    tb.innerHTML = filtered.map(e => `<tr>
-      <td style="font-weight:600;color:#0f172a;">${empLabels[e.emp]}<br><span style="font-size:0.78rem;color:#9ca3af;font-weight:400;">${e.emp}</span></td>
-      <td>${e.plan}</td>
-      <td><span class="badge badge-type">${e.type}</span></td>
-      <td>${e.provider}</td>
-      <td style="font-family:monospace;font-size:0.88rem;">${e.empCost}</td>
-      <td style="font-family:monospace;font-size:0.88rem;">${e.erCost}</td>
-      <td>${e.start}</td>
-      <td>${e.end}</td>
-      <td>${statusBadge(e.status)}</td>
+    tb.innerHTML = filtered.map(e => {
+      const plan = planMap[e.plan_id];
+      return `<tr>
+        <td style="font-weight:600;color:#0f172a;">${empLabels[e.employee_id] ?? '—'}<br><span style="font-size:0.78rem;color:#9ca3af;font-weight:400;">#${e.employee_id}</span></td>
+        <td>${plan?.plan_name ?? e.plan_id}</td>
+        <td><span class="badge badge-type">${plan?.plan_type ?? '—'}</span></td>
+        <td>${plan?.provider ?? '—'}</td>
+        <td style="font-family:monospace;font-size:0.88rem;">$${Number(e.employee_cost ?? 0).toFixed(2)}</td>
+        <td style="font-family:monospace;font-size:0.88rem;">$${Number(e.employer_cost ?? 0).toFixed(2)}</td>
+        <td>${e.start_date ?? '—'}</td>
+        <td>${e.end_date   ?? '—'}</td>
+        <td>${statusBadge(e.status)}</td>
       <td>
         <div class="tbl-actions">
-          <button class="icon-btn" title="Edit"   onclick="editEnrollment(${e.id})">✏️</button>
-          <button class="icon-btn del" title="Delete" onclick="askDelete('enrollment',${e.id},'${e.plan.replace(/'/g,"\\'")} — ${empLabels[e.emp]}')">🗑️</button>
+          <button class="icon-btn" title="Edit"   onclick="editEnrollment(${e.enrollment_id})">✏️</button>
+          <button class="icon-btn del" title="Delete" onclick="askDelete('enrollment',${e.enrollment_id},'${(plan?.plan_name ?? String(e.plan_id)).replace(/'/g,"\\'")} — ${(empLabels[e.employee_id] ?? '').replace(/'/g,"\\'")}')">🗑️</button>
         </div>
       </td>
     </tr>`).join('');
@@ -801,16 +815,19 @@
     openDlg('dlgDelete');
   }
 
-  document.getElementById('confirmDeleteBtn').addEventListener('click', () => {
-    if (pendingDeleteType === 'enrollment') {
-      enrollments = enrollments.filter(x => x.id !== pendingDeleteId);
-      saveToStorage();
-      renderEnrollments();
-    } else if (pendingDeleteType === 'plan') {
-      plans = plans.filter(x => x.id !== pendingDeleteId);
-      renderPlans();
-    }
+  document.getElementById('confirmDeleteBtn').addEventListener('click', async () => {
     document.getElementById('dlgDelete').close();
+    try {
+      if (pendingDeleteType === 'enrollment') {
+        const res = await fetch(`${API}/benefits/enrollments/${pendingDeleteId}`, { method: 'DELETE', headers: authHdrs });
+        if (!res.ok) throw new Error(await res.text());
+        await loadEnrollments();
+      } else if (pendingDeleteType === 'plan') {
+        const res = await fetch(`${API}/benefits/plans/${pendingDeleteId}`, { method: 'DELETE', headers: authHdrs });
+        if (!res.ok) throw new Error(await res.text());
+        await loadPlans();
+      }
+    } catch (err) { showError('Could not delete: ' + err.message); }
     pendingDeleteType = pendingDeleteId = null;
   });
 
@@ -843,10 +860,11 @@
   });
 
   // ── INIT ──
-  initEmployees();
-  loadFromStorage();
-  renderEnrollments();
-  renderPlans();
+  (async () => {
+    await initEmployees();
+    await loadPlans();
+    await loadEnrollments();
+  })();
 </script>
 </body>
 </html>

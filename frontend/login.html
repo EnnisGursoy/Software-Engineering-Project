@@ -632,6 +632,13 @@
         <p class="footer-note">
           By signing in, you confirm you are authorized to access this payroll system.
         </p>
+
+        <div id="setupSection" style="margin-top:16px;display:none;">
+          <button type="button" id="setupBtn" style="width:100%;padding:10px;background:#0f766e;color:#fff;border:none;border-radius:11px;font-size:0.9rem;font-weight:700;font-family:inherit;cursor:pointer;">
+            Create Admin Account (First-Time Setup)
+          </button>
+          <p id="setupMsg" style="font-size:0.85rem;margin-top:8px;text-align:center;display:none;"></p>
+        </div>
       </div>
     </section>
   </div>
@@ -691,6 +698,50 @@
         loginBtn.textContent = "Sign In";
       }
     }
+
+    // ── First-time setup: show button only if no users exist ──
+    fetch('http://127.0.0.1:8000/auth/setup-status')
+      .then(r => r.json())
+      .then(data => {
+        if (data.needs_setup) {
+          document.getElementById('setupSection').style.display = 'block';
+        }
+      })
+      .catch(() => {});
+
+    document.getElementById('setupBtn').addEventListener('click', async () => {
+      const msg = document.getElementById('setupMsg');
+      msg.style.display = 'block';
+      msg.style.color = 'var(--muted)';
+      msg.textContent = 'Creating admin account…';
+      try {
+        const res = await fetch('http://127.0.0.1:8000/auth/create', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            username: 'Admin',
+            password: 'Admin123',
+            first_name: 'Muhammed',
+            last_name: 'Sanusi',
+            role: 'admin'
+          })
+        });
+        const data = await res.json();
+        if (res.ok) {
+          msg.style.color = '#166534';
+          msg.textContent = '✓ Admin account created! Username: Admin / Password: Admin123';
+          document.getElementById('setupSection').style.display = 'none';
+          usernameInput.value = 'Admin';
+          passwordInput.value = 'Admin123';
+        } else {
+          msg.style.color = 'var(--error)';
+          msg.textContent = data.detail ?? 'Failed to create admin.';
+        }
+      } catch {
+        msg.style.color = 'var(--error)';
+        msg.textContent = 'Could not reach the server.';
+      }
+    });
 
     loginForm.addEventListener("submit", async (e) => {
       e.preventDefault();
