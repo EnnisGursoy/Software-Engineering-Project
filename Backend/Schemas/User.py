@@ -6,10 +6,7 @@ from datetime import datetime
 class UserCreate(BaseModel):
     username: str
     password: str
-    first_name: Optional[str] = None
-    last_name: Optional[str] = None
-    role: str = "admin"   # or "manager", "hr"
-    department_name: Optional[str] = None
+    role: str = "admin"   # or "manager", "hr", "employee"
 
 class UserLogin(BaseModel):
     username: str
@@ -26,10 +23,7 @@ class ChangePassword(BaseModel):
 class UserOut(BaseModel):
     user_id: int
     username: str
-    first_name: Optional[str] = None
-    last_name: Optional[str] = None
     role: str
-    department_id: Optional[int] = None
     is_active: bool
     created_at: datetime
     updated_at: datetime

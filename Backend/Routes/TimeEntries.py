@@ -44,7 +44,7 @@ async def entries_for_employee(
 @router.post("/create", response_model=TimeEntryOut)
 async def add_entry(
     entry: TimeEntryCreate,
-    user: User = Depends(admin_or_manager),
+    user: User = Depends(manager_only),
     db: Session = Depends(get_db),
 ):
     return create_time_entry(entry, db)
@@ -54,7 +54,7 @@ async def add_entry(
 async def edit_entry(
     entry_id: int,
     data: TimeEntryUpdate,
-    user: User = Depends(admin_or_manager),
+    user: User = Depends(hr_only),
     db: Session = Depends(get_db),
 ):
     return update_time_entry(entry_id, data, db)

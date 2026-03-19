@@ -1,9 +1,10 @@
 from sqlalchemy import Column, Integer, String, Date, Enum, TIMESTAMP, ForeignKey
 from Backend.Database.connection import Base
 from datetime import datetime
-
+from sqlalchemy.orm import relationship
 class Employee(Base):
     __tablename__ = "employees" 
+    user_id = Column(Integer, ForeignKey("users.user_id"), nullable=True)
     employee_id = Column(Integer, primary_key=True, index=True, autoincrement=True)
     first_name = Column(String(50), nullable=False)
     last_name = Column(String(50), nullable=False, unique=True)
@@ -25,6 +26,7 @@ class Employee(Base):
     department_id = Column(Integer, ForeignKey("departments.department_id"), nullable=True)
     created_at = Column(Date, default=datetime.utcnow)
     updated_at = Column(Date, default=datetime.utcnow, onupdate=datetime.utcnow)
+    user = relationship("User", back_populates="employee")
 
     def __repr__(self):
         return f"<Employee(employee_id={self.employee_id}, email='{self.email}')>"

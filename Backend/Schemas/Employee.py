@@ -1,10 +1,12 @@
 from pydantic import BaseModel, ConfigDict
 from datetime import date
 from typing import Optional
+from Backend.Schemas.User import UserCreate, UserOut
 
 
 
 class EmployeeCreate(BaseModel):
+    user : UserCreate
     first_name: str
     last_name: str
     email: str
@@ -21,6 +23,7 @@ class EmployeeCreate(BaseModel):
 
 
 class EmployeeOut(BaseModel):
+    user : UserOut
     employee_id: int
     first_name: str
     last_name: str

@@ -5,10 +5,11 @@ from Backend.Utility.dependencies import get_db, admin_only, get_current_user
 from Backend.Models.User import User
 from Backend.Models.Department import Department
 from Backend.Models.LoginLog import LoginLog
+from Backend.Schemas.Employee import EmployeeCreate, EmployeeOut
 from Backend.Schemas.User import UserCreate, UserOut, ChangePassword, UpdateProfile
 from Backend.Utility.security import hash_password, verify_password, create_access_token
 from pydantic import BaseModel
-
+from Backend.Services.employee_service import create_employee
 
 class Token(BaseModel):
     access_token: str
@@ -65,56 +66,19 @@ async def auth_login(
         "sub": str(user.user_id),
         "role": user.role,
         "username": user.username,
-        "first_name": user.first_name,
-        "last_name": user.last_name
     }
 
     access_token = create_access_token(token_data)
 
     return {"access_token": access_token, "token_type": "bearer"}
 
-@router.post("/create", response_model=UserOut)
+@router.post("/create", response_model=EmployeeOut)
 async def register_user(
-    user: UserCreate,
+    user: EmployeeCreate,
     db: Session = Depends(get_db),
     _ = Depends(admin_only)
 ):
-    total_users = db.query(User).count()
-
-    # First user becomes admin
-    if total_users == 0:
-        user.role = "admin"
-
-    # Check duplicate username
-    existing_user = db.query(User).filter(User.username == user.username).first()
-    if existing_user:
-        raise HTTPException(status_code=400, detail="User already exists")
-
-    # Look up department by name if provided
-    department_id = None
-    if user.department_name:
-        dept = db.query(Department).filter(Department.department_name == user.department_name).first()
-        if not dept:
-            raise HTTPException(status_code=404, detail=f"Department '{user.department_name}' not found")
-        department_id = dept.department_id
-
-    hashed_password = hash_password(user.password)
-
-    new_user = User(
-        username=user.username,
-        password_hash=hashed_password,
-        first_name=user.first_name,
-        last_name=user.last_name,
-        role=user.role,
-        department_id=department_id,
-        is_active=True
-    )
-
-    db.add(new_user)
-    db.commit()
-    db.refresh(new_user)
-
-    return new_user
+   return create_employee(user, db)
 
 
 @router.get("/me", response_model=UserOut)

@@ -719,12 +719,26 @@
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({
-            username: 'Admin',
-            password: 'Admin123',
-            first_name: 'Muhammed',
-            last_name: 'Sanusi',
-            role: 'admin'
-          })
+  first_name: "Muhammed",
+  last_name: "Sanusi",
+  ssn: "000-00-0000",
+  email: "admin@example.com",
+  phone: "0000000000",
+  address: "N/A",
+  city: "N/A",
+  state: "N/A",
+  zip_code: "00000",
+  date_of_birth: "1990-01-01",
+  hire_date: "2024-01-01",
+  employment_status: "active",
+  department_name: "Administration",
+
+  user: {
+    username: "Admin",
+    password: "Admin123",
+    role: "admin"
+  }
+})
         });
         const data = await res.json();
         if (res.ok) {
