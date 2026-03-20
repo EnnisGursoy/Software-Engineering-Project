@@ -57,19 +57,25 @@ def update_time_entry(entry_id: int, data: TimeEntryUpdate, db: Session):
     return entry
 
 
-def approve_time_entry(entry_id: int, data: TimeEntryApprove, db: Session, user: User):
+def approve_time_entry(entry_id: int, data: TimeEntryApprove, db: Session, user: User = None):
     entry = db.query(TimeEntries).filter(TimeEntries.entry_id == entry_id).first()
     if not entry:
         raise HTTPException(status_code=404, detail="Time entry not found")
 
-    # Find the employee record for the logged-in HR/admin user
-    approver = db.query(Employee).filter(Employee.user_id == user.id).first()
-    if not approver:
-        raise HTTPException(status_code=404, detail="Approver employee not found")
+    if data.approved_by is not None:
+        # Validate that the specified approver employee exists
+        approver = db.query(Employee).filter(Employee.employee_id == data.approved_by).first()
+        if not approver:
+            raise HTTPException(status_code=404, detail="Approver employee not found")
+        entry.approved_by = data.approved_by
+    elif user is not None:
+        # Fall back to finding the employee linked to the logged-in user
+        approver = db.query(Employee).filter(Employee.user_id == user.user_id).first()
+        if not approver:
+            raise HTTPException(status_code=404, detail="Approver employee not found")
+        entry.approved_by = approver.employee_id
 
     entry.approved = True
-    entry.approved_by = approver.employee_id
-
     db.commit()
     db.refresh(entry)
     return entry

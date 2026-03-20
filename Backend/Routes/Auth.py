@@ -5,11 +5,9 @@ from Backend.Utility.dependencies import get_db, admin_only, get_current_user
 from Backend.Models.User import User
 from Backend.Models.Department import Department
 from Backend.Models.LoginLog import LoginLog
-from Backend.Schemas.Employee import EmployeeCreate, EmployeeOut
-from Backend.Schemas.User import UserCreate, UserOut, ChangePassword, UpdateProfile
+from Backend.Schemas.User import UserCreate, UserOut, UserRegister, ChangePassword, UpdateProfile
 from Backend.Utility.security import hash_password, verify_password, create_access_token
 from pydantic import BaseModel
-from Backend.Services.employee_service import create_employee
 
 class Token(BaseModel):
     access_token: str
@@ -72,13 +70,46 @@ async def auth_login(
 
     return {"access_token": access_token, "token_type": "bearer"}
 
-@router.post("/create", response_model=EmployeeOut)
+@router.post("/create", response_model=UserOut)
 async def register_user(
-    user: EmployeeCreate,
+    body: UserRegister,
     db: Session = Depends(get_db),
     _ = Depends(admin_only)
 ):
-   return create_employee(user, db)
+    # Resolve department if provided
+    department_id = None
+    if body.department_name:
+        dept = db.query(Department).filter(
+            Department.department_name == body.department_name
+        ).first()
+        if not dept:
+            raise HTTPException(
+                status_code=404,
+                detail=f"Department '{body.department_name}' not found"
+            )
+        department_id = dept.department_id
+
+    existing = db.query(User).filter(User.username == body.username).first()
+    if existing:
+        raise HTTPException(status_code=400, detail="User already exists")
+
+    # First user ever is always promoted to admin
+    if db.query(User).count() == 0:
+        body.role = "admin"
+
+    new_user = User(
+        username=body.username,
+        password_hash=hash_password(body.password),
+        role=body.role,
+        first_name=body.first_name,
+        last_name=body.last_name,
+        department_id=department_id,
+        is_active=True,
+    )
+    db.add(new_user)
+    db.commit()
+    db.refresh(new_user)
+    return new_user
 
 
 @router.get("/me", response_model=UserOut)

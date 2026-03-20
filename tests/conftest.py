@@ -89,8 +89,6 @@ def admin_user(db) -> User:
     user = User(
         username="test_admin",
         password_hash=hash_password("Admin@1234"),
-        first_name="Test",
-        last_name="Admin",
         role="admin",
         is_active=True,
     )
@@ -105,8 +103,6 @@ def hr_user(db) -> User:
     user = User(
         username="test_hr",
         password_hash=hash_password("Hr@1234"),
-        first_name="Test",
-        last_name="HR",
         role="hr",
         is_active=True,
     )
@@ -121,8 +117,6 @@ def manager_user(db) -> User:
     user = User(
         username="test_manager",
         password_hash=hash_password("Manager@1234"),
-        first_name="Test",
-        last_name="Manager",
         role="manager",
         is_active=True,
     )
@@ -139,8 +133,6 @@ def make_token(user: User) -> str:
         "sub": str(user.user_id),
         "role": user.role,
         "username": user.username,
-        "first_name": user.first_name,
-        "last_name": user.last_name,
     })
 
 

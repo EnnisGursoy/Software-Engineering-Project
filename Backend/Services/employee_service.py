@@ -1,3 +1,4 @@
+import re
 from sqlalchemy.orm import Session
 from fastapi import HTTPException
 from Backend.Models.Employee import Employee
@@ -6,12 +7,26 @@ from Backend.Models.Time_entries import TimeEntries
 from Backend.Models.Tax_information import TaxInformation
 from Backend.Models.employee_position import EmployeePosition
 from Backend.Models.Department import Department
-from Backend.Utility.security import encrypt_ssn, hash_password
+from Backend.Utility.security import encrypt_ssn, hash_password, hash_ssn
 from Backend.Schemas.Employee import EmployeeCreate, EmployeeUpdate
 from datetime import date
 from Backend.Models.User import User
 
 
+SSN_PATTERN = re.compile(r"^\d{3}-\d{2}-\d{4}$")
+
+
+def validate_ssn_format(ssn: str):
+    """Validate SSN format and known-invalid number ranges."""
+    if not SSN_PATTERN.match(ssn):
+        raise HTTPException(status_code=403, detail="SSN must be in the format XXX-XX-XXXX")
+    area, group, serial = ssn.split("-")
+    if area in ("000", "666") or area.startswith("9"):
+        raise HTTPException(status_code=403, detail="Invalid SSN: invalid area number")
+    if group == "00":
+        raise HTTPException(status_code=403, detail="Invalid SSN: invalid group number")
+    if serial == "0000":
+        raise HTTPException(status_code=403, detail="Invalid SSN: invalid serial number")
 
 
 def validate_name(first: str, last: str, db: Session):
@@ -27,9 +42,10 @@ def validate_name(first: str, last: str, db: Session):
         )
 
 
-
 def duplicate_ssn(social_security: str, db: Session):
-    ssn_exists = db.query(Employee).filter(Employee.ssn == social_security).first()
+    """Check for duplicate SSN using a deterministic hash comparison."""
+    ssn_hash = hash_ssn(social_security)
+    ssn_exists = db.query(Employee).filter(Employee.ssn_hash == ssn_hash).first()
     if ssn_exists:
         raise HTTPException(
             status_code=400,
@@ -37,34 +53,40 @@ def duplicate_ssn(social_security: str, db: Session):
         )
 
 
-
 def create_employee(data: EmployeeCreate, db: Session):
-    # 1. Handle first-user-ever admin logic
-    total_users = db.query(User).count()
-    if total_users == 0:
-        data.user.role = "admin"
+    # 1. Validate SSN format first (raises 403 on invalid)
+    validate_ssn_format(data.ssn)
 
-    # 2. Check duplicate username
+    # 2. Check for duplicate SSN before any DB writes
+    duplicate_ssn(data.ssn, db)
+
+    # 3. Check duplicate username
     existing_user = db.query(User).filter(User.username == data.user.username).first()
     if existing_user:
         raise HTTPException(status_code=400, detail="User already exists")
 
-    # 3. Resolve department
+    # 4. Resolve department — raise 404 if department name given but not found
     department_id = None
     if data.department_name:
         dept = db.query(Department).filter(
             Department.department_name == data.department_name
         ).first()
         if not dept:
-            dept = Department(department_name=data.department_name)
-            db.add(dept)
-            db.flush()
+            raise HTTPException(
+                status_code=404,
+                detail=f"Department '{data.department_name}' not found"
+            )
         department_id = dept.department_id
 
-    # 4. Hash password
+    # 5. Handle first-user-ever admin bootstrap
+    total_users = db.query(User).count()
+    if total_users == 0:
+        data.user.role = "admin"
+
+    # 6. Hash password
     hashed_password = hash_password(data.user.password)
 
-    # 5. Create User
+    # 7. Create User (flush only — commit after employee is created)
     new_user = User(
         username=data.user.username,
         password_hash=hashed_password,
@@ -73,18 +95,18 @@ def create_employee(data: EmployeeCreate, db: Session):
         is_active=True
     )
     db.add(new_user)
-    db.commit()
-    db.refresh(new_user)
+    db.flush()  # get user_id without committing
 
-    # 6. Encrypt SSN
-    duplicate_ssn(data.ssn, db)
+    # 8. Encrypt SSN and compute hash for deduplication
     encrypted = encrypt_ssn(data.ssn)
+    ssn_hash_val = hash_ssn(data.ssn)
 
-    # 7. Create Employee linked to User
+    # 9. Create Employee linked to User
     employee = Employee(
         first_name=data.first_name,
         last_name=data.last_name,
         ssn=encrypted,
+        ssn_hash=ssn_hash_val,
         email=data.email,
         phone=data.phone,
         address=data.address,
@@ -100,10 +122,10 @@ def create_employee(data: EmployeeCreate, db: Session):
 
     db.add(employee)
     db.commit()
+    db.refresh(new_user)
     db.refresh(employee)
 
     return employee
-
 
 
 def show_employee(id: int, db: Session):
@@ -113,10 +135,8 @@ def show_employee(id: int, db: Session):
     return user_exist
 
 
-
 def show_all_employees(db: Session):
     return db.query(Employee).all()
-
 
 
 def update_employee(id: int, data: EmployeeUpdate, db: Session):
@@ -133,7 +153,6 @@ def update_employee(id: int, data: EmployeeUpdate, db: Session):
     db.commit()
     db.refresh(employee)
     return employee
-
 
 
 def get_employees_by_department(department_id: int, db: Session):
@@ -174,21 +193,13 @@ def delete_employee(id: int, db: Session):
             status_code=404,
             detail="Employee does not exist in the database"
         )
-    
 
     if employee.employment_status == "terminated":
-       return {"message": "Employee is already terminated"}
-    
-    else :
-         employee.employment_status = "terminated"
+        return {"message": "Employee is already terminated"}
+    else:
+        employee.employment_status = "terminated"
 
     db.commit()
     db.refresh(employee)
 
     return {"message": "Employee terminated successfully"}
-
-    
-
-    
-
-   

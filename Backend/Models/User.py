@@ -10,6 +10,8 @@ class User(Base):
     username = Column(String(100), unique=True, nullable=False)
     password_hash = Column(String(255), nullable=False)
     role = Column(Enum("admin", "manager", "hr","employee",  name="user_roles"), default="employee") #hr = human responsibility role
+    first_name = Column(String(50), nullable=True)
+    last_name = Column(String(50), nullable=True)
     department_id = Column(Integer, ForeignKey("departments.department_id"), nullable=True)
     is_active = Column(Boolean, default=True)
 

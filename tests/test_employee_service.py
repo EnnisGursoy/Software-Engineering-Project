@@ -18,6 +18,7 @@ from Backend.Services.employee_service import (
     get_employees_by_department,
 )
 from Backend.Schemas.Employee import EmployeeCreate, EmployeeUpdate
+from Backend.Schemas.User import UserCreate
 from Backend.Models.Employee import Employee
 from Backend.Utility.security import encrypt_ssn
 
@@ -64,6 +65,7 @@ class TestValidateSSNFormat:
 class TestCreateEmployee:
     def _make_data(self, last_name, ssn, email, dept_name=None):
         return EmployeeCreate(
+            user=UserCreate(username=f"user_{last_name.lower()}", password="Pass@1234"),
             first_name="Test",
             last_name=last_name,
             email=email,

@@ -1,10 +1,12 @@
 from passlib.context import CryptContext
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, timezone
 from jose import JWTError, jwt
-import os 
+import os
+import hmac
+import hashlib
 from dotenv import load_dotenv
 from cryptography.fernet import Fernet
-from decouple import config   
+from decouple import config
 
 
 
@@ -30,7 +32,7 @@ def verify_password(plain_password: str, hashed_password: str) -> bool:
 
 def create_access_token(data: dict) -> str:
     to_encode = data.copy()
-    expire = datetime.utcnow() + timedelta(minutes=ACCESS_TOKEN_EXPIRE_MINUTES)
+    expire = datetime.now(timezone.utc) + timedelta(minutes=ACCESS_TOKEN_EXPIRE_MINUTES)
     to_encode.update({"exp": expire})
     encoded_jwt = jwt.encode(to_encode, SECRET_KEY, algorithm=ALGORITHM)
     return encoded_jwt
@@ -50,3 +52,9 @@ def encrypt_ssn(ssn : str) -> str :
 
 def decrypt_ssn(encrypted_ssn : str) -> str :
     return fernet.decrypt(encrypted_ssn.encode()).decode()
+
+
+def hash_ssn(ssn: str) -> str:
+    """Return a deterministic HMAC-SHA256 hex digest of the SSN for deduplication."""
+    key = (SECRET_KEY or "fallback-key").encode()
+    return hmac.new(key, ssn.encode(), hashlib.sha256).hexdigest()
