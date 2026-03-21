@@ -3,7 +3,7 @@ from sqlalchemy.orm import Session
 from Backend.Utility.dependencies import get_db, admin_only, hr_only, manager_only
 from Backend.Models.User import User
 from Backend.Models.department import Department
-from Backend.Schemas.department import DepartmentCreate, Departmentout, DepartmentUpdate
+from Backend.Schemas.department import DepartmentCreate, DepartmentOut, DepartmentUpdate
 from Backend.Services.Department_service import show_department, get_department_by_manager_id, assign_manager, create_department, delete_department, get_my_department
 
 
@@ -11,7 +11,7 @@ from Backend.Services.Department_service import show_department, get_department_
 router  = APIRouter()
 
 
-@router.post('/create', response_model=Departmentout)
+@router.post('/create', response_model=DepartmentOut)
 async def create_dept(data: DepartmentCreate, user: User = Depends(hr_only), db: Session = Depends(get_db)):
     return create_department(data, db)
 

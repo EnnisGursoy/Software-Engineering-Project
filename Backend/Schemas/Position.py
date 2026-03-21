@@ -1,4 +1,4 @@
-from pydantic import BaseModel
+from pydantic import BaseModel, ConfigDict
 from datetime import date
 from typing import Optional
 
@@ -19,8 +19,7 @@ class PositionOut(BaseModel):
     hourly_rate: Optional[float]
     employment_type: str
 
-    class Config:
-        orm_mode = True
+    model_config = ConfigDict(from_attributes=True)
 
 
 class PositionUpdate(BaseModel):
@@ -51,5 +50,4 @@ class EmployeePositionOut(BaseModel):
     pay_frequency: str
     is_current: bool
 
-    class Config:
-        orm_mode = True
+    model_config = ConfigDict(from_attributes=True)

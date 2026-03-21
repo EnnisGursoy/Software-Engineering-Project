@@ -9,7 +9,7 @@ class DepartmentCreate(BaseModel):
 
 
 
-class Departmentout(BaseModel):
+class DepartmentOut(BaseModel):
     department_id: int
     manager_id: int | None = None
     department_name: str
