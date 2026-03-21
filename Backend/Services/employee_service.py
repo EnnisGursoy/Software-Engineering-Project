@@ -5,7 +5,7 @@ from Backend.Models.Paychecks import Paychecks
 from Backend.Models.Time_entries import TimeEntries
 from Backend.Models.Tax_information import TaxInformation
 from Backend.Models.employee_position import EmployeePosition
-from Backend.Models.Department import Department
+from Backend.Models.department import Department
 from Backend.Utility.security import encrypt_ssn, hash_password
 from Backend.Schemas.Employee import EmployeeCreate, EmployeeUpdate
 from datetime import date
