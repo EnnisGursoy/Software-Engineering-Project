@@ -15,7 +15,7 @@ from Backend.Services.Department_service import (
     get_my_department,
 )
 from Backend.Schemas.department import DepartmentCreate, DepartmentUpdate
-from Backend.Models.Department import Department
+from Backend.Models.department import Department
 
 
 # ── Helpers ────────────────────────────────────────────────────────────────────

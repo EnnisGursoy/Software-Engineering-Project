@@ -55,7 +55,7 @@ def update_tax_info(tax_id: int, data: TaxInfoUpdate, db: Session):
     if data.filing_status and data.filing_status not in VALID_FILING_STATUSES:
         raise HTTPException(status_code=400, detail=f"Invalid filing status. Choose from: {VALID_FILING_STATUSES}")
 
-    update_data = data.dict(exclude_unset=True)
+    update_data = data.model_dump(exclude_unset=True)
     for key, value in update_data.items():
         setattr(record, key, value)
 

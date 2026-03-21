@@ -1,4 +1,4 @@
-from pydantic import BaseModel
+from pydantic import BaseModel, ConfigDict
 from datetime import date
 from typing import Optional
 
@@ -25,8 +25,7 @@ class TaxInfoOut(BaseModel):
     exempt_federal: Optional[bool]
     effective_date: Optional[date]
 
-    class Config:
-        orm_mode = True
+    model_config = ConfigDict(from_attributes=True)
 
 
 class TaxInfoUpdate(BaseModel):

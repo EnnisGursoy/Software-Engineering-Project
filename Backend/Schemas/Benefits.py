@@ -1,4 +1,4 @@
-from pydantic import BaseModel
+from pydantic import BaseModel, ConfigDict
 from typing import Optional
 from datetime import date
 
@@ -23,8 +23,7 @@ class PlanOut(BaseModel):
     coverage_level: Optional[str]
     notes:         Optional[str]
 
-    class Config:
-        orm_mode = True
+    model_config = ConfigDict(from_attributes=True)
 
 
 class PlanUpdate(BaseModel):
@@ -59,8 +58,7 @@ class EnrollmentOut(BaseModel):
     employer_cost: Optional[float]
     notes:         Optional[str]
 
-    class Config:
-        orm_mode = True
+    model_config = ConfigDict(from_attributes=True)
 
 
 class EnrollmentUpdate(BaseModel):

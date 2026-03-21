@@ -7,7 +7,7 @@ from Backend.Models.User import User
 
 oauth2_scheme = OAuth2PasswordBearer(
     tokenUrl="auth/login",
-    auto_error=False   
+    auto_error=False
 )
 
 def get_db():
@@ -18,13 +18,13 @@ def get_db():
         db.close()
 
 
-
-def get_current_user(
+def get_optional_user(
     token: str | None = Depends(oauth2_scheme),
     db: Session = Depends(get_db)
-):
+) -> User | None:
+    """Returns the current user or None if no token is provided."""
     if not token:
-        return None   # no login provided
+        return None
 
     payload = decode_access_token(token)
     if payload is None:
@@ -41,12 +41,21 @@ def get_current_user(
     return user
 
 
+def get_current_user(
+    user: User | None = Depends(get_optional_user),
+) -> User:
+    """Returns the current authenticated user, raising 401 if not authenticated."""
+    if not user:
+        raise HTTPException(status_code=401, detail="Not authenticated")
+    return user
+
+
 # ---------------------------------------------------------
 # Admin dependency with first-user bootstrap
 # ---------------------------------------------------------
 def admin_only(
     db: Session = Depends(get_db),
-    current_user: User | None = Depends(get_current_user)
+    current_user: User | None = Depends(get_optional_user)
 ):
     total_users = db.query(User).count()
 

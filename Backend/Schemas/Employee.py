@@ -6,7 +6,7 @@ from Backend.Schemas.User import UserCreate, UserOut
 
 
 class EmployeeCreate(BaseModel):
-    user : UserCreate
+    user: Optional[UserCreate] = None
     first_name: str
     last_name: str
     email: str

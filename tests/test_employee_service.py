@@ -192,8 +192,7 @@ class TestGetEmployeesByDepartment:
         assert result == []
 
     def test_does_not_return_employees_from_other_departments(self, db, sample_employee, sample_department):
-        other_dept = __import__("Backend.Models.Department", fromlist=["Department"]).Department
-        from Backend.Models.Department import Department
+        from Backend.Models.department import Department
         other = Department(department_name="Finance", manager_id=None)
         db.add(other)
         db.commit()
