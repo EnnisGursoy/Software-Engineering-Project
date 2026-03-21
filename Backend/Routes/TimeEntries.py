@@ -67,7 +67,7 @@ async def approve_entry(
     user: User = Depends(hr_only),
     db: Session = Depends(get_db),
 ):
-    return approve_time_entry(entry_id, data, db, user)
+    return approve_time_entry(entry_id, data, db)
 
 
 @router.delete("/{entry_id}")

@@ -32,6 +32,7 @@ class TimeEntryOut(BaseModel):
 
 class TimeEntryApprove(BaseModel):
     approved: bool
+    approved_by: int
 
 class TimeEntryUpdate(BaseModel):
     clock_in: Optional[time] = None

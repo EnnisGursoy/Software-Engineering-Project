@@ -1,3 +1,4 @@
+import re
 from sqlalchemy.orm import Session
 from fastapi import HTTPException
 from Backend.Models.Employee import Employee
@@ -12,6 +13,17 @@ from datetime import date
 from Backend.Models.User import User
 
 
+def validate_ssn_format(ssn: str):
+    """Validate SSN format (AAA-BB-CCCC) and reject known invalid number ranges."""
+    if not re.match(r'^\d{3}-\d{2}-\d{4}$', ssn):
+        raise HTTPException(status_code=403, detail="SSN must be in format AAA-BB-CCCC")
+    area, group, serial = ssn.split('-')
+    if area in ('000', '666') or area.startswith('9'):
+        raise HTTPException(status_code=403, detail="Invalid SSN: invalid area number")
+    if group == '00':
+        raise HTTPException(status_code=403, detail="Invalid SSN: invalid group number")
+    if serial == '0000':
+        raise HTTPException(status_code=403, detail="Invalid SSN: invalid serial number")
 
 
 def validate_name(first: str, last: str, db: Session):
@@ -40,47 +52,46 @@ def duplicate_ssn(social_security: str, db: Session):
 
 def create_employee(data: EmployeeCreate, db: Session):
     # 1. Handle first-user-ever admin logic
-    total_users = db.query(User).count()
-    if total_users == 0:
-        data.user.role = "admin"
-
-    # 2. Check duplicate username
-    existing_user = db.query(User).filter(User.username == data.user.username).first()
-    if existing_user:
-        raise HTTPException(status_code=400, detail="User already exists")
-
-    # 3. Resolve department
+    # 2. Resolve department (must already exist)
     department_id = None
     if data.department_name:
         dept = db.query(Department).filter(
             Department.department_name == data.department_name
         ).first()
         if not dept:
-            dept = Department(department_name=data.department_name)
-            db.add(dept)
-            db.flush()
+            raise HTTPException(status_code=404, detail=f"Department '{data.department_name}' not found")
         department_id = dept.department_id
 
-    # 4. Check duplicate SSN before creating any records
+    # 3. Validate SSN format and check for duplicates before creating any records
+    validate_ssn_format(data.ssn)
     duplicate_ssn(data.ssn, db)
     encrypted = encrypt_ssn(data.ssn)
 
-    # 5. Hash password
-    hashed_password = hash_password(data.user.password)
+    # 4. Optionally create a linked User account
+    user_id = None
+    if data.user is not None:
+        total_users = db.query(User).count()
+        if total_users == 0:
+            data.user.role = "admin"
 
-    # 6. Create User
-    new_user = User(
-        username=data.user.username,
-        password_hash=hashed_password,
-        role=data.user.role,
-        department_id=department_id,
-        is_active=True
-    )
-    db.add(new_user)
-    db.commit()
-    db.refresh(new_user)
+        existing_user = db.query(User).filter(User.username == data.user.username).first()
+        if existing_user:
+            raise HTTPException(status_code=400, detail="User already exists")
 
-    # 7. Create Employee linked to User
+        hashed_password = hash_password(data.user.password)
+        new_user = User(
+            username=data.user.username,
+            password_hash=hashed_password,
+            role=data.user.role,
+            department_id=department_id,
+            is_active=True,
+        )
+        db.add(new_user)
+        db.commit()
+        db.refresh(new_user)
+        user_id = new_user.user_id
+
+    # 5. Create Employee
     employee = Employee(
         first_name=data.first_name,
         last_name=data.last_name,
@@ -95,7 +106,7 @@ def create_employee(data: EmployeeCreate, db: Session):
         hire_date=data.hire_date,
         employment_status=data.employment_status,
         department_id=department_id,
-        user_id=new_user.user_id
+        user_id=user_id,
     )
 
     db.add(employee)

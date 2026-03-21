@@ -12,6 +12,8 @@ class User(Base):
     role = Column(Enum("admin", "manager", "hr","employee",  name="user_roles"), default="employee") #hr = human responsibility role
     department_id = Column(Integer, ForeignKey("departments.department_id"), nullable=True)
     is_active = Column(Boolean, default=True)
+    first_name = Column(String(50), nullable=True)
+    last_name = Column(String(50), nullable=True)
 
     created_at = Column(TIMESTAMP, server_default=func.now())
     updated_at = Column(TIMESTAMP, server_default=func.now(), onupdate=func.now())
