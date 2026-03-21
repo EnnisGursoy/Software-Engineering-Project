@@ -63,7 +63,7 @@ def approve_time_entry(entry_id: int, data: TimeEntryApprove, db: Session, user:
         raise HTTPException(status_code=404, detail="Time entry not found")
 
     # Find the employee record for the logged-in HR/admin user
-    approver = db.query(Employee).filter(Employee.user_id == user.id).first()
+    approver = db.query(Employee).filter(Employee.user_id == user.user_id).first()
     if not approver:
         raise HTTPException(status_code=404, detail="Approver employee not found")
 

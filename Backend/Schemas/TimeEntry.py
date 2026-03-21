@@ -9,7 +9,7 @@ class TimeEntryCreate(BaseModel):
     clock_in: Optional[time] = None
     clock_out: Optional[time] = None
     regular_hours: Optional[float] = None
-    overtime_hours: Optional[float] = 0.0
+    overtime_hours: Optional[float] = None
     entry_type: Optional[str] = "work"
     notes: Optional[str] = None
 

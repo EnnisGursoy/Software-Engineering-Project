@@ -24,4 +24,3 @@ SessionLocal = sessionmaker(
 
 Base = declarative_base()
 
-print("Loaded DATABASE_URL =", DATABASE_URL)

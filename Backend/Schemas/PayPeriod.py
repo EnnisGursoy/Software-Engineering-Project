@@ -1,4 +1,4 @@
-from pydantic import BaseModel
+from pydantic import BaseModel, ConfigDict
 from datetime import date
 from typing import Optional
 
@@ -18,8 +18,7 @@ class PayPeriodOut(BaseModel):
     period_type: str
     status: Optional[str]
 
-    class Config:
-        orm_mode = True
+    model_config = ConfigDict(from_attributes=True)
 
 
 class PayPeriodStatusUpdate(BaseModel):

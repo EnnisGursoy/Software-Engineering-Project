@@ -7,7 +7,7 @@ class Employee(Base):
     user_id = Column(Integer, ForeignKey("users.user_id"), nullable=True)
     employee_id = Column(Integer, primary_key=True, index=True, autoincrement=True)
     first_name = Column(String(50), nullable=False)
-    last_name = Column(String(50), nullable=False, unique=True)
+    last_name = Column(String(50), nullable=False)
     email = Column(String(100), nullable=False, unique=True)
     phone = Column(String(20), nullable=True)
     address = Column(String(255), nullable=True)

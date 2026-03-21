@@ -3,7 +3,7 @@ from sqlalchemy.orm import Session
 from fastapi.security import OAuth2PasswordRequestForm
 from Backend.Utility.dependencies import get_db, admin_only, get_current_user
 from Backend.Models.User import User
-from Backend.Models.Department import Department
+from Backend.Models.department import Department
 from Backend.Models.LoginLog import LoginLog
 from Backend.Schemas.Employee import EmployeeCreate, EmployeeOut
 from Backend.Schemas.User import UserCreate, UserOut, ChangePassword, UpdateProfile
@@ -92,10 +92,12 @@ async def update_me(
     current_user: User = Depends(get_current_user),
     db: Session = Depends(get_db)
 ):
-    if body.first_name is not None:
-        current_user.first_name = body.first_name
-    if body.last_name is not None:
-        current_user.last_name = body.last_name
+    employee = current_user.employee
+    if employee:
+        if body.first_name is not None:
+            employee.first_name = body.first_name
+        if body.last_name is not None:
+            employee.last_name = body.last_name
     db.commit()
     db.refresh(current_user)
     return current_user

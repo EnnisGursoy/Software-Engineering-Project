@@ -19,7 +19,7 @@ def get_plan(plan_id: int, db: Session):
 
 
 def create_plan(data: PlanCreate, db: Session):
-    plan = BenefitPlan(**data.dict())
+    plan = BenefitPlan(**data.model_dump())
     db.add(plan)
     db.commit()
     db.refresh(plan)
@@ -28,7 +28,7 @@ def create_plan(data: PlanCreate, db: Session):
 
 def update_plan(plan_id: int, data: PlanUpdate, db: Session):
     plan = get_plan(plan_id, db)
-    for key, value in data.dict(exclude_unset=True).items():
+    for key, value in data.model_dump(exclude_unset=True).items():
         setattr(plan, key, value)
     db.commit()
     db.refresh(plan)
@@ -55,7 +55,7 @@ def get_enrollments_by_employee(employee_id: int, db: Session):
 
 
 def create_enrollment(data: EnrollmentCreate, db: Session):
-    enrollment = BenefitEnrollment(**data.dict())
+    enrollment = BenefitEnrollment(**data.model_dump())
     db.add(enrollment)
     db.commit()
     db.refresh(enrollment)
@@ -68,7 +68,7 @@ def update_enrollment(enrollment_id: int, data: EnrollmentUpdate, db: Session):
     ).first()
     if not enrollment:
         raise HTTPException(status_code=404, detail="Enrollment not found")
-    for key, value in data.dict(exclude_unset=True).items():
+    for key, value in data.model_dump(exclude_unset=True).items():
         setattr(enrollment, key, value)
     db.commit()
     db.refresh(enrollment)

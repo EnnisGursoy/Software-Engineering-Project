@@ -61,10 +61,14 @@ def create_employee(data: EmployeeCreate, db: Session):
             db.flush()
         department_id = dept.department_id
 
-    # 4. Hash password
+    # 4. Check duplicate SSN before creating any records
+    duplicate_ssn(data.ssn, db)
+    encrypted = encrypt_ssn(data.ssn)
+
+    # 5. Hash password
     hashed_password = hash_password(data.user.password)
 
-    # 5. Create User
+    # 6. Create User
     new_user = User(
         username=data.user.username,
         password_hash=hashed_password,
@@ -75,10 +79,6 @@ def create_employee(data: EmployeeCreate, db: Session):
     db.add(new_user)
     db.commit()
     db.refresh(new_user)
-
-    # 6. Encrypt SSN
-    duplicate_ssn(data.ssn, db)
-    encrypted = encrypt_ssn(data.ssn)
 
     # 7. Create Employee linked to User
     employee = Employee(

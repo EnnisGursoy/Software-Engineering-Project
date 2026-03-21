@@ -45,7 +45,7 @@ def update_position(position_id: int, data: PositionUpdate, db: Session):
     if data.employment_type and data.employment_type not in VALID_EMPLOYMENT_TYPES:
         raise HTTPException(status_code=400, detail=f"Invalid employment type. Choose from: {VALID_EMPLOYMENT_TYPES}")
 
-    update_data = data.dict(exclude_unset=True)
+    update_data = data.model_dump(exclude_unset=True)
     for key, value in update_data.items():
         setattr(position, key, value)
 
