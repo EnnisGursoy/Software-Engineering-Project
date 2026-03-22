@@ -23,7 +23,7 @@ class EmployeeCreate(BaseModel):
 
 
 class EmployeeOut(BaseModel):
-    user : UserOut
+    user : Optional[UserOut] = None
     employee_id: int
     first_name: str
     last_name: str
