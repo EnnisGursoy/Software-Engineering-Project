@@ -4,11 +4,10 @@ import os
 from dotenv import load_dotenv
 
 # Load environment variables
-load_dotenv()
+load_dotenv(override=False)  # env vars already set (e.g. Railway) take priority
 
-# Read DB URL from .env
-# Railway provides mysql:// but SQLAlchemy needs mysql+pymysql://
-DATABASE_URL = os.getenv("DATABASE_URL", "")
+# Railway MySQL plugin sets MYSQL_URL automatically; fall back to DATABASE_URL or .env
+DATABASE_URL = os.getenv("MYSQL_URL") or os.getenv("DATABASE_URL", "")
 if DATABASE_URL.startswith("mysql://"):
     DATABASE_URL = DATABASE_URL.replace("mysql://", "mysql+pymysql://", 1)
 
