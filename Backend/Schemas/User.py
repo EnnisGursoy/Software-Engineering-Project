@@ -43,6 +43,7 @@ class UserOut(BaseModel):
     is_active: bool
     first_name: Optional[str] = None
     last_name: Optional[str] = None
+    department_id: Optional[int] = None
     created_at: datetime
     updated_at: datetime
 

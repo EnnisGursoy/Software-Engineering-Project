@@ -104,11 +104,12 @@
     .tab-panel { display: none; }
     .tab-panel.active { display: block; }
   </style>
+  <script src="config.js"></script>
 </head>
 <body>
 
 <header class="topbar">
-  <a href="employees.html" class="brand">
+  <a href="homepage.html" class="brand">
     <div class="brand-logo">
       <img src="PAY CENTRAL LOGO.png" alt="PayCentral" onerror="this.style.display='none'">
     </div>
@@ -126,11 +127,13 @@
         <a href="homepage.html">Home</a>
         <a href="profile.html">Profile</a>
         <a href="employees.html">Employees</a>
+        <a href="departments.html">Departments</a>
         <a href="shifts.html">Shifts</a>
         <a href="payroll.html">Payroll</a>
         <a href="benefits.html">Benefits</a>
         <a href="taxes.html">Taxes</a>
         <a href="reports.html">Reports</a>
+        <a href="audit.html">Audit Log</a>
         <a href="settings.html">Settings</a>
         <a href="logout.html" class="signout">Sign Out</a>
       </nav>
@@ -277,7 +280,6 @@
 </main>
 
 <script>
-  const API      = 'http://localhost:8000';
   const token    = localStorage.getItem('access_token');
   const hdrs     = { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` };
   const fmt      = n => n != null ? '$' + Number(n).toFixed(2) : '—';

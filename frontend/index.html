@@ -840,6 +840,15 @@
   </footer>
 
   <script>
+    // Auto-redirect logged-in users to their home page
+    const _tok  = localStorage.getItem("access_token");
+    const _role = localStorage.getItem("user_role");
+    if (_tok) {
+      window.location.href = (_role === "hr" || _role === "admin" || _role === "manager")
+        ? "homepage.html"
+        : "employee_portal.html";
+    }
+
     const hamburgerBtn = document.getElementById("hamburgerBtn");
     const mobileMenu = document.getElementById("mobileMenu");
 

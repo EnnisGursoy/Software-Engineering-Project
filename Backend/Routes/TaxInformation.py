@@ -1,6 +1,7 @@
 from fastapi import APIRouter, Depends
 from sqlalchemy.orm import Session
-from Backend.Utility.dependencies import get_db, hr_only, manager_only
+from Backend.Utility.dependencies import get_db, hr_only, manager_only, get_current_employee
+from Backend.Models.Employee import Employee
 from Backend.Models.User import User
 from Backend.Schemas.TaxInformation import TaxInfoCreate, TaxInfoOut, TaxInfoUpdate
 from Backend.Services.taxinfo_service import (
@@ -14,7 +15,16 @@ from Backend.Services.taxinfo_service import (
 router = APIRouter()
 
 
+@router.get("/me", response_model=list[TaxInfoOut])
+async def my_tax_info(
+    employee: Employee = Depends(get_current_employee),
+    db: Session = Depends(get_db),
+):
+    return get_tax_info_by_employee(employee.employee_id, db)
+
+
 @router.get("/all", response_model=list[TaxInfoOut])
+@router.get("/", response_model=list[TaxInfoOut])
 async def list_all(
     user: User = Depends(hr_only),
     db: Session = Depends(get_db),

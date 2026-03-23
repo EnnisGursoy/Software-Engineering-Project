@@ -225,6 +225,7 @@
     .btn.ghost:hover { background: #f1f5f9; }
     .btn.danger-btn { background: #fef2f2; color: #991b1b; border-color: #fecaca; }
   </style>
+  <script src="config.js"></script>
 </head>
 <body>
 
@@ -238,11 +239,13 @@
         <a href="homepage.html">Home</a>
         <a href="profile.html">Profile</a>
         <a href="employees.html">Employees</a>
+        <a href="departments.html">Departments</a>
         <a href="shifts.html">Shifts</a>
         <a href="payroll.html">Payroll</a>
         <a href="benefits.html">Benefits</a>
         <a href="taxes.html">Taxes</a>
         <a href="reports.html">Reports</a>
+        <a href="audit.html">Audit Log</a>
         <a href="settings.html">Settings</a>
         <a href="logout.html" style="color:#ef4444;">Sign Out</a>
       </nav>
@@ -439,7 +442,6 @@
 </dialog>
 
 <script>
-  const API_BASE = 'http://localhost:8000';
   const API_EMP  = API_BASE + '/employee';
   const API_TAX  = API_BASE + '/tax';
   const API_POS  = API_BASE + '/positions';

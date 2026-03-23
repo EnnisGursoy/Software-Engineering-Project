@@ -1,6 +1,7 @@
 from fastapi import APIRouter, Depends
 from sqlalchemy.orm import Session
-from Backend.Utility.dependencies import get_db, hr_only, manager_only, admin_or_manager
+from Backend.Utility.dependencies import get_db, hr_only, manager_only, admin_or_manager, get_current_employee
+from Backend.Models.Employee import Employee
 from Backend.Models.User import User
 from Backend.Schemas.TimeEntry import TimeEntryCreate, TimeEntryOut, TimeEntryUpdate, TimeEntryApprove
 from Backend.Services.timeentry_service import (
@@ -14,6 +15,24 @@ from Backend.Services.timeentry_service import (
 )
 
 router = APIRouter()
+
+
+@router.get("/me", response_model=list[TimeEntryOut])
+async def my_time_entries(
+    employee: Employee = Depends(get_current_employee),
+    db: Session = Depends(get_db),
+):
+    return get_entries_by_employee(employee.employee_id, db)
+
+
+@router.post("/me", response_model=TimeEntryOut)
+async def submit_my_time_entry(
+    data: TimeEntryCreate,
+    employee: Employee = Depends(get_current_employee),
+    db: Session = Depends(get_db),
+):
+    data.employee_id = employee.employee_id
+    return create_time_entry(data, db)
 
 
 @router.get("/all", response_model=list[TimeEntryOut])

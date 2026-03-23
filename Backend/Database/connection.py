@@ -7,7 +7,10 @@ from dotenv import load_dotenv
 load_dotenv()
 
 # Read DB URL from .env
-DATABASE_URL = os.getenv("DATABASE_URL")
+# Railway provides mysql:// but SQLAlchemy needs mysql+pymysql://
+DATABASE_URL = os.getenv("DATABASE_URL", "")
+if DATABASE_URL.startswith("mysql://"):
+    DATABASE_URL = DATABASE_URL.replace("mysql://", "mysql+pymysql://", 1)
 
 # Create engine and session
 engine = create_engine(

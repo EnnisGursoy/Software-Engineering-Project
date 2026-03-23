@@ -34,6 +34,7 @@ class EmployeeOut(BaseModel):
     state: Optional[str]
     zip_code: Optional[str]
     department_id: Optional[int] = None
+    employment_status: Optional[str] = None
 
     model_config = ConfigDict(from_attributes=True)
 

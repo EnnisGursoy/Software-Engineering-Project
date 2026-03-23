@@ -11,6 +11,10 @@
       --surface: #ffffff;
       --border: #d1d5db;
       --accent: #0f766e;
+      --primary: #1d4ed8;
+      --primary-dark: #1e40af;
+      --muted: #64748b;
+      --shadow: 0 8px 24px rgba(15, 23, 42, 0.08);
     }
 
     body.dark {
@@ -133,7 +137,7 @@
       align-items: center;
       gap: 14px;
       background: var(--surface);
-      border: 3px solid #0f172a;
+      border: 1px solid var(--border);
       padding: 14px 18px;
       margin-bottom: 16px;
     }
@@ -253,10 +257,13 @@
       .divider { display: none; }
     }
   </style>
+  <script src="config.js"></script>
 </head>
 <body>
   <header>
     <h1>Payroll</h1>
+    <div style="display:flex;align-items:center;gap:10px;">
+      <button id="themeToggle" style="border:1px solid rgba(255,255,255,0.45);background:rgba(255,255,255,0.12);color:#fff;padding:8px 14px;border-radius:8px;font-size:0.88rem;cursor:pointer;">Toggle Theme</button>
     <div class="menu-wrap">
       <button class="menu-btn" id="menuBtn" aria-label="Open menu" aria-expanded="false" aria-controls="hrMenu">
         <span></span><span></span><span></span>
@@ -265,14 +272,17 @@
         <a href="homepage.html">Home</a>
         <a href="profile.html">Profile</a>
         <a href="employees.html">Employees</a>
+        <a href="departments.html">Departments</a>
         <a href="shifts.html">Shifts</a>
         <a href="payroll.html">Payroll</a>
         <a href="benefits.html">Benefits</a>
         <a href="taxes.html">Taxes</a>
         <a href="reports.html">Reports</a>
+        <a href="audit.html">Audit Log</a>
         <a href="settings.html">Settings</a>
         <a href="logout.html" style="color:#ef4444;">Sign Out</a>
       </nav>
+    </div>
     </div>
   </header>
 
@@ -286,6 +296,7 @@
         <select id="periodSelect" style="padding:9px 11px;border:1px solid var(--border);border-radius:8px;font-size:0.9rem;font-family:inherit;background:var(--surface);color:var(--text);min-width:220px;">
           <option value="">Select pay period to run…</option>
         </select>
+        <button class="btn" onclick="previewPayroll()" style="border:1px solid var(--border);background:var(--surface);color:var(--text);">&#x1F441; Preview</button>
         <button class="btn btn-green" id="runBtn" onclick="runPayroll()">▶ Run Payroll</button>
       </div>
     </div>
@@ -390,13 +401,19 @@
     });
 
     // ── Dark mode ─────────────────────────────────────────────────
-    if (localStorage.getItem('payroll_dark_mode') === 'enabled') {
+    if (localStorage.getItem('theme') === 'dark') {
       document.body.classList.add('dark');
     }
+    document.getElementById('themeToggle').addEventListener('click', () => {
+      document.body.classList.toggle('dark');
+      localStorage.setItem('theme', document.body.classList.contains('dark') ? 'dark' : 'light');
+    });
 
     // ── Config ────────────────────────────────────────────────────
-    const API   = 'http://localhost:8000';
     const token = localStorage.getItem('access_token');
+    const role  = localStorage.getItem('user_role');
+    if (!token) { window.location.href = 'login.html'; }
+    if (role === 'employee') { window.location.href = 'employee_portal.html'; }
     const hdrs  = { 'Authorization': `Bearer ${token}`, 'Content-Type': 'application/json' };
 
     const fmt = n => n != null ? '$' + Number(n).toFixed(2) : '—';
@@ -426,7 +443,7 @@
     }
 
     function empName(id) {
-      const e = allEmployees.find(e => e.employee_id === id);
+      const e = allEmployees.find(e => Number(e.employee_id) === Number(id));
       return e ? `${e.first_name} ${e.last_name}` : `Employee #${id}`;
     }
 
@@ -504,9 +521,12 @@
             <td>$${fica(p)}</td>
             <td class="amount">${fmt(p.net_pay)}</td>
             <td><span class="badge ${badgeClass(p.payment_status)}">${p.payment_status ?? '—'}</span></td>
-            <td>${p.payment_status !== 'paid' && p.payment_status !== 'void'
-              ? `<button onclick="markPaid(${p.paycheck_id})" style="padding:5px 10px;font-size:0.8rem;border:none;border-radius:6px;background:#15803d;color:#fff;cursor:pointer;font-weight:600;">Mark Paid</button>`
-              : '—'}</td>
+            <td style="display:flex;gap:6px;align-items:center;">
+              ${p.payment_status !== 'paid' && p.payment_status !== 'void'
+                ? `<button onclick="markPaid(${p.paycheck_id})" style="padding:5px 10px;font-size:0.8rem;border:none;border-radius:6px;background:#15803d;color:#fff;cursor:pointer;font-weight:600;">Mark Paid</button>`
+                : ''}
+              <button onclick="showPayStub(${p.paycheck_id})" style="padding:5px 10px;font-size:0.8rem;border:1px solid #d1d5db;border-radius:6px;background:#f8fbff;color:#1d4ed8;cursor:pointer;font-weight:600;">Pay Stub</button>
+            </td>
           </tr>`).join('');
       } catch {
         tbody.innerHTML = `<tr><td colspan="8" style="text-align:center;padding:24px;color:#ef4444;">Failed to load payroll data.</td></tr>`;
@@ -543,6 +563,63 @@
       } catch {
         showStatus('Could not reach the server.', 'error');
       }
+    }
+
+    // ── Payroll preview ───────────────────────────────────────────
+    async function previewPayroll() {
+      const periodId = document.getElementById('periodSelect').value;
+      if (!periodId) { showStatus('Select a pay period first.', 'error'); return; }
+
+      const periodLabel = document.getElementById('periodSelect').options[document.getElementById('periodSelect').selectedIndex]?.text ?? `Period #${periodId}`;
+      document.getElementById('previewPeriodLabel').textContent = `Estimated paychecks for: ${periodLabel}`;
+      document.getElementById('previewBody').innerHTML = `<tr><td colspan="6" style="text-align:center;padding:24px;color:#64748b;">Calculating…</td></tr>`;
+      document.getElementById('previewFoot').innerHTML = '';
+      document.getElementById('dlgPreview').showModal();
+
+      const active = allEmployees.filter(e => e.employment_status === 'active');
+      if (!active.length) {
+        document.getElementById('previewBody').innerHTML = `<tr><td colspan="6" style="text-align:center;padding:24px;color:#64748b;">No active employees found.</td></tr>`;
+        return;
+      }
+
+      const results = await Promise.allSettled(
+        active.map(e => fetch(`${API}/payroll/calculate/${e.employee_id}/${periodId}`, { headers: hdrs }).then(r => r.json()))
+      );
+
+      let totGross = 0, totNet = 0, totFed = 0, totState = 0, totFica = 0;
+      const rows = [];
+
+      results.forEach((r, i) => {
+        const emp = active[i];
+        const name = empName(emp.employee_id);
+        if (r.status === 'rejected' || r.value?.detail) {
+          rows.push(`<tr><td style="padding:8px 10px;">${name}</td><td colspan="5" style="padding:8px 10px;color:#ef4444;text-align:right;">No position/rate on file</td></tr>`);
+          return;
+        }
+        const d = r.value;
+        const fica = (d.social_security ?? 0) + (d.medicare ?? 0);
+        totGross += d.gross_pay ?? 0; totNet += d.net_pay ?? 0;
+        totFed   += d.federal_tax ?? 0; totState += d.state_tax ?? 0; totFica += fica;
+        rows.push(`<tr style="border-bottom:1px solid #f1f5f9;">
+          <td style="padding:8px 10px;">${name}</td>
+          <td style="padding:8px 10px;text-align:right;">${fmt(d.gross_pay)}</td>
+          <td style="padding:8px 10px;text-align:right;">${fmt(d.federal_tax)}</td>
+          <td style="padding:8px 10px;text-align:right;">${fmt(d.state_tax)}</td>
+          <td style="padding:8px 10px;text-align:right;">${fmt(fica)}</td>
+          <td style="padding:8px 10px;text-align:right;font-weight:700;">${fmt(d.net_pay)}</td>
+        </tr>`);
+      });
+
+      document.getElementById('previewBody').innerHTML = rows.join('');
+      document.getElementById('previewFoot').innerHTML = `
+        <tr style="background:#f8fbff;font-weight:700;border-top:2px solid #e2e8f0;">
+          <td style="padding:10px;">Totals (${results.length} employees)</td>
+          <td style="padding:10px;text-align:right;">${fmt(totGross)}</td>
+          <td style="padding:10px;text-align:right;">${fmt(totFed)}</td>
+          <td style="padding:10px;text-align:right;">${fmt(totState)}</td>
+          <td style="padding:10px;text-align:right;">${fmt(totFica)}</td>
+          <td style="padding:10px;text-align:right;color:#1d4ed8;">${fmt(totNet)}</td>
+        </tr>`;
     }
 
     // ── Run payroll ───────────────────────────────────────────────
@@ -594,6 +671,55 @@
       } catch { showStatus('Could not reach the server.', 'error'); }
     }
 
+    // ── Pay stub modal ────────────────────────────────────────────
+    function showPayStub(paycheckId) {
+      const p = allPaychecks.find(x => x.paycheck_id === paycheckId);
+      if (!p) return;
+
+      const fmtN = n => n != null ? '$' + Number(n).toFixed(2) : '$0.00';
+      const totalDeductions = [p.federal_tax, p.state_tax, p.social_security, p.medicare,
+        p.health_insurance, p.retirement_401k, p.other_deductions]
+        .reduce((s, v) => s + (Number(v) || 0), 0);
+
+      document.getElementById('stubContent').innerHTML = `
+        <div class="stub-header">
+          <div class="stub-company">PayCentral</div>
+          <div class="stub-title">Pay Stub</div>
+        </div>
+        <div class="stub-meta">
+          <div><strong>Employee:</strong> ${empName(p.employee_id)}</div>
+          <div><strong>Pay Period:</strong> ${periodLabels[p.pay_period_id] ?? `Period #${p.pay_period_id}`}</div>
+          <div><strong>Check #:</strong> ${p.check_number ?? p.paycheck_id}</div>
+          <div><strong>Payment Date:</strong> ${p.payment_date ?? '—'}</div>
+          <div><strong>Status:</strong> ${p.payment_status ?? '—'}</div>
+        </div>
+        <table class="stub-table">
+          <thead><tr><th colspan="2">Earnings</th></tr></thead>
+          <tbody>
+            <tr><td>Gross Pay</td><td class="amount">${fmtN(p.gross_pay)}</td></tr>
+          </tbody>
+        </table>
+        <table class="stub-table">
+          <thead><tr><th colspan="2">Deductions</th></tr></thead>
+          <tbody>
+            <tr><td>Federal Income Tax</td><td class="amount">${fmtN(p.federal_tax)}</td></tr>
+            <tr><td>State Income Tax</td><td class="amount">${fmtN(p.state_tax)}</td></tr>
+            <tr><td>Social Security</td><td class="amount">${fmtN(p.social_security)}</td></tr>
+            <tr><td>Medicare</td><td class="amount">${fmtN(p.medicare)}</td></tr>
+            <tr><td>Health Insurance</td><td class="amount">${fmtN(p.health_insurance)}</td></tr>
+            <tr><td>401(k)</td><td class="amount">${fmtN(p.retirement_401k)}</td></tr>
+            <tr><td>Other Deductions</td><td class="amount">${fmtN(p.other_deductions)}</td></tr>
+            <tr class="stub-subtotal"><td>Total Deductions</td><td class="amount">${'$' + totalDeductions.toFixed(2)}</td></tr>
+          </tbody>
+        </table>
+        <div class="stub-net">
+          <span>Net Pay</span>
+          <span>${fmtN(p.net_pay)}</span>
+        </div>`;
+
+      document.getElementById('dlgPayStub').showModal();
+    }
+
     // ── Filters ───────────────────────────────────────────────────
     document.getElementById('searchInput').addEventListener('input', loadPayroll);
     document.getElementById('statusFilter').addEventListener('change', loadPayroll);
@@ -602,5 +728,69 @@
     // ── Init ──────────────────────────────────────────────────────
     (async () => { await loadEmployees(); await loadPeriods(); await loadPayroll(); })();
   </script>
+
+  <!-- Pay Stub Dialog -->
+  <dialog id="dlgPayStub" style="border:none;border-radius:12px;padding:0;width:480px;max-width:95vw;box-shadow:0 20px 60px rgba(0,0,0,0.25);">
+    <div style="padding:24px 28px;">
+      <div id="stubContent"></div>
+      <div style="display:flex;gap:10px;justify-content:flex-end;margin-top:20px;">
+        <button onclick="window.print()" style="padding:8px 18px;background:#1d4ed8;color:#fff;border:none;border-radius:8px;font-weight:600;cursor:pointer;font-size:0.9rem;">Print</button>
+        <button onclick="document.getElementById('dlgPayStub').close()" style="padding:8px 18px;background:#f3f4f6;color:#374151;border:1px solid #d1d5db;border-radius:8px;font-weight:600;cursor:pointer;font-size:0.9rem;">Close</button>
+      </div>
+    </div>
+  </dialog>
+
+  <!-- Payroll Preview Dialog -->
+  <dialog id="dlgPreview" style="border:none;border-radius:12px;padding:0;width:700px;max-width:96vw;box-shadow:0 20px 60px rgba(0,0,0,0.25);">
+    <div style="padding:24px 28px;">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;">
+        <h3 style="margin:0;font-size:1.05rem;color:#0f172a;">Payroll Preview</h3>
+        <button onclick="document.getElementById('dlgPreview').close()" style="background:none;border:none;font-size:1.3rem;cursor:pointer;color:#64748b;">✕</button>
+      </div>
+      <p id="previewPeriodLabel" style="font-size:0.85rem;color:#64748b;margin:0 0 14px;"></p>
+      <div style="overflow-x:auto;">
+        <table style="width:100%;border-collapse:collapse;font-size:0.85rem;">
+          <thead>
+            <tr style="background:#f8fbff;">
+              <th style="text-align:left;padding:8px 10px;border-bottom:1px solid #e2e8f0;font-size:0.72rem;text-transform:uppercase;color:#64748b;">Employee</th>
+              <th style="text-align:right;padding:8px 10px;border-bottom:1px solid #e2e8f0;font-size:0.72rem;text-transform:uppercase;color:#64748b;">Gross</th>
+              <th style="text-align:right;padding:8px 10px;border-bottom:1px solid #e2e8f0;font-size:0.72rem;text-transform:uppercase;color:#64748b;">Fed Tax</th>
+              <th style="text-align:right;padding:8px 10px;border-bottom:1px solid #e2e8f0;font-size:0.72rem;text-transform:uppercase;color:#64748b;">State Tax</th>
+              <th style="text-align:right;padding:8px 10px;border-bottom:1px solid #e2e8f0;font-size:0.72rem;text-transform:uppercase;color:#64748b;">FICA</th>
+              <th style="text-align:right;padding:8px 10px;border-bottom:1px solid #e2e8f0;font-size:0.72rem;text-transform:uppercase;color:#64748b;font-weight:700;">Net Pay</th>
+            </tr>
+          </thead>
+          <tbody id="previewBody"></tbody>
+          <tfoot id="previewFoot"></tfoot>
+        </table>
+      </div>
+      <div style="display:flex;justify-content:flex-end;margin-top:18px;">
+        <button onclick="document.getElementById('dlgPreview').close()" style="padding:8px 18px;background:#f3f4f6;color:#374151;border:1px solid #d1d5db;border-radius:8px;font-weight:600;cursor:pointer;font-size:0.9rem;">Close</button>
+      </div>
+    </div>
+  </dialog>
+
+  <style>
+    dialog:not([open]) { display: none; }
+    dialog::backdrop { background: rgba(0,0,0,0.45); }
+
+    .stub-header { text-align:center; margin-bottom:16px; border-bottom:2px solid #1d4ed8; padding-bottom:12px; }
+    .stub-company { font-size:1.4rem; font-weight:700; color:#1d4ed8; }
+    .stub-title { font-size:0.9rem; color:#6b7280; text-transform:uppercase; letter-spacing:1px; }
+    .stub-meta { display:grid; grid-template-columns:1fr 1fr; gap:4px 16px; font-size:0.85rem; margin-bottom:16px; color:#374151; }
+    .stub-table { width:100%; border-collapse:collapse; margin-bottom:12px; font-size:0.85rem; }
+    .stub-table th { background:#f1f5f9; text-align:left; padding:6px 10px; font-size:0.8rem; color:#374151; text-transform:uppercase; letter-spacing:0.5px; }
+    .stub-table td { padding:5px 10px; border-bottom:1px solid #e5e7eb; }
+    .stub-table td.amount { text-align:right; font-variant-numeric:tabular-nums; }
+    .stub-subtotal td { font-weight:600; color:#374151; border-top:2px solid #d1d5db; border-bottom:none; }
+    .stub-net { display:flex; justify-content:space-between; align-items:center; background:#1d4ed8; color:#fff; border-radius:8px; padding:12px 16px; font-size:1.05rem; font-weight:700; margin-top:4px; }
+
+    @media print {
+      body > *:not(#dlgPayStub) { display: none !important; }
+      #dlgPayStub { display: block !important; position: static; box-shadow: none; width: 100%; }
+      #dlgPayStub button { display: none; }
+      dialog::backdrop { display: none; }
+    }
+  </style>
 </body>
 </html>

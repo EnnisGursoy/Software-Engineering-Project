@@ -45,8 +45,8 @@ class EmployeePositionOut(BaseModel):
     position_id: int
     start_date: Optional[date]
     end_date: Optional[date]
-    current_salary: float
-    current_hourly_rate: float
+    current_salary: Optional[float] = None
+    current_hourly_rate: Optional[float] = None
     pay_frequency: str
     is_current: bool
 

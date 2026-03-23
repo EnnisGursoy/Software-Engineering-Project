@@ -683,6 +683,7 @@
       }
     }
   </style>
+  <script src="config.js"></script>
 </head>
 <body>
   <header class="topbar">
@@ -715,11 +716,13 @@
           <a href="homepage.html">Home</a>
           <a href="profile.html">Profile</a>
           <a href="employees.html">Employees</a>
+          <a href="departments.html">Departments</a>
           <a href="shifts.html">Shifts</a>
           <a href="payroll.html">Payroll</a>
           <a href="benefits.html">Benefits</a>
           <a href="taxes.html">Taxes</a>
           <a href="reports.html">Reports</a>
+          <a href="audit.html">Audit Log</a>
           <a href="settings.html">Settings</a>
           <a href="logout.html" class="signout">Sign Out</a>
         </nav>
@@ -766,12 +769,19 @@
 
     <section class="controls" style="grid-template-columns:1fr;">
       <div class="card search-box">
-        <h3 class="section-title">Search Employees</h3>
-        <input
-          type="text"
-          id="searchInput"
-          placeholder="Search by name, email, or status..."
-        />
+        <h3 class="section-title">Search &amp; Filter Employees</h3>
+        <div style="display:flex;gap:10px;flex-wrap:wrap;">
+          <input type="text" id="searchInput" placeholder="Search by name, email, or status..." style="flex:1;min-width:200px;" />
+          <select id="deptFilter" onchange="applyFilters()" style="padding:9px 12px;border:1px solid var(--border);border-radius:8px;font-size:0.95rem;background:var(--surface);color:var(--text);font-family:inherit;">
+            <option value="">All Departments</option>
+          </select>
+          <select id="statusFilter" onchange="applyFilters()" style="padding:9px 12px;border:1px solid var(--border);border-radius:8px;font-size:0.95rem;background:var(--surface);color:var(--text);font-family:inherit;">
+            <option value="">All Statuses</option>
+            <option value="active">Active</option>
+            <option value="on_leave">On Leave</option>
+            <option value="terminated">Terminated</option>
+          </select>
+        </div>
       </div>
     </section>
 
@@ -867,7 +877,9 @@
           </div>
           <div class="form-group">
             <label for="add_department">Department</label>
-            <input id="add_department" name="department_name" placeholder="e.g. Engineering" />
+            <select id="add_department" name="department_name">
+              <option value="">-- Select Department --</option>
+            </select>
           </div>
         </div>
 
@@ -987,10 +999,34 @@
       document.getElementById(id).classList.remove("open");
     }
 
-    const API   = 'http://localhost:8000';
     const token = localStorage.getItem('access_token');
     const role  = localStorage.getItem('user_role');
+
+    if (!token) { window.location.href = 'login.html'; }
+    if (role === 'employee') { window.location.href = 'employee_portal.html'; }
+
     const authHdrs = { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` };
+
+    let allEmployees = [];
+    let deptIdToName = {};
+
+    // ── Load departments into dropdowns ──────────────────────────
+    async function loadDepartments() {
+      try {
+        const res = await fetch(`${API}/department/`, { headers: authHdrs });
+        if (!res.ok) return;
+        const depts = await res.json();
+        deptIdToName = Object.fromEntries(depts.map(d => [d.department_id, d.department_name]));
+        const addSel   = document.getElementById('add_department');
+        const deptSel  = document.getElementById('deptFilter');
+        addSel.innerHTML = '<option value="">-- Select Department --</option>';
+        deptSel.innerHTML = '<option value="">All Departments</option>';
+        depts.forEach(d => {
+          addSel.appendChild(new Option(d.department_name, d.department_name));
+          deptSel.appendChild(new Option(d.department_name, d.department_id));
+        });
+      } catch {}
+    }
 
     // ── Load employees from backend ───────────────────────────────
     async function loadEmployees() {
@@ -1021,41 +1057,84 @@
         document.getElementById('totalDepartments').textContent = depts;
         document.getElementById('avgPayRate').textContent      = '—';
 
+        allEmployees = employees;
         if (!employees.length) {
           tbody.innerHTML = `<tr><td colspan="7" style="text-align:center;padding:20px;color:#64748b;">No employees found. Click "+ Add Employee" to get started.</td></tr>`;
           return;
         }
-        tbody.innerHTML = employees.map(e => {
-          const name      = `${e.first_name} ${e.last_name}`;
-          const status    = e.employment_status ?? 'active';
-          const badgeClass = status === 'active' ? 'badge-active' : status === 'on_leave' ? 'badge-on-leave' : 'badge-terminated';
-          const safeFirst = e.first_name.replace(/'/g, "\\'");
-          const safeLast  = e.last_name.replace(/'/g, "\\'");
-          const safeEmail = (e.email ?? '').replace(/'/g, "\\'");
-          const safePhone = (e.phone ?? '').replace(/'/g, "\\'");
-          return `<tr>
-            <td style="font-weight:600;">${name}</td>
-            <td>${e.email ?? '—'}</td>
-            <td>${e.department_id ?? '—'}</td>
-            <td>${e.phone ?? '—'}</td>
-            <td>—</td>
-            <td><span class="badge ${badgeClass}">${status.replace('_', ' ')}</span></td>
-            <td>
-              <div class="actions">
-                <button class="btn btn-secondary btn-sm" type="button"
-                  onclick="openEditModal(${e.employee_id},'${safeFirst}','${safeLast}','${safeEmail}','${safePhone}')">Edit</button>
-                <button class="btn btn-sm" type="button" style="background:#eff6ff;color:#1d4ed8;border:1px solid #bfdbfe;"
-                  onclick="window.location.href='positions.html?employee_id=${e.employee_id}&name=${encodeURIComponent(`${safeFirst} ${safeLast}`).replace(/`/g,'')}'" >Position</button>
-                <button class="btn btn-danger btn-sm" type="button"
-                  onclick="removeEmployee(${e.employee_id}, '${safeFirst} ${safeLast}')">Remove</button>
-                ${role === 'admin' ? `<button class="btn btn-sm" type="button" style="background:#450a0a;color:#fca5a5;border:1px solid #7f1d1d;"
-                  onclick="hardDeleteEmployee(${e.employee_id}, '${safeFirst} ${safeLast}')">Hard Delete</button>` : ''}
-              </div>
-            </td>
-          </tr>`;
-        }).join('');
+        renderEmployeeRows(employees);
       } catch (err) {
         tbody.innerHTML = `<tr><td colspan="7" style="text-align:center;padding:20px;color:#ef4444;">Failed to load employees. Make sure you are logged in.</td></tr>`;
+      }
+    }
+
+    function renderEmployeeRows(employees) {
+      const tbody = document.getElementById('employeeTableBody');
+      if (!employees.length) {
+        tbody.innerHTML = `<tr><td colspan="7" style="text-align:center;padding:20px;color:#64748b;">No employees match your filters.</td></tr>`;
+        return;
+      }
+      tbody.innerHTML = employees.map(e => {
+        const name       = `${e.first_name} ${e.last_name}`;
+        const status     = e.employment_status ?? 'active';
+        const badgeClass = status === 'active' ? 'badge-active' : status === 'on_leave' ? 'badge-on-leave' : 'badge-terminated';
+        const deptLabel  = e.department_id ? (deptIdToName[e.department_id] ?? `Dept #${e.department_id}`) : '—';
+        const safeFirst  = e.first_name.replace(/'/g, "\\'");
+        const safeLast   = e.last_name.replace(/'/g, "\\'");
+        const safeEmail  = (e.email ?? '').replace(/'/g, "\\'");
+        const safePhone  = (e.phone ?? '').replace(/'/g, "\\'");
+        const safeUser   = (e.user?.username ?? '').replace(/'/g, "\\'");
+        return `<tr>
+          <td style="font-weight:600;">${name}</td>
+          <td>${e.email ?? '—'}</td>
+          <td>${deptLabel}</td>
+          <td>${e.phone ?? '—'}</td>
+          <td>—</td>
+          <td><span class="badge ${badgeClass}">${status.replace('_', ' ')}</span></td>
+          <td>
+            <div class="actions">
+              <button class="btn btn-secondary btn-sm" type="button"
+                onclick="openEditModal(${e.employee_id},'${safeFirst}','${safeLast}','${safeEmail}','${safePhone}')">Edit</button>
+              <button class="btn btn-sm" type="button" style="background:#eff6ff;color:#1d4ed8;border:1px solid #bfdbfe;"
+                onclick="window.location.href='positions.html?employee_id=${e.employee_id}&name=${encodeURIComponent(name)}'">Position</button>
+              ${role === 'admin' && safeUser ? `<button class="btn btn-sm" type="button" style="background:#fefce8;color:#78350f;border:1px solid #fde68a;"
+                onclick="resetEmployeePassword('${safeUser}','${safeFirst} ${safeLast}')">Reset Pwd</button>` : ''}
+              <button class="btn btn-danger btn-sm" type="button"
+                onclick="removeEmployee(${e.employee_id}, '${safeFirst} ${safeLast}')">Remove</button>
+              ${role === 'admin' ? `<button class="btn btn-sm" type="button" style="background:#450a0a;color:#fca5a5;border:1px solid #7f1d1d;"
+                onclick="hardDeleteEmployee(${e.employee_id}, '${safeFirst} ${safeLast}')">Hard Delete</button>` : ''}
+            </div>
+          </td>
+        </tr>`;
+      }).join('');
+    }
+
+    function applyFilters() {
+      const search = document.getElementById('searchInput').value.toLowerCase().trim();
+      const deptId = document.getElementById('deptFilter').value;
+      const status = document.getElementById('statusFilter').value;
+      const filtered = allEmployees.filter(e => {
+        const text = `${e.first_name} ${e.last_name} ${e.email ?? ''} ${e.employment_status ?? ''}`.toLowerCase();
+        return (!search || text.includes(search))
+          && (!deptId || String(e.department_id) === String(deptId))
+          && (!status || e.employment_status === status);
+      });
+      renderEmployeeRows(filtered);
+    }
+
+    async function resetEmployeePassword(username, name) {
+      const newPwd = prompt(`Reset password for ${name} (username: ${username})\n\nEnter new password:`);
+      if (!newPwd) return;
+      if (newPwd.length < 4) { showStatus('Password must be at least 4 characters.', 'error'); return; }
+      try {
+        const res = await fetch(`${API}/auth/reset-password`, {
+          method: 'POST', headers: authHdrs,
+          body: JSON.stringify({ username, new_password: newPwd }),
+        });
+        if (!res.ok) { showStatus((await res.json()).detail ?? 'Password reset failed.', 'error'); return; }
+        showStatus(`Password for ${name} reset successfully.`, 'success');
+      } catch {
+        showStatus('Could not reach the server.', 'error');
       }
     }
 
@@ -1076,7 +1155,7 @@
         state:             document.getElementById('add_state').value.trim()        || null,
         zip_code:          document.getElementById('add_zip').value.trim()          || null,
         employment_status: statusMap[document.getElementById('add_status').value] ?? 'active',
-        department_name:   document.getElementById('add_department').value.trim()  || null,
+        department_name:   document.getElementById('add_department').value || null,
       };
       try {
         const res = await fetch(`${API}/employee/sign_up`, {
@@ -1160,21 +1239,9 @@
     }
 
     loadEmployees();
+    loadDepartments();
 
-    searchInput.addEventListener("input", function () {
-      const term = this.value.toLowerCase().trim();
-      const rows = employeeTableBody.querySelectorAll("tr");
-      let visibleCount = 0;
-
-      rows.forEach(row => {
-        const rowText = row.textContent.toLowerCase();
-        const match = rowText.includes(term);
-        row.style.display = match ? "" : "none";
-        if (match) visibleCount++;
-      });
-
-      emptyState.style.display = visibleCount === 0 ? "block" : "none";
-    });
+    searchInput.addEventListener("input", applyFilters);
 
     document.querySelectorAll(".modal-backdrop").forEach(backdrop => {
       backdrop.addEventListener("click", (e) => {

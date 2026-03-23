@@ -1,18 +1,33 @@
 from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.orm import Session
-from Backend.Utility.dependencies import get_db, hr_only, admin_only, manager_only
+from Backend.Utility.dependencies import get_db, hr_only, admin_only, manager_only, get_current_employee
+from Backend.Models.Employee import Employee
 from Backend.Models.User import User
 from Backend.Schemas.Employee import EmployeeCreate, EmployeeOut, EmployeeUpdate
 from Backend.Services.employee_service import create_employee, update_employee, show_employee, show_all_employees, delete_employee, hard_delete_employee, get_employees_by_department
 
 router = APIRouter()
 
-@router.get('/by-department/{department_id}')
+@router.get('/by-department/{department_id}', response_model=list[EmployeeOut])
 async def get_by_department(department_id: int, user: User = Depends(manager_only), db: Session = Depends(get_db)):
     return get_employees_by_department(department_id, db)
 
 
-@router.get('/all')
+@router.get('/me', response_model=EmployeeOut)
+async def get_my_profile(employee: Employee = Depends(get_current_employee)):
+    return employee
+
+
+@router.patch('/me', response_model=EmployeeOut)
+async def update_my_profile(
+    data: EmployeeUpdate,
+    employee: Employee = Depends(get_current_employee),
+    db: Session = Depends(get_db),
+):
+    return update_employee(employee.employee_id, data, db)
+
+
+@router.get('/all', response_model=list[EmployeeOut])
 async def get_all(user : User = Depends(manager_only), db : Session = Depends(get_db)):
    all_employees = show_all_employees(db)
    return all_employees

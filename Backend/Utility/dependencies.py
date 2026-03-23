@@ -3,7 +3,8 @@ from Backend.Utility.security import decode_access_token
 from fastapi import Depends, HTTPException, status
 from sqlalchemy.orm import Session
 from fastapi.security import OAuth2PasswordBearer
-from Backend.Models.User import User   
+from Backend.Models.User import User
+from Backend.Models.Employee import Employee
 
 oauth2_scheme = OAuth2PasswordBearer(
     tokenUrl="auth/login",
@@ -53,6 +54,17 @@ def get_current_user(
 # ---------------------------------------------------------
 # Admin dependency with first-user bootstrap
 # ---------------------------------------------------------
+def get_current_employee(
+    current_user: User = Depends(get_current_user),
+    db: Session = Depends(get_db),
+) -> Employee:
+    """Returns the Employee record linked to the logged-in user."""
+    emp = db.query(Employee).filter(Employee.user_id == current_user.user_id).first()
+    if not emp:
+        raise HTTPException(status_code=404, detail="No employee record linked to this account")
+    return emp
+
+
 def admin_only(
     db: Session = Depends(get_db),
     current_user: User | None = Depends(get_optional_user)

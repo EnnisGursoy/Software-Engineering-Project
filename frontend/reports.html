@@ -186,6 +186,7 @@
 
     body.dark .admin-only-note { background: #1c1a07; border-color: #713f12; color: #fde68a; }
   </style>
+  <script src="config.js"></script>
 </head>
 <body>
   <header>
@@ -198,11 +199,13 @@
         <a href="homepage.html">Home</a>
         <a href="profile.html">Profile</a>
         <a href="employees.html">Employees</a>
+        <a href="departments.html">Departments</a>
         <a href="shifts.html">Shifts</a>
         <a href="payroll.html">Payroll</a>
         <a href="benefits.html">Benefits</a>
         <a href="taxes.html">Taxes</a>
         <a href="reports.html">Reports</a>
+        <a href="audit.html">Audit Log</a>
         <a href="settings.html">Settings</a>
         <a href="logout.html" style="color:#ef4444;">Sign Out</a>
       </nav>
@@ -214,6 +217,7 @@
       <button class="tab-btn active" data-tab="payroll-summary">Payroll Summary</button>
       <button class="tab-btn"        data-tab="pay-periods">Pay Period Summary</button>
       <button class="tab-btn"        data-tab="tax-overview">Tax Overview</button>
+      <button class="tab-btn"        data-tab="headcount">Headcount</button>
     </div>
 
     <!-- ── Tab 1: Payroll Summary ── -->
@@ -304,6 +308,27 @@
         </div>
       </div>
     </div>
+
+    <!-- ── Tab 4: Headcount ── -->
+    <div class="tab-panel" id="tab-headcount">
+      <div class="summary-cards" id="headcountStats"></div>
+      <div class="table-shell">
+        <div class="table-card">
+          <table>
+            <thead>
+              <tr>
+                <th>Department</th>
+                <th>Active</th>
+                <th>On Leave</th>
+                <th>Terminated</th>
+                <th>Total</th>
+              </tr>
+            </thead>
+            <tbody id="headcountBody"></tbody>
+          </table>
+        </div>
+      </div>
+    </div>
   </main>
 
   <script>
@@ -311,9 +336,10 @@
       document.body.classList.add('dark');
     }
 
-    const API   = 'http://localhost:8000';
     const token = localStorage.getItem('access_token');
     const role  = localStorage.getItem('user_role');
+    if (!token) { window.location.href = 'login.html'; }
+    if (role === 'employee') { window.location.href = 'employee_portal.html'; }
     const hdrs  = { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` };
     const fmt   = (n) => n != null ? '$' + Number(n).toFixed(2) : '—';
 
@@ -525,10 +551,66 @@
       </tr>`).join('');
     }
 
+    // ── Headcount by department ───────────────────────────────────────────
+    async function loadHeadcount() {
+      const tbody = document.getElementById('headcountBody');
+      const statsDiv = document.getElementById('headcountStats');
+      try {
+        const [eRes, dRes] = await Promise.allSettled([
+          fetch(`${API}/employee/all`, { headers: hdrs }),
+          fetch(`${API}/department/`,  { headers: hdrs }),
+        ]);
+        const employees = eRes.status === 'fulfilled' && eRes.value.ok ? await eRes.value.json() : [];
+        const depts     = dRes.status === 'fulfilled' && dRes.value.ok ? await dRes.value.json() : [];
+        const deptNames = Object.fromEntries(depts.map(d => [d.department_id, d.department_name]));
+
+        const totalActive   = employees.filter(e => e.employment_status === 'active').length;
+        const totalOnLeave  = employees.filter(e => e.employment_status === 'on_leave').length;
+        const totalTerminated = employees.filter(e => e.employment_status === 'terminated').length;
+
+        statsDiv.innerHTML = [
+          ['Total Employees', employees.length],
+          ['Active', totalActive],
+          ['On Leave', totalOnLeave],
+          ['Terminated', totalTerminated],
+        ].map(([l, v]) => `<div class="summary-card"><div class="label">${l}</div><div class="value">${v}</div></div>`).join('');
+
+        // Group by department
+        const groups = {};
+        employees.forEach(e => {
+          const key = e.department_id ?? '__none__';
+          if (!groups[key]) groups[key] = { active: 0, on_leave: 0, terminated: 0 };
+          const s = e.employment_status ?? 'active';
+          if (s === 'active') groups[key].active++;
+          else if (s === 'on_leave') groups[key].on_leave++;
+          else groups[key].terminated++;
+        });
+
+        const rows = Object.entries(groups)
+          .sort((a, b) => (b[1].active + b[1].on_leave) - (a[1].active + a[1].on_leave))
+          .map(([deptId, counts]) => {
+            const name  = deptId === '__none__' ? '<em style="color:var(--muted);">Unassigned</em>' : (deptNames[deptId] ?? `Dept #${deptId}`);
+            const total = counts.active + counts.on_leave + counts.terminated;
+            return `<tr>
+              <td style="font-weight:600;">${name}</td>
+              <td><span style="color:#15803d;font-weight:600;">${counts.active}</span></td>
+              <td>${counts.on_leave}</td>
+              <td style="color:#b91c1c;">${counts.terminated}</td>
+              <td style="font-weight:700;">${total}</td>
+            </tr>`;
+          });
+
+        tbody.innerHTML = rows.length ? rows.join('') : emptyRow(5, 'No employee data found.');
+      } catch {
+        tbody.innerHTML = emptyRow(5, 'Failed to load headcount data.');
+      }
+    }
+
     // ── Init ─────────────────────────────────────────────────────────────
     loadPayrollSummary();
     loadPayPeriodSummary();
     loadTaxOverview();
+    loadHeadcount();
   </script>
 </body>
 </html>

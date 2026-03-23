@@ -2,6 +2,9 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
+  <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate" />
+  <meta http-equiv="Pragma" content="no-cache" />
+  <meta http-equiv="Expires" content="0" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <meta name="description" content="View and manage your PayCentral user profile, account information, and preferences." />
   <title>Profile | PayCentral</title>
@@ -531,6 +534,7 @@
       }
     }
   </style>
+  <script src="config.js"></script>
 </head>
 <body>
   <header class="topbar">
@@ -565,11 +569,13 @@
           <a href="homepage.html">Home</a>
           <a href="profile.html">Profile</a>
           <a href="employees.html">Employees</a>
+          <a href="departments.html">Departments</a>
           <a href="shifts.html">Shifts</a>
           <a href="payroll.html">Payroll</a>
           <a href="benefits.html">Benefits</a>
           <a href="taxes.html">Taxes</a>
           <a href="reports.html">Reports</a>
+          <a href="audit.html">Audit Log</a>
           <a href="settings.html">Settings</a>
           <a href="logout.html" class="signout">Sign Out</a>
         </nav>
@@ -689,7 +695,10 @@
   </main>
 
   <script>
-    const API = "http://127.0.0.1:8000";
+    // Employees have their own portal — redirect immediately without waiting for API
+    if (!localStorage.getItem("access_token")) { window.location.replace("login.html"); }
+    if (localStorage.getItem("user_role") === "employee") { window.location.replace("employee_portal.html"); }
+
     const body = document.body;
     const menuBtn = document.getElementById("menuBtn");
     const hrMenu = document.getElementById("hrMenu");
@@ -774,12 +783,15 @@
 
     const user = await res.json();
 
-    // Employee fields are nested now
-    const emp = user.employee ?? {};
+    // Employees have their own portal
+    if (user.role === 'employee') {
+      window.location.href = 'employee_portal.html';
+      return;
+    }
 
-    document.getElementById('firstName').value = emp.first_name ?? '';
-    document.getElementById('lastName').value  = emp.last_name  ?? '';
-    document.getElementById('role').value      = user.role      ?? '';
+    document.getElementById('firstName').value = user.first_name ?? '';
+    document.getElementById('lastName').value  = user.last_name  ?? '';
+    document.getElementById('role').value      = user.role       ?? '';
 
     updateProfilePreview();
   } catch {}
