@@ -23,7 +23,7 @@ class EmployeeCreate(BaseModel):
 
 
 class EmployeeOut(BaseModel):
-    user : UserOut
+    user : Optional[UserOut] = None
     employee_id: int
     first_name: str
     last_name: str
@@ -34,6 +34,7 @@ class EmployeeOut(BaseModel):
     state: Optional[str]
     zip_code: Optional[str]
     department_id: Optional[int] = None
+    employment_status: Optional[str] = None
 
     model_config = ConfigDict(from_attributes=True)
 

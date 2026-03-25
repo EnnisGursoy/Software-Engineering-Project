@@ -1,6 +1,7 @@
 from fastapi import APIRouter, Depends
 from sqlalchemy.orm import Session
-from Backend.Utility.dependencies import get_db, hr_only, manager_only, admin_or_manager
+from Backend.Utility.dependencies import get_db, hr_only, manager_only, admin_or_manager, get_current_employee
+from Backend.Models.Employee import Employee
 from Backend.Models.User import User
 from Backend.Schemas.Paycheck import PaycheckCreate, PaycheckOut, PaycheckStatusUpdate
 from Backend.Services.paycheck_service import (
@@ -15,6 +16,14 @@ from Backend.Services.paycheck_service import (
 )
 
 router = APIRouter()
+
+
+@router.get("/me", response_model=list[PaycheckOut])
+async def my_paychecks(
+    employee: Employee = Depends(get_current_employee),
+    db: Session = Depends(get_db),
+):
+    return get_paychecks_by_employee(employee.employee_id, db)
 
 
 @router.get("/all", response_model=list[PaycheckOut])

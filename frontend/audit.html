@@ -1,0 +1,333 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Audit Log | PayCentral</title>
+  <script src="config.js"></script>
+  <style>
+    :root {
+      --bg: #eef3f9;
+      --text: #1f2937;
+      --surface: #ffffff;
+      --surface-soft: #f8fbff;
+      --border: #d4dde8;
+      --primary: #1d4ed8;
+      --primary-dark: #1e40af;
+      --primary-light: #dbeafe;
+      --muted: #64748b;
+      --success: #0f766e;
+      --danger: #b91c1c;
+      --shadow: 0 14px 36px rgba(15, 23, 42, 0.08);
+    }
+
+    body.dark {
+      --bg: #0b1220;
+      --text: #f3f4f6;
+      --surface: #111827;
+      --surface-soft: #0f172a;
+      --border: #374151;
+      --primary-light: rgba(59, 130, 246, 0.18);
+      --muted: #9ca3af;
+      --shadow: 0 16px 40px rgba(0, 0, 0, 0.35);
+    }
+
+    * { box-sizing: border-box; }
+    html { scroll-behavior: smooth; }
+
+    body {
+      margin: 0;
+      font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+      background:
+        radial-gradient(circle at top left, #dbeafe 0%, transparent 35%),
+        radial-gradient(circle at top right, #e0f2fe 0%, transparent 30%),
+        linear-gradient(180deg, #eff6ff 0%, var(--bg) 100%);
+      color: var(--text);
+      transition: background 0.2s ease, color 0.2s ease;
+    }
+
+    body.dark {
+      background:
+        radial-gradient(circle at top left, rgba(29,78,216,0.18) 0%, transparent 30%),
+        radial-gradient(circle at top right, rgba(14,165,233,0.10) 0%, transparent 25%),
+        linear-gradient(180deg, #0b1220 0%, #111827 100%);
+    }
+
+    a { color: inherit; text-decoration: none; }
+
+    /* TOP NAV */
+    .topbar {
+      position: sticky; top: 0; z-index: 100;
+      display: flex; justify-content: space-between; align-items: center;
+      padding: 14px 22px;
+      background: rgba(255,255,255,0.88);
+      backdrop-filter: blur(10px);
+      border-bottom: 1px solid var(--border);
+      box-shadow: 0 2px 12px rgba(29,78,216,0.07);
+    }
+    body.dark .topbar { background: rgba(17,24,39,0.85); }
+    .topbar-left { display: flex; align-items: center; gap: 14px; }
+    .brand { display: flex; align-items: center; gap: 12px; }
+    .brand-logo {
+      width: 46px; height: 46px; border-radius: 14px;
+      background: var(--primary);
+      display: flex; align-items: center; justify-content: center;
+      overflow: hidden; box-shadow: 0 8px 20px rgba(29,78,216,0.22);
+    }
+    .brand-logo img { width: 100%; height: 100%; object-fit: contain; padding: 6px; }
+    .brand-fallback { width: 24px; height: 24px; fill: none; stroke: white; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; display: none; }
+    .brand-text h1 { margin: 0; font-size: 1.1rem; line-height: 1.1; letter-spacing: -0.3px; }
+    .brand-text p  { margin: 3px 0 0; color: var(--muted); font-size: 0.82rem; }
+    .topbar-actions { display: flex; align-items: center; gap: 10px; }
+    .top-btn { border: 1px solid var(--border); background: var(--surface); color: var(--text); padding: 10px 14px; border-radius: 10px; font-size: 0.9rem; cursor: pointer; transition: 0.15s ease; }
+    .top-btn:hover { background: var(--surface-soft); transform: translateY(-1px); }
+    .menu-wrap { position: relative; }
+    .menu-btn { width: 44px; height: 44px; border: 1px solid var(--border); border-radius: 10px; background: var(--surface); cursor: pointer; display: flex; flex-direction: column; justify-content: center; align-items: center; gap: 5px; padding: 0; transition: background 0.15s ease, transform 0.15s ease; }
+    .menu-btn:hover { background: var(--surface-soft); transform: translateY(-1px); }
+    .menu-btn span { width: 20px; height: 2px; background: var(--text); border-radius: 10px; display: block; }
+    .menu { position: absolute; right: 0; top: 54px; min-width: 230px; background: var(--surface); border: 1px solid var(--border); border-radius: 14px; box-shadow: var(--shadow); padding: 8px; display: none; z-index: 20; }
+    .menu.open { display: block; }
+    .menu a { display: block; padding: 11px 12px; border-radius: 10px; font-size: 0.94rem; color: var(--text); transition: background 0.15s ease, color 0.15s ease; }
+    .menu a:hover { background: var(--primary-light); color: var(--primary); }
+    .menu a.active { background: var(--primary-light); color: var(--primary); font-weight: 600; }
+    .menu a.signout { color: #ef4444; font-weight: 600; }
+
+    /* MAIN */
+    main { padding: 28px 20px 40px; max-width: 1100px; margin: 0 auto; }
+
+    .page-header { display: flex; justify-content: space-between; align-items: flex-start; gap: 18px; margin-bottom: 22px; flex-wrap: wrap; }
+    .page-header h2 { margin: 0 0 8px; font-size: clamp(1.4rem, 3vw, 2rem); letter-spacing: -0.5px; }
+    .page-header p  { margin: 0; color: var(--muted); line-height: 1.7; }
+    .page-badge { display: inline-block; background: rgba(185,28,28,0.09); color: #b91c1c; border: 1px solid rgba(185,28,28,0.18); border-radius: 20px; padding: 4px 14px; font-size: 0.8rem; font-weight: 600; letter-spacing: 0.3px; margin-bottom: 8px; }
+
+    /* STATS ROW */
+    .stats-row { display: flex; gap: 14px; flex-wrap: wrap; margin-bottom: 22px; }
+    .stat-card { flex: 1; min-width: 160px; background: var(--surface); border: 1px solid var(--border); border-radius: 14px; padding: 16px 20px; box-shadow: var(--shadow); }
+    .stat-card .val { font-size: 1.8rem; font-weight: 700; line-height: 1.1; }
+    .stat-card .lbl { font-size: 0.8rem; color: var(--muted); margin-top: 4px; }
+    .stat-success { color: #0f766e; }
+    .stat-danger  { color: #b91c1c; }
+
+    /* FILTERS */
+    .toolbar { display: flex; gap: 10px; flex-wrap: wrap; align-items: center; margin-bottom: 16px; }
+    .toolbar input, .toolbar select {
+      padding: 8px 12px; border: 1px solid var(--border); border-radius: 8px;
+      background: var(--surface); color: var(--text); font-size: 0.88rem;
+    }
+    .toolbar input { min-width: 200px; }
+
+    /* TABLE */
+    .card { background: var(--surface); border: 1px solid var(--border); border-radius: 16px; box-shadow: var(--shadow); overflow: hidden; }
+    .table-wrap { overflow-x: auto; }
+    table { width: 100%; border-collapse: collapse; font-size: 0.88rem; }
+    thead th { background: var(--surface-soft); padding: 11px 14px; text-align: left; font-weight: 600; color: var(--muted); font-size: 0.8rem; text-transform: uppercase; letter-spacing: 0.5px; border-bottom: 1px solid var(--border); white-space: nowrap; }
+    tbody td { padding: 11px 14px; border-bottom: 1px solid var(--border); vertical-align: middle; }
+    tbody tr:last-child td { border-bottom: none; }
+    tbody tr:hover { background: var(--surface-soft); }
+
+    .badge { display: inline-block; padding: 3px 10px; border-radius: 20px; font-size: 0.75rem; font-weight: 600; }
+    .badge-ok  { background: #dcfce7; color: #15803d; }
+    .badge-fail{ background: #fee2e2; color: #b91c1c; }
+    body.dark .badge-ok   { background: rgba(21,128,61,0.2);  color: #4ade80; }
+    body.dark .badge-fail { background: rgba(185,28,28,0.2);  color: #f87171; }
+
+    .mono { font-family: "Courier New", monospace; font-size: 0.82rem; color: var(--muted); }
+    .empty-row { text-align: center; padding: 32px; color: var(--muted); font-style: italic; }
+  </style>
+</head>
+<body>
+  <header class="topbar">
+    <div class="topbar-left">
+      <a href="homepage.html" class="brand">
+        <div class="brand-logo">
+          <img src="PAY CENTRAL LOGO.png" alt="PayCentral logo" onerror="this.style.display='none'; this.nextElementSibling.style.display='block';">
+          <svg class="brand-fallback" viewBox="0 0 24 24">
+            <line x1="12" y1="1" x2="12" y2="23"></line>
+            <path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"></path>
+          </svg>
+        </div>
+        <div class="brand-text">
+          <h1>PayCentral</h1>
+          <p>HR Dashboard</p>
+        </div>
+      </a>
+    </div>
+
+    <div class="topbar-actions">
+      <button class="top-btn" id="themeToggle" type="button">Toggle Theme</button>
+      <div class="menu-wrap">
+        <button class="menu-btn" id="menuBtn" aria-label="Open menu" aria-expanded="false" aria-controls="hrMenu">
+          <span></span><span></span><span></span>
+        </button>
+        <nav class="menu" id="hrMenu" aria-hidden="true">
+          <a href="homepage.html">Home</a>
+          <a href="profile.html">Profile</a>
+          <a href="employees.html">Employees</a>
+          <a href="departments.html">Departments</a>
+          <a href="shifts.html">Shifts</a>
+          <a href="payroll.html">Payroll</a>
+          <a href="benefits.html">Benefits</a>
+          <a href="taxes.html">Taxes</a>
+          <a href="reports.html">Reports</a>
+          <a href="audit.html" class="active">Audit Log</a>
+          <a href="settings.html">Settings</a>
+          <a href="logout.html" class="signout">Sign Out</a>
+        </nav>
+      </div>
+    </div>
+  </header>
+
+  <main>
+    <div class="page-header">
+      <div>
+        <div class="page-badge">Admin Only</div>
+        <h2>Audit Log</h2>
+        <p>Login activity and authentication events — last 200 records</p>
+      </div>
+    </div>
+
+    <div class="stats-row">
+      <div class="stat-card">
+        <div class="val" id="statTotal">—</div>
+        <div class="lbl">Total Events</div>
+      </div>
+      <div class="stat-card">
+        <div class="val stat-success" id="statSuccess">—</div>
+        <div class="lbl">Successful Logins</div>
+      </div>
+      <div class="stat-card">
+        <div class="val stat-danger" id="statFailed">—</div>
+        <div class="lbl">Failed Attempts</div>
+      </div>
+      <div class="stat-card">
+        <div class="val" id="statUsers">—</div>
+        <div class="lbl">Unique Usernames</div>
+      </div>
+    </div>
+
+    <div class="toolbar">
+      <input type="text" id="searchInput" placeholder="Search username or IP…" oninput="renderTable()">
+      <select id="statusFilter" onchange="renderTable()">
+        <option value="">All Events</option>
+        <option value="success">Successful only</option>
+        <option value="fail">Failed only</option>
+      </select>
+    </div>
+
+    <div class="card">
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th>#</th>
+              <th>Timestamp</th>
+              <th>Username</th>
+              <th>IP Address</th>
+              <th>Result</th>
+            </tr>
+          </thead>
+          <tbody id="logBody"></tbody>
+        </table>
+      </div>
+    </div>
+  </main>
+
+  <script>
+    // ── Auth guard — admin only ────────────────────────────────────
+    const token = localStorage.getItem('access_token');
+    const role  = localStorage.getItem('user_role');
+    if (!token) { window.location.replace('login.html'); }
+    if (role !== 'admin') { window.location.replace('homepage.html'); }
+
+    const hdrs = { Authorization: `Bearer ${token}` };
+
+    // ── Theme ─────────────────────────────────────────────────────
+    if (localStorage.getItem('theme') === 'dark') document.body.classList.add('dark');
+    document.getElementById('themeToggle').addEventListener('click', () => {
+      document.body.classList.toggle('dark');
+      localStorage.setItem('theme', document.body.classList.contains('dark') ? 'dark' : 'light');
+    });
+
+    // ── Menu ──────────────────────────────────────────────────────
+    const menuBtn = document.getElementById('menuBtn');
+    const hrMenu  = document.getElementById('hrMenu');
+    menuBtn.addEventListener('click', () => {
+      const open = hrMenu.classList.toggle('open');
+      menuBtn.setAttribute('aria-expanded', open);
+      hrMenu.setAttribute('aria-hidden', !open);
+    });
+    document.addEventListener('click', e => {
+      if (!menuBtn.contains(e.target) && !hrMenu.contains(e.target)) {
+        hrMenu.classList.remove('open');
+        menuBtn.setAttribute('aria-expanded', false);
+        hrMenu.setAttribute('aria-hidden', true);
+      }
+    });
+
+    // ── Data ──────────────────────────────────────────────────────
+    let allLogs = [];
+
+    async function loadLogs() {
+      const tbody = document.getElementById('logBody');
+      tbody.innerHTML = `<tr><td colspan="5" class="empty-row">Loading…</td></tr>`;
+      try {
+        const res = await fetch(`${API}/auth/logs`, { headers: hdrs });
+        if (!res.ok) {
+          const d = await res.json().catch(() => ({}));
+          tbody.innerHTML = `<tr><td colspan="5" class="empty-row" style="color:#ef4444;">${d.detail ?? 'Failed to load logs.'}</td></tr>`;
+          return;
+        }
+        allLogs = await res.json();
+
+        // Stats
+        const total   = allLogs.length;
+        const success = allLogs.filter(l => l.success).length;
+        const failed  = total - success;
+        const unique  = new Set(allLogs.map(l => l.username)).size;
+        document.getElementById('statTotal').textContent   = total;
+        document.getElementById('statSuccess').textContent = success;
+        document.getElementById('statFailed').textContent  = failed;
+        document.getElementById('statUsers').textContent   = unique;
+
+        renderTable();
+      } catch {
+        document.getElementById('logBody').innerHTML = `<tr><td colspan="5" class="empty-row" style="color:#ef4444;">Could not reach the server.</td></tr>`;
+      }
+    }
+
+    function renderTable() {
+      const search = document.getElementById('searchInput').value.trim().toLowerCase();
+      const status = document.getElementById('statusFilter').value;
+
+      const rows = allLogs.filter(l => {
+        if (search && !l.username.toLowerCase().includes(search) && !(l.ip_address ?? '').includes(search)) return false;
+        if (status === 'success' && !l.success) return false;
+        if (status === 'fail'    &&  l.success) return false;
+        return true;
+      });
+
+      const tbody = document.getElementById('logBody');
+      if (!rows.length) {
+        tbody.innerHTML = `<tr><td colspan="5" class="empty-row">No matching records.</td></tr>`;
+        return;
+      }
+
+      tbody.innerHTML = rows.map(l => {
+        const dt = l.attempted_at ? new Date(l.attempted_at).toLocaleString() : '—';
+        const badge = l.success
+          ? `<span class="badge badge-ok">Success</span>`
+          : `<span class="badge badge-fail">Failed</span>`;
+        return `<tr>
+          <td class="mono">${l.log_id}</td>
+          <td>${dt}</td>
+          <td><strong>${l.username}</strong></td>
+          <td class="mono">${l.ip_address ?? '—'}</td>
+          <td>${badge}</td>
+        </tr>`;
+      }).join('');
+    }
+
+    loadLogs();
+  </script>
+</body>
+</html>

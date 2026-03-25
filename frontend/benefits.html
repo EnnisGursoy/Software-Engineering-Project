@@ -22,27 +22,20 @@
     header {
       display: flex; justify-content: space-between; align-items: center;
       padding: 14px 20px; background: var(--primary); border-bottom: 1px solid var(--primary-dark);
+      position: sticky; top: 0; z-index: 10000; pointer-events: auto;
     }
+    header * { pointer-events: auto; }
     h1 { margin: 0; font-size: 1.3rem; color: #fff; }
     main { max-width: 1160px; margin: 0 auto; padding: 0 20px 40px; }
 
-    .menu-wrap { position: relative; }
-    .menu-btn {
-      width: 42px; height: 42px; border: 1px solid rgba(255,255,255,0.45);
-      border-radius: 8px; background: rgba(255,255,255,0.12); cursor: pointer;
-      display: flex; flex-direction: column; justify-content: center;
-      align-items: center; gap: 5px; padding: 0;
+    .topnav { display: flex; gap: 6px; align-items: center; flex-wrap: wrap; }
+    .topnav a {
+      color: rgba(255,255,255,0.85); text-decoration: none;
+      font-size: 0.82rem; padding: 5px 10px; border-radius: 6px;
+      border: 1px solid rgba(255,255,255,0.2); white-space: nowrap;
     }
-    .menu-btn span { width: 20px; height: 2px; background: #fff; border-radius: 10px; display: block; }
-    .menu {
-      position: absolute; right: 0; top: 50px; min-width: 210px;
-      background: var(--surface); border: 1px solid var(--border);
-      border-radius: 10px; box-shadow: 0 10px 25px rgba(0,0,0,0.1);
-      padding: 8px; display: none; z-index: 20;
-    }
-    .menu.open { display: block; }
-    .menu a { display: block; text-decoration: none; color: var(--text); padding: 10px 12px; border-radius: 8px; font-size: 0.95rem; }
-    .menu a:hover { background: #ecfeff; color: var(--accent); }
+    .topnav a:hover { background: rgba(255,255,255,0.15); color: #fff; }
+    .topnav a.signout { color: #fca5a5; border-color: rgba(252,165,165,0.3); }
 
     /* ── SUBNAV ── */
     .subnav {
@@ -172,6 +165,7 @@
     .plan-actions { display: flex; gap: 6px; margin-top: 4px; }
 
     /* ── DIALOGS ── */
+    dialog:not([open]) { display: none; }
     dialog {
       width: min(600px, calc(100vw - 32px));
       border: 1px solid var(--border); border-radius: 14px; padding: 0;
@@ -206,28 +200,23 @@
       padding: 6px 0 2px; border-top: 1px solid var(--border); margin-top: 4px;
     }
   </style>
+  <script src="config.js"></script>
 </head>
 <body>
 
 <header>
   <h1>Benefits</h1>
-  <div class="menu-wrap">
-    <button class="menu-btn" id="menuBtn" aria-label="Open menu" aria-expanded="false" aria-controls="hrMenu">
-      <span></span><span></span><span></span>
-    </button>
-                <nav class="menu" id="hrMenu" aria-hidden="true">
-        <a href="homepage.html">Home</a>
-        <a href="profile.html">Profile</a>
-        <a href="employees.html">Employees</a>
-        <a href="shifts.html">Shifts</a>
-        <a href="payroll.html">Payroll</a>
-        <a href="benefits.html">Benefits</a>
-        <a href="taxes.html">Taxes</a>
-        <a href="reports.html">Reports</a>
-        <a href="settings.html">Settings</a>
-        <a href="logout.html" style="color:#ef4444;">Sign Out</a>
-      </nav>
-  </div>
+  <nav class="topnav">
+    <a href="homepage.html">Home</a>
+    <a href="employees.html">Employees</a>
+    <a href="departments.html">Departments</a>
+    <a href="payroll.html">Payroll</a>
+    <a href="benefits.html">Benefits</a>
+    <a href="taxes.html">Taxes</a>
+    <a href="reports.html">Reports</a>
+    <a href="audit.html">Audit Log</a>
+    <a href="logout.html" class="signout">Sign Out</a>
+  </nav>
 </header>
 
 <main>
@@ -330,16 +319,16 @@
           <!-- populated dynamically from EMPLOYEES list in JS -->
         </select>
       </div>
-      <div class="field"><label>Benefit Type</label>
+      <div class="field"><label>Filter by Type</label>
         <select class="fselect" id="eAdd_type" onchange="populatePlanDropdown('eAdd_type','eAdd_plan')">
-          <option value="">— Select type —</option>
+          <option value="">— All Types —</option>
           <option>Health</option><option>Dental</option><option>Vision</option>
           <option>Life</option><option>Retirement</option><option>Other</option>
         </select>
       </div>
-      <div class="field"><label>Plan</label>
+      <div class="field"><label>Plan *</label>
         <select class="fselect" id="eAdd_plan">
-          <option value="">— Select type first —</option>
+          <option value="">— Select plan —</option>
         </select>
       </div>
       <div class="field"><label>Employee Cost (per period)</label>
@@ -366,7 +355,7 @@
   </div>
   <div class="dlg-actions">
     <button class="btn ghost" onclick="document.getElementById('dlgEnrollAdd').close()">Cancel</button>
-    <button class="btn primary" onclick="saveEnrollment()">Add Enrollment</button>
+    <button class="btn primary" id="btnSaveEnroll" onclick="saveEnrollment()">Add Enrollment</button>
   </div>
 </dialog>
 
@@ -462,7 +451,7 @@
   </div>
   <div class="dlg-actions">
     <button class="btn ghost" onclick="document.getElementById('dlgPlanAdd').close()">Cancel</button>
-    <button class="btn primary" onclick="savePlan()">Add Plan</button>
+    <button class="btn primary" id="btnSavePlan" onclick="savePlan()">Add Plan</button>
   </div>
 </dialog>
 
@@ -525,12 +514,22 @@
 
 
 <script>
-  const API     = 'http://localhost:8000';
   const token   = localStorage.getItem('access_token');
+  if (!token) { window.location.replace('login.html'); }
   const authHdrs = { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` };
 
   // ── UTILITY ──
-  function openDlg(id) { document.getElementById(id).showModal(); }
+  function openDlg(id) {
+    if (id === 'dlgEnrollAdd') {
+      document.getElementById('eAdd_type').value = '';
+      const planSel = document.getElementById('eAdd_plan');
+      planSel.innerHTML = plans.length
+        ? plans.map(function(p){ return '<option value="'+p.plan_id+'">['+p.plan_type+'] '+p.plan_name+(p.provider ? ' - '+p.provider : '')+'</option>'; }).join('')
+        : '<option value="">No plans in catalog yet</option>';
+    }
+    clearDlgError(id);
+    document.getElementById(id).showModal();
+  }
   function statusBadge(s) {
     const cls = s === 'Active' ? 'badge-active' : s === 'Pending' ? 'badge-pending' : 'badge-inactive';
     return `<span class="badge ${cls}">${s}</span>`;
@@ -538,14 +537,34 @@
   function emptyRow(cols, msg) {
     return `<tr><td colspan="${cols}" style="text-align:center;color:var(--muted);font-style:italic;padding:32px 14px;">${msg}</td></tr>`;
   }
+  function handle401(res) {
+    if (res.status === 401) { window.location.replace('login.html'); return true; }
+    return false;
+  }
+  function showDlgError(dlgId, msg) {
+    const dlg = document.getElementById(dlgId);
+    let err = dlg.querySelector('.dlg-inline-err');
+    if (!err) {
+      err = document.createElement('div');
+      err.className = 'dlg-inline-err';
+      err.style.cssText = 'background:#fef2f2;color:#991b1b;padding:8px 12px;font-size:0.83rem;border:1px solid #fecaca;border-radius:6px;margin:0 16px 8px;';
+      dlg.querySelector('.dlg-actions').before(err);
+    }
+    err.textContent = '\u26a0 ' + msg;
+    err.style.display = 'block';
+  }
+  function clearDlgError(dlgId) {
+    const err = document.getElementById(dlgId)?.querySelector('.dlg-inline-err');
+    if (err) err.style.display = 'none';
+  }
   function showError(msg) {
     console.error(msg);
     let b = document.getElementById('apiBanner');
     if (!b) {
       b = document.createElement('div');
       b.id = 'apiBanner';
-      b.style.cssText = 'position:fixed;top:0;left:0;right:0;background:#fef2f2;color:#991b1b;padding:10px 20px;font-size:0.85rem;z-index:9999;border-bottom:1px solid #fecaca;display:flex;justify-content:space-between;align-items:center;';
-      document.body.prepend(b);
+      b.style.cssText = 'background:#fef2f2;color:#991b1b;padding:10px 20px;font-size:0.85rem;border-bottom:1px solid #fecaca;display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;border-radius:8px;';
+      document.querySelector('main').insertAdjacentElement('afterbegin', b);
     }
     b.innerHTML = '&#9888; ' + msg + ' <button onclick="this.parentElement.remove()" style="background:none;border:none;cursor:pointer;font-size:1rem;color:#991b1b;">&#x2715;</button>';
   }
@@ -566,7 +585,7 @@
   async function initEmployees() {
     try {
       const res = await fetch(`${API}/employee/all`, { headers: authHdrs });
-      if (!res.ok) throw new Error(res.status);
+      if (!res.ok) { if (handle401(res)) return; throw new Error(res.status); }
       const data = await res.json();
       data.forEach(e => { empLabels[e.employee_id] = `${e.first_name} ${e.last_name}`; });
       const empOptions = data.map(e =>
@@ -581,13 +600,15 @@
   async function loadPlans() {
     try {
       const res = await fetch(`${API}/benefits/plans/all`, { headers: authHdrs });
-      if (!res.ok) throw new Error(res.status);
+      if (!res.ok) { if (handle401(res)) return; throw new Error(res.status); }
       plans = await res.json();
       renderPlans();
     } catch (err) { showError('Could not load plans: ' + err.message); }
   }
 
   async function savePlan() {
+    const btn = document.getElementById('btnSavePlan');
+    btn.disabled = true; btn.textContent = 'Saving…';
     const body = {
       plan_name:     document.getElementById('pAdd_name').value     || 'Untitled Plan',
       plan_type:     document.getElementById('pAdd_type').value,
@@ -599,11 +620,15 @@
     };
     try {
       const res = await fetch(`${API}/benefits/plans/create`, { method: 'POST', headers: authHdrs, body: JSON.stringify(body) });
-      if (!res.ok) throw new Error(await res.text());
+      if (!res.ok) { if (handle401(res)) return; throw new Error(await res.text()); }
+      btn.disabled = false; btn.textContent = 'Add Plan';
       document.getElementById('dlgPlanAdd').close();
       ['pAdd_name','pAdd_provider','pAdd_empCost','pAdd_erCost','pAdd_notes'].forEach(id => document.getElementById(id).value = '');
       await loadPlans();
-    } catch (err) { showError('Could not save plan: ' + err.message); }
+    } catch (err) {
+      showDlgError('dlgPlanAdd', 'Could not save plan: ' + err.message);
+      btn.disabled = false; btn.textContent = 'Add Plan';
+    }
   }
 
   function editPlan(id) {
@@ -632,10 +657,10 @@
     };
     try {
       const res = await fetch(`${API}/benefits/plans/${editingPlanId}`, { method: 'PATCH', headers: authHdrs, body: JSON.stringify(body) });
-      if (!res.ok) throw new Error(await res.text());
+      if (!res.ok) { if (handle401(res)) return; throw new Error(await res.text()); }
       document.getElementById('dlgPlanEdit').close();
       await loadPlans();
-    } catch (err) { showError('Could not update plan: ' + err.message); }
+    } catch (err) { showDlgError('dlgPlanEdit', 'Could not update plan: ' + err.message); }
   }
 
   function renderPlans() {
@@ -672,18 +697,15 @@
   function filterPlans() { renderPlans(); }
 
   function populatePlanDropdown(typeSelectId, planSelectId) {
-    const type = document.getElementById(typeSelectId).value;
-    const sel  = document.getElementById(planSelectId);
-    const matching = plans.filter(p => p.plan_type === type);
+    var type = document.getElementById(typeSelectId).value;
+    var sel  = document.getElementById(planSelectId);
+    var matching = type ? plans.filter(function(p){ return p.plan_type === type; }) : plans;
     if (!matching.length) {
-      sel.innerHTML = `<option value="">— No plans of this type —</option>`;
+      sel.innerHTML = '<option value="">No plans for this type</option>';
     } else {
-      sel.innerHTML = matching.map(p => `<option value="${p.plan_id}">${p.plan_name} (${p.provider ?? '—'})</option>`).join('');
-      const first = matching[0];
-      const empCostEl = document.getElementById('eAdd_empCost');
-      const erCostEl  = document.getElementById('eAdd_erCost');
-      if (empCostEl && !empCostEl.value) empCostEl.value = first.employee_cost ?? '';
-      if (erCostEl  && !erCostEl.value)  erCostEl.value  = first.employer_cost ?? '';
+      sel.innerHTML = matching.map(function(p){
+        return '<option value="'+p.plan_id+'">['+p.plan_type+'] '+p.plan_name+(p.provider ? ' - '+p.provider : '')+'</option>';
+      }).join('');
     }
   }
 
@@ -695,7 +717,7 @@
     tb.innerHTML = emptyRow(10, 'Loading...');
     try {
       const res = await fetch(`${API}/benefits/enrollments/all`, { headers: authHdrs });
-      if (!res.ok) throw new Error(res.status);
+      if (!res.ok) { if (handle401(res)) return; throw new Error(res.status); }
       enrollments = await res.json();
       renderEnrollments();
     } catch (err) {
@@ -705,9 +727,15 @@
   }
 
   async function saveEnrollment() {
+    const btn = document.getElementById('btnSaveEnroll');
+    const empId  = parseInt(document.getElementById('eAdd_emp').value);
+    const planId = parseInt(document.getElementById('eAdd_plan').value);
+    if (!empId)  { showDlgError('dlgEnrollAdd', 'Please select an employee.'); return; }
+    if (!planId) { showDlgError('dlgEnrollAdd', 'Please select a plan.'); return; }
+    btn.disabled = true; btn.textContent = 'Saving…';
     const body = {
-      employee_id:   parseInt(document.getElementById('eAdd_emp').value),
-      plan_id:       parseInt(document.getElementById('eAdd_plan').value),
+      employee_id:   empId,
+      plan_id:       planId,
       status:        document.getElementById('eAdd_status').value,
       start_date:    document.getElementById('eAdd_start').value  || null,
       end_date:      document.getElementById('eAdd_end').value    || null,
@@ -715,16 +743,18 @@
       employer_cost: parseFloat(document.getElementById('eAdd_erCost').value)  || null,
       notes:         document.getElementById('eAdd_notes').value  || null,
     };
-    if (!body.employee_id || !body.plan_id) { showError('Please select an employee and a plan.'); return; }
     try {
       const res = await fetch(`${API}/benefits/enrollments/create`, { method: 'POST', headers: authHdrs, body: JSON.stringify(body) });
-      if (!res.ok) throw new Error(await res.text());
+      if (!res.ok) { if (handle401(res)) return; throw new Error(await res.text()); }
+      btn.disabled = false; btn.textContent = 'Add Enrollment';
       document.getElementById('dlgEnrollAdd').close();
       ['eAdd_empCost','eAdd_erCost','eAdd_start','eAdd_end','eAdd_notes'].forEach(id => document.getElementById(id).value = '');
       document.getElementById('eAdd_emp').value = '';
-      document.getElementById('eAdd_plan').innerHTML = '<option value="">— Select type first —</option>';
       await loadEnrollments();
-    } catch (err) { showError('Could not save enrollment: ' + err.message); }
+    } catch (err) {
+      showDlgError('dlgEnrollAdd', 'Could not save enrollment: ' + err.message);
+      btn.disabled = false; btn.textContent = 'Add Enrollment';
+    }
   }
 
   function editEnrollment(id) {
@@ -755,10 +785,10 @@
     };
     try {
       const res = await fetch(`${API}/benefits/enrollments/${editingEnrollId}`, { method: 'PATCH', headers: authHdrs, body: JSON.stringify(body) });
-      if (!res.ok) throw new Error(await res.text());
+      if (!res.ok) { if (handle401(res)) return; throw new Error(await res.text()); }
       document.getElementById('dlgEnrollEdit').close();
       await loadEnrollments();
-    } catch (err) { showError('Could not update enrollment: ' + err.message); }
+    } catch (err) { showDlgError('dlgEnrollEdit', 'Could not update enrollment: ' + err.message); }
   }
 
   function renderEnrollments() {
@@ -784,25 +814,29 @@
       return;
     }
 
-    tb.innerHTML = filtered.map(e => {
-      const plan = planMap[e.plan_id];
-      return `<tr>
-        <td style="font-weight:600;color:#0f172a;">${empLabels[e.employee_id] ?? '—'}<br><span style="font-size:0.78rem;color:#9ca3af;font-weight:400;">#${e.employee_id}</span></td>
-        <td>${plan?.plan_name ?? e.plan_id}</td>
-        <td><span class="badge badge-type">${plan?.plan_type ?? '—'}</span></td>
-        <td>${plan?.provider ?? '—'}</td>
-        <td style="font-family:monospace;font-size:0.88rem;">$${Number(e.employee_cost ?? 0).toFixed(2)}</td>
-        <td style="font-family:monospace;font-size:0.88rem;">$${Number(e.employer_cost ?? 0).toFixed(2)}</td>
-        <td>${e.start_date ?? '—'}</td>
-        <td>${e.end_date   ?? '—'}</td>
-        <td>${statusBadge(e.status)}</td>
-      <td>
-        <div class="tbl-actions">
-          <button class="icon-btn" title="Edit"   onclick="editEnrollment(${e.enrollment_id})">✏️</button>
-          <button class="icon-btn del" title="Delete" onclick="askDelete('enrollment',${e.enrollment_id},'${(plan?.plan_name ?? String(e.plan_id)).replace(/'/g,"\\'")} — ${(empLabels[e.employee_id] ?? '').replace(/'/g,"\\'")}')">🗑️</button>
-        </div>
-      </td>
-    </tr>`).join('');
+    tb.innerHTML = filtered.map(function(e) {
+      var plan     = planMap[e.plan_id];
+      var planName = plan ? plan.plan_name : String(e.plan_id);
+      var empName  = empLabels[e.employee_id] || '';
+      var delLabel = planName.replace(/'/g, "\\'") + ' - ' + empName.replace(/'/g, "\\'");
+      var planType = plan ? plan.plan_type : '—';
+      var provider = plan ? (plan.provider || '—') : '—';
+      return '<tr>' +
+        '<td style="font-weight:600;color:#0f172a;">' + (empLabels[e.employee_id] || '—') + '<br><span style="font-size:0.78rem;color:#9ca3af;font-weight:400;">#' + e.employee_id + '</span></td>' +
+        '<td>' + planName + '</td>' +
+        '<td><span class="badge badge-type">' + planType + '</span></td>' +
+        '<td>' + provider + '</td>' +
+        '<td style="font-family:monospace;font-size:0.88rem;">$' + Number(e.employee_cost || 0).toFixed(2) + '</td>' +
+        '<td style="font-family:monospace;font-size:0.88rem;">$' + Number(e.employer_cost || 0).toFixed(2) + '</td>' +
+        '<td>' + (e.start_date || '—') + '</td>' +
+        '<td>' + (e.end_date   || '—') + '</td>' +
+        '<td>' + statusBadge(e.status) + '</td>' +
+        '<td><div class="tbl-actions">' +
+          '<button class="icon-btn" title="Edit" onclick="editEnrollment(' + e.enrollment_id + ')">&#9998;</button>' +
+          '<button class="icon-btn del" title="Delete" onclick="askDelete(\'enrollment\',' + e.enrollment_id + ',\'' + delLabel + '\')">&#128465;</button>' +
+        '</div></td>' +
+        '</tr>';
+    }).join('');
   }
 
   function filterEnrollments() { renderEnrollments(); }
@@ -820,11 +854,11 @@
     try {
       if (pendingDeleteType === 'enrollment') {
         const res = await fetch(`${API}/benefits/enrollments/${pendingDeleteId}`, { method: 'DELETE', headers: authHdrs });
-        if (!res.ok) throw new Error(await res.text());
+        if (!res.ok) { if (handle401(res)) return; throw new Error(await res.text()); }
         await loadEnrollments();
       } else if (pendingDeleteType === 'plan') {
         const res = await fetch(`${API}/benefits/plans/${pendingDeleteId}`, { method: 'DELETE', headers: authHdrs });
-        if (!res.ok) throw new Error(await res.text());
+        if (!res.ok) { if (handle401(res)) return; throw new Error(await res.text()); }
         await loadPlans();
       }
     } catch (err) { showError('Could not delete: ' + err.message); }
@@ -843,21 +877,6 @@
   const hash = (location.hash || '').replace('#', '');
   if (hash) setPanel(hash);
 
-  // ── MENU ──
-  const menuBtn = document.getElementById('menuBtn');
-  const hrMenu  = document.getElementById('hrMenu');
-  menuBtn.addEventListener('click', () => {
-    const open = hrMenu.classList.toggle('open');
-    menuBtn.setAttribute('aria-expanded', String(open));
-    hrMenu.setAttribute('aria-hidden', String(!open));
-  });
-  document.addEventListener('click', e => {
-    if (!e.target.closest('.menu-wrap')) {
-      hrMenu.classList.remove('open');
-      menuBtn.setAttribute('aria-expanded', 'false');
-      hrMenu.setAttribute('aria-hidden', 'true');
-    }
-  });
 
   // ── INIT ──
   (async () => {

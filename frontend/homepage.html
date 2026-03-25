@@ -614,6 +614,26 @@
       }
     }
   </style>
+  <script src="config.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.2/dist/chart.umd.min.js"></script>
+  <style>
+    .charts-grid {
+      display: grid;
+      grid-template-columns: 1.6fr 1fr;
+      gap: 16px;
+      margin-bottom: 16px;
+    }
+    .chart-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      padding: 20px 24px;
+      box-shadow: var(--shadow);
+    }
+    .chart-card h3 { margin: 0 0 4px; font-size: 0.95rem; }
+    .chart-card p  { margin: 0 0 16px; font-size: 0.82rem; color: var(--muted); }
+    @media (max-width: 940px) { .charts-grid { grid-template-columns: 1fr; } }
+  </style>
 </head>
 <body>
   <header class="topbar">
@@ -648,11 +668,13 @@
           <a href="homepage.html">Home</a>
           <a href="profile.html">Profile</a>
           <a href="employees.html">Employees</a>
+          <a href="departments.html">Departments</a>
           <a href="shifts.html">Shifts</a>
           <a href="payroll.html">Payroll</a>
           <a href="benefits.html">Benefits</a>
           <a href="taxes.html">Taxes</a>
           <a href="reports.html">Reports</a>
+          <a href="audit.html">Audit Log</a>
           <a href="settings.html">Settings</a>
           <a href="logout.html" class="signout">Sign Out</a>
         </nav>
@@ -681,9 +703,9 @@
         </p>
 
         <div class="quick-actions">
-          <button class="btn primary" type="button">Run Payroll Preview</button>
-          <button class="btn secondary" type="button">Create Shift Plan</button>
-          <button class="btn" type="button">Export Monthly Report</button>
+          <button class="btn primary" type="button" onclick="window.location.href='payroll.html'">Run Payroll Preview</button>
+          <button class="btn secondary" type="button" onclick="window.location.href='shifts.html'">Create Shift Plan</button>
+          <button class="btn" type="button" onclick="window.location.href='reports.html'">Export Monthly Report</button>
         </div>
       </article>
 
@@ -732,6 +754,19 @@
       </article>
     </section>
 
+    <section class="charts-grid">
+      <div class="chart-card">
+        <h3>Payroll Spend by Period</h3>
+        <p>Total net pay issued per pay period</p>
+        <canvas id="chartPayroll" height="160"></canvas>
+      </div>
+      <div class="chart-card">
+        <h3>Headcount by Department</h3>
+        <p>Active employees per department</p>
+        <canvas id="chartDept" height="160"></canvas>
+      </div>
+    </section>
+
     <section class="content-grid">
       <article class="card">
         <div class="section-title-row">
@@ -763,14 +798,20 @@
       <aside class="card">
         <div class="section-title-row">
           <div>
-            <h3>Action Items</h3>
-            <p>Important tasks that still need attention today.</p>
+            <h3>Pending Approvals</h3>
+            <p>Time entries awaiting your review.</p>
           </div>
+          <a href="shifts.html" style="font-size:0.8rem;color:var(--primary);text-decoration:none;font-weight:600;white-space:nowrap;">View All →</a>
         </div>
-
-        <ul class="list" id="actionList">
-          <li><span style="color:#64748b;">Loading...</span></li>
-        </ul>
+        <div id="pendingList" style="font-size:0.88rem;">
+          <span style="color:#64748b;">Loading...</span>
+        </div>
+        <div style="margin-top:18px;border-top:1px solid var(--border);padding-top:14px;">
+          <p style="font-size:0.72rem;font-weight:700;text-transform:uppercase;letter-spacing:0.05em;color:var(--muted);margin:0 0 8px;">Action Items</p>
+          <ul class="list" id="actionList" style="margin:0;">
+            <li><span style="color:#64748b;">Loading...</span></li>
+          </ul>
+        </div>
       </aside>
     </section>
 
@@ -784,8 +825,9 @@
     const hrMenu     = document.getElementById("hrMenu");
     const themeToggle = document.getElementById("themeToggle");
     const body       = document.body;
-    const API        = 'http://localhost:8000';
     const token      = localStorage.getItem('access_token');
+    if (!token) { window.location.href = 'login.html'; }
+    if (localStorage.getItem('user_role') === 'employee') { window.location.href = 'employee_portal.html'; }
     const hdrs       = { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` };
     const fmt        = n => n != null ? '$' + Number(n).toFixed(2) : '—';
 
@@ -870,14 +912,82 @@
         }).join('');
       }
 
+      // ── Charts ───────────────────────────────────────────────
+      // Payroll spend bar chart
+      const spendByPeriod = {};
+      paychecks.forEach(p => {
+        const lbl = periodMap[p.pay_period_id] ?? `#${p.pay_period_id}`;
+        spendByPeriod[lbl] = (spendByPeriod[lbl] ?? 0) + (p.net_pay ?? 0);
+      });
+      const periodChartLabels = Object.keys(spendByPeriod).slice(-6);
+      const periodChartData   = periodChartLabels.map(k => +spendByPeriod[k].toFixed(2));
+
+      new Chart(document.getElementById('chartPayroll'), {
+        type: 'bar',
+        data: {
+          labels: periodChartLabels,
+          datasets: [{ label: 'Net Pay ($)', data: periodChartData,
+            backgroundColor: 'rgba(29,78,216,0.75)', borderRadius: 6, borderSkipped: false }]
+        },
+        options: {
+          responsive: true, maintainAspectRatio: true,
+          plugins: { legend: { display: false } },
+          scales: {
+            y: { ticks: { callback: v => '$' + v.toLocaleString() }, grid: { color: 'rgba(0,0,0,0.05)' } },
+            x: { ticks: { font: { size: 10 } } }
+          }
+        }
+      });
+
+      // Headcount doughnut chart
+      const deptMap = {};
+      employees.filter(e => e.employment_status === 'active').forEach(e => {
+        const d = e.department_id ? `Dept ${e.department_id}` : 'Unassigned';
+        deptMap[d] = (deptMap[d] ?? 0) + 1;
+      });
+      const deptColors = ['#1d4ed8','#0f766e','#b45309','#7c3aed','#be185d','#0369a1','#15803d'];
+      new Chart(document.getElementById('chartDept'), {
+        type: 'doughnut',
+        data: {
+          labels: Object.keys(deptMap),
+          datasets: [{ data: Object.values(deptMap),
+            backgroundColor: deptColors, borderWidth: 2, borderColor: '#fff' }]
+        },
+        options: {
+          responsive: true, maintainAspectRatio: true,
+          plugins: { legend: { position: 'bottom', labels: { font: { size: 11 }, boxWidth: 12 } } },
+          cutout: '65%'
+        }
+      });
+
+      // ── Pending approvals list ────────────────────────────────
+      const empNameMap = Object.fromEntries(employees.map(e => [e.employee_id, `${e.first_name} ${e.last_name}`]));
+      const pending = entries.filter(e => !e.approved).slice(0, 8);
+      const pendingDiv = document.getElementById('pendingList');
+      if (!pending.length) {
+        pendingDiv.innerHTML = `<p style="color:var(--muted);font-style:italic;margin:0;">No pending entries — all clear!</p>`;
+      } else {
+        pendingDiv.innerHTML = pending.map(e => `
+          <div style="display:flex;justify-content:space-between;align-items:center;padding:7px 0;border-bottom:1px solid var(--border);">
+            <div>
+              <div style="font-weight:600;font-size:0.85rem;">${empNameMap[e.employee_id] ?? `Emp #${e.employee_id}`}</div>
+              <div style="color:var(--muted);font-size:0.78rem;">${e.entry_date ?? '—'} · ${e.entry_type ?? 'work'}</div>
+            </div>
+            <button onclick="approveEntry(${e.entry_id}, this)"
+              style="padding:4px 10px;font-size:0.75rem;background:#dcfce7;color:#166534;border:1px solid #a7f3d0;border-radius:6px;cursor:pointer;font-weight:600;font-family:inherit;white-space:nowrap;">
+              ✓ Approve
+            </button>
+          </div>`).join('');
+      }
+
       // ── Action items ──────────────────────────────────────────
       const actions = [];
       if (pendingTime > 0)
-        actions.push({ title: `${pendingTime} time entr${pendingTime === 1 ? 'y' : 'ies'} awaiting approval`, desc: 'Go to Shifts to review and approve.' });
+        actions.push({ title: `${pendingTime} time entr${pendingTime === 1 ? 'y' : 'ies'} awaiting approval`, desc: 'Review in Shifts.' });
       if (openPeriods > 0)
-        actions.push({ title: `${openPeriods} open pay period${openPeriods === 1 ? '' : 's'}`, desc: 'Run payroll or close periods in Payroll.' });
+        actions.push({ title: `${openPeriods} open pay period${openPeriods === 1 ? '' : 's'}`, desc: 'Run payroll or close in Payroll.' });
       if (employees.length === 0)
-        actions.push({ title: 'No employees added yet', desc: 'Add your first employee in the Employees page.' });
+        actions.push({ title: 'No employees added yet', desc: 'Add your first employee.' });
       if (paychecks.length === 0 && employees.length > 0)
         actions.push({ title: 'No paychecks generated yet', desc: 'Create a pay period and run payroll.' });
       if (!actions.length)
@@ -886,6 +996,25 @@
       document.getElementById('actionList').innerHTML = actions.map(a =>
         `<li><strong>${a.title}</strong><span>${a.desc}</span></li>`
       ).join('');
+    }
+
+    async function approveEntry(id, btn) {
+      btn.disabled = true;
+      btn.textContent = '...';
+      try {
+        const res = await fetch(`${API}/timeentries/${id}/approve`, {
+          method: 'PATCH', headers: hdrs,
+          body: JSON.stringify({ approved: true }),
+        });
+        if (res.ok) {
+          btn.closest('div[style]').style.opacity = '0.4';
+          btn.textContent = '✓ Done';
+          document.getElementById('statPendingEntries').textContent =
+            Math.max(0, parseInt(document.getElementById('statPendingEntries').textContent || '0') - 1);
+        } else {
+          btn.disabled = false; btn.textContent = '✓ Approve';
+        }
+      } catch { btn.disabled = false; btn.textContent = '✓ Approve'; }
     }
 
     if (token) {

@@ -260,6 +260,7 @@
 
     .admin-only { display: none; }
   </style>
+  <script src="config.js"></script>
 </head>
 <body>
   <header>
@@ -276,11 +277,13 @@
         <a href="homepage.html">Home</a>
         <a href="profile.html">Profile</a>
         <a href="employees.html">Employees</a>
+        <a href="departments.html">Departments</a>
         <a href="shifts.html">Shifts</a>
         <a href="payroll.html">Payroll</a>
         <a href="benefits.html">Benefits</a>
         <a href="taxes.html">Taxes</a>
         <a href="reports.html">Reports</a>
+        <a href="audit.html">Audit Log</a>
         <a href="settings.html">Settings</a>
         <a href="logout.html" style="color:#ef4444;">Sign Out</a>
       </nav>
@@ -399,7 +402,6 @@
       }
     });
 
-    const API   = 'http://localhost:8000';
     const role  = localStorage.getItem('user_role');
     const token = localStorage.getItem('access_token');
 

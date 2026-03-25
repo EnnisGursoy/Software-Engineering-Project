@@ -1,6 +1,7 @@
 from fastapi import APIRouter, Depends
 from sqlalchemy.orm import Session
-from Backend.Utility.dependencies import get_db, hr_only, manager_only
+from Backend.Utility.dependencies import get_db, hr_only, manager_only, get_current_user, get_current_employee
+from Backend.Models.Employee import Employee
 from Backend.Models.User import User
 from Backend.Schemas.Benefits import (
     PlanCreate, PlanOut, PlanUpdate,
@@ -19,7 +20,7 @@ router = APIRouter()
 
 @router.get("/plans/all", response_model=list[PlanOut])
 async def list_plans(
-    user: User = Depends(manager_only),
+    user: User = Depends(get_current_user),
     db: Session = Depends(get_db),
 ):
     return get_all_plans(db)
@@ -54,6 +55,14 @@ async def remove_plan(
 
 
 # ── ENROLLMENTS ────────────────────────────────────────────────────────────────
+
+@router.get("/enrollments/me", response_model=list[EnrollmentOut])
+async def my_enrollments(
+    employee: Employee = Depends(get_current_employee),
+    db: Session = Depends(get_db),
+):
+    return get_enrollments_by_employee(employee.employee_id, db)
+
 
 @router.get("/enrollments/all", response_model=list[EnrollmentOut])
 async def list_enrollments(

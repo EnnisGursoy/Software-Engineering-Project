@@ -203,7 +203,87 @@
     #formError {
       color: #ef4444; font-size: 0.88rem; margin-top: 8px; display: none;
     }
+
+    /* ── View tabs ── */
+    .view-tabs { display: flex; gap: 4px; margin-bottom: 18px; border-bottom: 2px solid var(--border); }
+    .view-tab {
+      padding: 9px 20px; border: none; background: none; cursor: pointer;
+      font-size: 0.95rem; font-weight: 600; color: var(--muted);
+      border-bottom: 3px solid transparent; margin-bottom: -2px; font-family: inherit;
+    }
+    .view-tab.active { color: var(--primary); border-bottom-color: var(--primary); }
+    .view-tab:hover:not(.active) { color: var(--text); }
+
+    /* ── Week nav ── */
+    .week-nav {
+      display: flex; align-items: center; gap: 10px;
+      margin-bottom: 14px; flex-wrap: wrap;
+    }
+    .week-nav-btn {
+      width: 34px; height: 34px; border: 1px solid var(--border);
+      border-radius: 8px; background: var(--surface); color: var(--text);
+      font-size: 1.1rem; cursor: pointer; display: flex; align-items: center; justify-content: center;
+    }
+    .week-nav-btn:hover { background: #f0f4ff; border-color: var(--primary); color: var(--primary); }
+    .week-label { font-weight: 600; font-size: 0.95rem; min-width: 200px; }
+    .today-btn {
+      padding: 6px 14px; border: 1px solid var(--border);
+      border-radius: 8px; background: var(--surface); color: var(--text);
+      font-size: 0.88rem; cursor: pointer; font-family: inherit;
+    }
+    .today-btn:hover { background: #f0f4ff; color: var(--primary); border-color: var(--primary); }
+    .add-shift-btn {
+      margin-left: auto; padding: 7px 16px;
+      background: var(--primary); color: #fff;
+      border: none; border-radius: 8px; font-size: 0.88rem;
+      font-weight: 600; cursor: pointer; font-family: inherit;
+    }
+    .add-shift-btn:hover { background: var(--primary-dark); }
+
+    /* ── Schedule grid ── */
+    .schedule-wrap { overflow-x: auto; }
+    .schedule-table { width: 100%; border-collapse: collapse; min-width: 700px; }
+    .schedule-table th {
+      background: #f8fbff; border: 1px solid var(--table-border);
+      padding: 8px 10px; font-size: 0.82rem; font-weight: 600;
+      color: var(--muted); text-align: center; min-width: 110px; white-space: nowrap;
+    }
+    .schedule-table th.today-col { background: #dbeafe; color: var(--primary); }
+    .schedule-table td {
+      border: 1px solid var(--table-border); padding: 6px 8px;
+      vertical-align: top; min-height: 60px; height: 60px;
+    }
+    .schedule-table td.emp-col {
+      background: #f8fbff; font-weight: 600; font-size: 0.88rem;
+      min-width: 130px; white-space: nowrap; color: var(--text); text-align: left;
+    }
+    .schedule-table td.today-col { background: #eff6ff; }
+    .schedule-table td.empty-cell {
+      cursor: pointer; transition: background 0.12s;
+    }
+    .schedule-table td.empty-cell:hover { background: #f0f9ff; }
+    .schedule-table td.empty-cell:hover::after {
+      content: '+'; display: block; text-align: center;
+      color: var(--primary); font-size: 1.2rem; font-weight: 300; line-height: 2;
+    }
+    .shift-block {
+      border-radius: 6px; padding: 3px 7px; font-size: 0.78rem;
+      font-weight: 600; margin-bottom: 3px; cursor: default;
+      display: flex; justify-content: space-between; align-items: center; gap: 4px;
+    }
+    .shift-block .del-btn {
+      background: none; border: none; cursor: pointer;
+      color: inherit; opacity: 0.6; font-size: 0.85rem; padding: 0 2px; line-height: 1;
+    }
+    .shift-block .del-btn:hover { opacity: 1; }
+    .shift-work     { background: #dbeafe; color: #1e40af; }
+    .shift-sick     { background: #fef9c3; color: #854d0e; }
+    .shift-vacation { background: #dcfce7; color: #166534; }
+    .shift-holiday  { background: #ede9fe; color: #5b21b6; }
+    .shift-unpaid   { background: #f3f4f6; color: #374151; }
+    .no-emp { text-align: center; color: var(--muted); font-style: italic; padding: 32px; }
   </style>
+  <script src="config.js"></script>
 </head>
 <body>
   <header>
@@ -216,11 +296,13 @@
         <a href="homepage.html">Home</a>
         <a href="profile.html">Profile</a>
         <a href="employees.html">Employees</a>
+        <a href="departments.html">Departments</a>
         <a href="shifts.html">Shifts</a>
         <a href="payroll.html">Payroll</a>
         <a href="benefits.html">Benefits</a>
         <a href="taxes.html">Taxes</a>
         <a href="reports.html">Reports</a>
+        <a href="audit.html">Audit Log</a>
         <a href="settings.html">Settings</a>
         <a href="logout.html" style="color:#ef4444;">Sign Out</a>
       </nav>
@@ -228,56 +310,73 @@
   </header>
 
   <main>
-    <div class="toolbar">
-      <input id="searchInput" type="search" placeholder="Search by employee ID">
-      <select id="typeFilter">
-        <option value="">All Types</option>
-        <option value="work">Work</option>
-        <option value="sick">Sick</option>
-        <option value="vacation">Vacation</option>
-        <option value="holiday">Holiday</option>
-        <option value="unpaid">Unpaid</option>
-      </select>
-      <select id="approvedFilter">
-        <option value="">All Statuses</option>
-        <option value="true">Approved</option>
-        <option value="false">Pending</option>
-      </select>
-      <button class="btn btn-primary" id="addBtn">+ Log Entry</button>
+    <div class="view-tabs">
+      <button class="view-tab active" id="tabSchedule" onclick="switchView('schedule')">Weekly Schedule</button>
+      <button class="view-tab" id="tabEntries" onclick="switchView('entries')">All Entries</button>
     </div>
 
-    <section class="table-shell">
-      <div class="table-card">
-        <table>
-          <thead>
-            <tr>
-              <th>Entry ID</th>
-              <th>Employee</th>
-              <th>Date</th>
-              <th>Clock In</th>
-              <th>Clock Out</th>
-              <th>Reg Hrs</th>
-              <th>OT Hrs</th>
-              <th>Type</th>
-              <th>Status</th>
-              <th>Actions</th>
-            </tr>
-          </thead>
-          <tbody id="shiftsBody">
-            <tr><td colspan="10" style="text-align:center;padding:24px;color:#64748b;">Loading…</td></tr>
-          </tbody>
-        </table>
+    <!-- Schedule View -->
+    <div id="scheduleView">
+      <div class="week-nav">
+        <button class="week-nav-btn" onclick="prevWeek()">‹</button>
+        <span class="week-label" id="weekLabel"></span>
+        <button class="week-nav-btn" onclick="nextWeek()">›</button>
+        <button class="today-btn" onclick="goToday()">Today</button>
+        <button class="add-shift-btn" onclick="openAddModal()">+ Add Shift</button>
       </div>
-    </section>
+      <div class="schedule-wrap">
+        <table class="schedule-table" id="scheduleGrid"></table>
+      </div>
+    </div>
+
+    <!-- Entries View -->
+    <div id="entriesView" style="display:none;">
+      <div class="toolbar">
+        <input id="searchInput" type="search" placeholder="Search by employee ID">
+        <select id="typeFilter">
+          <option value="">All Types</option>
+          <option value="work">Work</option>
+          <option value="sick">Sick</option>
+          <option value="vacation">Vacation</option>
+          <option value="holiday">Holiday</option>
+          <option value="unpaid">Unpaid</option>
+        </select>
+        <select id="approvedFilter">
+          <option value="">All Statuses</option>
+          <option value="true">Approved</option>
+          <option value="false">Pending</option>
+        </select>
+        <button class="btn btn-primary" id="addBtn">+ Log Entry</button>
+      </div>
+      <section class="table-shell">
+        <div class="table-card">
+          <table>
+            <thead>
+              <tr>
+                <th>Entry ID</th><th>Employee</th><th>Date</th>
+                <th>Clock In</th><th>Clock Out</th>
+                <th>Reg Hrs</th><th>OT Hrs</th>
+                <th>Type</th><th>Status</th><th>Actions</th>
+              </tr>
+            </thead>
+            <tbody id="shiftsBody">
+              <tr><td colspan="10" style="text-align:center;padding:24px;color:#64748b;">Loading…</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </section>
+    </div>
   </main>
 
   <!-- Log Entry Modal -->
   <div class="overlay" id="entryOverlay">
     <div class="modal">
-      <h2 id="modalTitle">Log Time Entry</h2>
+      <h2 id="modalTitle">Schedule Shift</h2>
       <div class="field">
-        <label>Employee ID</label>
-        <input type="number" id="fEmployeeId" placeholder="e.g. 1">
+        <label>Employee</label>
+        <select id="fEmployeeId">
+          <option value="">— Select Employee —</option>
+        </select>
       </div>
       <div class="field">
         <label>Date</label>
@@ -322,30 +421,24 @@
   </div>
 
   <script>
-    if (localStorage.getItem('payroll_dark_mode') === 'enabled') {
-      document.body.classList.add('dark');
-    }
+    if (localStorage.getItem('theme') === 'dark') document.body.classList.add('dark');
 
-    const API   = 'http://localhost:8000';
-    const token = localStorage.getItem('access_token');
+    const token  = localStorage.getItem('access_token');
+    if (!token) window.location.replace('login.html');
+    const role = localStorage.getItem('user_role');
+    if (role === 'employee') window.location.replace('employee_portal.html');
+
     const headers = { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` };
-
-    function parseJwt(t) {
-      try { return JSON.parse(atob(t.split('.')[1].replace(/-/g, '+').replace(/_/g, '/'))); } catch { return {}; }
-    }
-    const jwtPayload = parseJwt(token);
 
     // ── Menu ─────────────────────────────────────────────────────
     const menuBtn = document.getElementById('menuBtn');
     const hrMenu  = document.getElementById('hrMenu');
-
     menuBtn.addEventListener('click', () => {
-      const isOpen = hrMenu.classList.toggle('open');
-      menuBtn.setAttribute('aria-expanded', String(isOpen));
-      hrMenu.setAttribute('aria-hidden', String(!isOpen));
+      const open = hrMenu.classList.toggle('open');
+      menuBtn.setAttribute('aria-expanded', String(open));
+      hrMenu.setAttribute('aria-hidden', String(!open));
     });
-
-    document.addEventListener('click', (e) => {
+    document.addEventListener('click', e => {
       if (!e.target.closest('.menu-wrap')) {
         hrMenu.classList.remove('open');
         menuBtn.setAttribute('aria-expanded', 'false');
@@ -353,7 +446,140 @@
       }
     });
 
-    // ── Load & render ────────────────────────────────────────────
+    // ── View toggle ──────────────────────────────────────────────
+    function switchView(view) {
+      document.getElementById('scheduleView').style.display = view === 'schedule' ? '' : 'none';
+      document.getElementById('entriesView').style.display  = view === 'entries'  ? '' : 'none';
+      document.getElementById('tabSchedule').classList.toggle('active', view === 'schedule');
+      document.getElementById('tabEntries').classList.toggle('active', view === 'entries');
+      if (view === 'entries') loadEntries();
+    }
+
+    // ── Weekly schedule ──────────────────────────────────────────
+    let allEmployees = [];
+    let allEntries   = [];
+    let weekStart    = getMonday(new Date());
+
+    function getMonday(d) {
+      const dt = new Date(d);
+      const day = dt.getDay();
+      dt.setDate(dt.getDate() - (day === 0 ? 6 : day - 1));
+      dt.setHours(0,0,0,0);
+      return dt;
+    }
+
+    function fmtDate(d) {
+      return d.toISOString().split('T')[0];
+    }
+
+    function fmtShort(d) {
+      return d.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+    }
+
+    function weekDays() {
+      return Array.from({length: 7}, (_, i) => {
+        const d = new Date(weekStart);
+        d.setDate(d.getDate() + i);
+        return d;
+      });
+    }
+
+    function prevWeek() { weekStart.setDate(weekStart.getDate() - 7); renderSchedule(); }
+    function nextWeek() { weekStart.setDate(weekStart.getDate() + 7); renderSchedule(); }
+    function goToday()  { weekStart = getMonday(new Date()); renderSchedule(); }
+
+    function openAddModal(empId, dateStr) {
+      document.getElementById('formError').style.display = 'none';
+      if (empId)   document.getElementById('fEmployeeId').value = empId;
+      if (dateStr) document.getElementById('fDate').value = dateStr;
+      document.getElementById('entryOverlay').classList.add('open');
+    }
+
+    async function loadScheduleData() {
+      try {
+        const [eRes, tRes] = await Promise.all([
+          fetch(`${API}/employee/all`, { headers }),
+          fetch(`${API}/timeentries/all`, { headers })
+        ]);
+        allEmployees = eRes.ok  ? (await eRes.json()).filter(e => e.employment_status === 'active') : [];
+        allEntries   = tRes.ok  ? await tRes.json() : [];
+        const sel = document.getElementById('fEmployeeId');
+        sel.innerHTML = '<option value="">— Select Employee —</option>';
+        allEmployees.forEach(e => {
+          const opt = new Option(`${e.first_name} ${e.last_name}`, e.employee_id);
+          sel.appendChild(opt);
+        });
+      } catch (_) {}
+      renderSchedule();
+    }
+
+    function renderSchedule() {
+      const days  = weekDays();
+      const today = fmtDate(new Date());
+
+      // Update week label
+      document.getElementById('weekLabel').textContent =
+        `${fmtShort(days[0])} – ${fmtShort(days[6])}, ${days[0].getFullYear()}`;
+
+      const typeClass = t => ({ work:'shift-work', sick:'shift-sick', vacation:'shift-vacation',
+        holiday:'shift-holiday', unpaid:'shift-unpaid' }[t] ?? 'shift-work');
+
+      const grid = document.getElementById('scheduleGrid');
+
+      if (!allEmployees.length) {
+        grid.innerHTML = `<tr><td class="no-emp" colspan="8">No active employees found.</td></tr>`;
+        return;
+      }
+
+      const dayNames = ['Mon','Tue','Wed','Thu','Fri','Sat','Sun'];
+
+      // Header row
+      let html = '<thead><tr><th style="text-align:left;min-width:130px;">Employee</th>';
+      days.forEach((d, i) => {
+        const isTod = fmtDate(d) === today;
+        html += `<th class="${isTod ? 'today-col' : ''}">${dayNames[i]}<br><span style="font-weight:400;">${fmtShort(d)}</span></th>`;
+      });
+      html += '</tr></thead><tbody>';
+
+      // Employee rows
+      allEmployees.forEach(emp => {
+        html += `<tr><td class="emp-col">${emp.first_name} ${emp.last_name}</td>`;
+        days.forEach(d => {
+          const ds = fmtDate(d);
+          const isTod = ds === today;
+          const dayEntries = allEntries.filter(e => e.employee_id === emp.employee_id && e.entry_date === ds);
+
+          if (dayEntries.length) {
+            html += `<td class="${isTod ? 'today-col' : ''}">`;
+            dayEntries.forEach(e => {
+              const hrs = e.regular_hours != null ? `${e.regular_hours}h` : (e.clock_in ? e.clock_in.slice(0,5) : '');
+              html += `<div class="shift-block ${typeClass(e.entry_type)}">
+                <span>${e.entry_type ?? 'work'}${hrs ? ' · ' + hrs : ''}</span>
+                <button class="del-btn" onclick="deleteScheduleEntry(${e.entry_id})" title="Remove">✕</button>
+              </div>`;
+            });
+            html += `</td>`;
+          } else {
+            html += `<td class="empty-cell${isTod ? ' today-col' : ''}" onclick="openAddModal(${emp.employee_id}, '${ds}')"></td>`;
+          }
+        });
+        html += '</tr>';
+      });
+
+      html += '</tbody>';
+      grid.innerHTML = html;
+    }
+
+    async function deleteScheduleEntry(id) {
+      if (!confirm('Remove this shift?')) return;
+      const res = await fetch(`${API}/timeentries/${id}`, { method: 'DELETE', headers });
+      if (res.ok) {
+        allEntries = allEntries.filter(e => e.entry_id !== id);
+        renderSchedule();
+      }
+    }
+
+    // ── Entries list ─────────────────────────────────────────────
     async function loadEntries() {
       const tbody      = document.getElementById('shiftsBody');
       const searchVal  = document.getElementById('searchInput').value.toLowerCase();
@@ -362,28 +588,23 @@
 
       try {
         const res = await fetch(`${API}/timeentries/all`, { headers });
-
         if (res.status === 401) {
-          tbody.innerHTML = `<tr><td colspan="10" style="text-align:center;padding:24px;color:#ef4444;">Session expired — please log in again.</td></tr>`;
+          tbody.innerHTML = `<tr><td colspan="10" style="text-align:center;padding:24px;color:#ef4444;">Session expired.</td></tr>`;
           return;
         }
-
         const entries = await res.json();
-
-        let rows = entries.filter(e => {
+        const rows = entries.filter(e => {
           const searchMatch = searchVal === '' || String(e.employee_id).includes(searchVal);
-          const typeMatch   = typeVal === '' || e.entry_type === typeVal;
-          const apprMatch   = approvedVal === ''
+          const typeMatch   = !typeVal || e.entry_type === typeVal;
+          const apprMatch   = !approvedVal
             || (approvedVal === 'true'  && e.approved === true)
             || (approvedVal === 'false' && e.approved !== true);
           return searchMatch && typeMatch && apprMatch;
         });
-
-        if (rows.length === 0) {
+        if (!rows.length) {
           tbody.innerHTML = `<tr><td colspan="10" style="text-align:center;padding:24px;color:#64748b;">No entries found.</td></tr>`;
           return;
         }
-
         tbody.innerHTML = rows.map(e => `
           <tr>
             <td>${e.entry_id}</td>
@@ -394,15 +615,12 @@
             <td>${e.regular_hours  ?? '—'}</td>
             <td>${e.overtime_hours ?? '—'}</td>
             <td><span class="type-badge">${e.entry_type ?? '—'}</span></td>
-            <td>
-              ${e.approved
-                ? '<span class="badge badge-approved">Approved</span>'
-                : '<span class="badge badge-pending">Pending</span>'}
+            <td>${e.approved
+              ? '<span class="badge badge-approved">Approved</span>'
+              : '<span class="badge badge-pending">Pending</span>'}
             </td>
             <td>
-              ${!e.approved
-                ? `<button class="action-btn" onclick="approveEntry(${e.entry_id})">Approve</button>`
-                : ''}
+              ${!e.approved ? `<button class="action-btn" onclick="approveEntry(${e.entry_id})">Approve</button>` : ''}
               <button class="action-btn" onclick="deleteEntry(${e.entry_id})" style="margin-left:4px;color:#ef4444;">Delete</button>
             </td>
           </tr>`).join('');
@@ -413,13 +631,12 @@
     }
 
     async function approveEntry(id) {
-  const res = await fetch(`${API}/timeentries/${id}/approve`, {
-    method: 'PATCH',
-    headers,
-    body: JSON.stringify({ approved: true })
-  });
-  if (res.ok) loadEntries();
-}
+      const res = await fetch(`${API}/timeentries/${id}/approve`, {
+        method: 'PATCH', headers,
+        body: JSON.stringify({ approved: true })
+      });
+      if (res.ok) loadEntries();
+    }
 
     async function deleteEntry(id) {
       if (!confirm('Delete this entry?')) return;
@@ -427,36 +644,31 @@
       if (res.ok) loadEntries();
     }
 
-    // ── Filters ──────────────────────────────────────────────────
     document.getElementById('searchInput').addEventListener('input', loadEntries);
     document.getElementById('typeFilter').addEventListener('change', loadEntries);
     document.getElementById('approvedFilter').addEventListener('change', loadEntries);
 
-    // ── Modal ─────────────────────────────────────────────────────
+    // ── Modal (shared) ───────────────────────────────────────────
     const overlay   = document.getElementById('entryOverlay');
     const formError = document.getElementById('formError');
 
-    document.getElementById('addBtn').addEventListener('click', () => {
-      formError.style.display = 'none';
-      overlay.classList.add('open');
-    });
+    document.getElementById('addBtn').addEventListener('click', () => openAddModal());
 
     document.getElementById('cancelBtn').addEventListener('click', () => {
       overlay.classList.remove('open');
+      ['fEmployeeId','fDate','fClockIn','fClockOut','fRegHours','fOtHours','fNotes']
+        .forEach(id => { document.getElementById(id).value = ''; });
     });
 
     document.getElementById('saveBtn').addEventListener('click', async () => {
       formError.style.display = 'none';
-
       const employeeId = parseInt(document.getElementById('fEmployeeId').value);
       const entryDate  = document.getElementById('fDate').value;
-
       if (!employeeId || !entryDate) {
         formError.textContent = 'Employee ID and Date are required.';
         formError.style.display = 'block';
         return;
       }
-
       const body = {
         employee_id:    employeeId,
         entry_date:     entryDate,
@@ -467,17 +679,16 @@
         entry_type:     document.getElementById('fType').value,
         notes:          document.getElementById('fNotes').value || null,
       };
-
       const res = await fetch(`${API}/timeentries/create`, {
         method: 'POST', headers, body: JSON.stringify(body)
       });
-
       if (res.ok) {
+        const saved = await res.json();
         overlay.classList.remove('open');
-        // Reset form
         ['fEmployeeId','fDate','fClockIn','fClockOut','fRegHours','fOtHours','fNotes']
           .forEach(id => { document.getElementById(id).value = ''; });
-        loadEntries();
+        allEntries.push(saved);
+        renderSchedule();
       } else {
         const err = await res.json().catch(() => ({}));
         formError.textContent = err.detail ?? 'Failed to save entry.';
@@ -485,7 +696,8 @@
       }
     });
 
-    loadEntries();
+    // ── Init ─────────────────────────────────────────────────────
+    loadScheduleData();
   </script>
 </body>
 </html>

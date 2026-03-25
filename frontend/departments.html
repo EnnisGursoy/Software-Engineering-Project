@@ -1,0 +1,346 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Departments | PayCentral</title>
+  <style>
+    :root {
+      --bg: #eef3f9; --text: #1f2937; --surface: #ffffff; --border: #d4dde8;
+      --primary: #1d4ed8; --primary-dark: #1e40af; --muted: #64748b;
+      --shadow: 0 4px 16px rgba(15,23,42,0.06);
+    }
+    body.dark {
+      --bg: #0b1220; --surface: #111827; --text: #f3f4f6;
+      --muted: #9ca3af; --border: #374151;
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0; font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+      background: radial-gradient(circle at top left, #dbeafe 0%, transparent 35%),
+                  radial-gradient(circle at top right, #e0f2fe 0%, transparent 30%), var(--bg);
+      color: var(--text);
+    }
+    header {
+      display: flex; justify-content: space-between; align-items: center;
+      padding: 14px 20px; background: var(--primary);
+      border-bottom: 1px solid var(--primary-dark); position: relative;
+    }
+    h1 { margin: 0; font-size: 1.3rem; color: #fff; }
+    .menu-wrap { position: relative; }
+    .menu-btn {
+      width: 42px; height: 42px; border: 1px solid rgba(255,255,255,0.45);
+      border-radius: 8px; background: rgba(255,255,255,0.12); cursor: pointer;
+      display: flex; flex-direction: column; justify-content: center;
+      align-items: center; gap: 5px; padding: 0;
+    }
+    .menu-btn span { width: 20px; height: 2px; background: #fff; border-radius: 10px; display: block; }
+    .menu { position: absolute; right: 0; top: 50px; min-width: 210px;
+      background: var(--surface); border: 1px solid var(--border); border-radius: 10px;
+      box-shadow: 0 10px 25px rgba(0,0,0,0.1); padding: 8px; display: none; z-index: 20; }
+    .menu.open { display: block; }
+    .menu a { display: block; text-decoration: none; color: var(--text);
+      padding: 10px 12px; border-radius: 8px; font-size: 0.95rem; }
+    .menu a:hover { background: #ecfeff; color: #0f766e; }
+    main { max-width: 900px; margin: 0 auto; padding: 28px 20px 60px; }
+    .toolbar { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; flex-wrap: wrap; gap: 10px; }
+    .toolbar h2 { margin: 0; font-size: 1.15rem; }
+    .btn-primary {
+      background: var(--primary); color: #fff; border: none; border-radius: 8px;
+      padding: 9px 18px; font-size: 0.9rem; font-weight: 600; cursor: pointer; font-family: inherit;
+    }
+    .btn-primary:hover { background: var(--primary-dark); }
+    .btn-danger {
+      background: #fef2f2; color: #b91c1c; border: 1px solid #fecaca;
+      border-radius: 6px; padding: 4px 10px; font-size: 0.8rem; font-weight: 600;
+      cursor: pointer; font-family: inherit;
+    }
+    .btn-danger:hover { background: #fee2e2; }
+    .btn-secondary {
+      background: #f1f5f9; color: #475569; border: 1px solid var(--border);
+      border-radius: 8px; padding: 9px 16px; font-size: 0.88rem; font-weight: 600;
+      cursor: pointer; font-family: inherit;
+    }
+    .card {
+      background: var(--surface); border: 1px solid var(--border);
+      border-radius: 14px; box-shadow: var(--shadow); overflow: hidden;
+    }
+    table { width: 100%; border-collapse: collapse; }
+    thead th {
+      font-size: 0.72rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.05em;
+      color: var(--muted); background: #f8fbff; border-bottom: 1px solid var(--border);
+      padding: 12px 16px; text-align: left;
+    }
+    tbody td { padding: 13px 16px; font-size: 0.9rem; }
+    tbody tr + tr td { border-top: 1px solid var(--border); }
+    tbody tr:hover td { background: #f8fbff; }
+    .dept-name { font-weight: 600; }
+    .badge-manager {
+      display: inline-block; font-size: 0.75rem; padding: 2px 8px;
+      background: #eff6ff; color: #1e40af; border-radius: 999px; border: 1px solid #bfdbfe;
+    }
+    .empty { text-align: center; padding: 48px; color: var(--muted); font-style: italic; }
+    .status-bar {
+      padding: 10px 14px; border-radius: 8px; font-size: 0.88rem;
+      margin-bottom: 16px; display: none;
+    }
+    .status-bar.success { display: block; background: #f0fdf4; color: #166534; border: 1px solid #bbf7d0; }
+    .status-bar.error   { display: block; background: #fef2f2; color: #b91c1c; border: 1px solid #fecaca; }
+
+    /* Modal */
+    dialog { border: none; border-radius: 14px; padding: 0; box-shadow: 0 20px 60px rgba(15,23,42,0.2); max-width: 420px; width: 90%; }
+    dialog:not([open]) { display: none; }
+    dialog::backdrop { background: rgba(15,23,42,0.45); }
+    .dlg-header { padding: 20px 24px 0; display: flex; justify-content: space-between; align-items: center; }
+    .dlg-header h3 { margin: 0; font-size: 1rem; color: #0f172a; }
+    .dlg-close { background: none; border: none; font-size: 1.3rem; cursor: pointer; color: var(--muted); }
+    .dlg-body { padding: 20px 24px 24px; }
+    .dlg-body label { display: block; font-size: 0.8rem; font-weight: 600; color: var(--muted); margin: 14px 0 4px; }
+    .dlg-body label:first-child { margin-top: 0; }
+    .dlg-body input, .dlg-body select {
+      width: 100%; padding: 9px 12px; border: 1px solid var(--border); border-radius: 8px;
+      font-size: 0.9rem; font-family: inherit; outline: none; background: var(--surface); color: var(--text);
+    }
+    .dlg-body input:focus { border-color: var(--primary); box-shadow: 0 0 0 3px rgba(29,78,216,0.1); }
+    .dlg-msg { font-size: 0.82rem; margin-top: 10px; min-height: 18px; }
+    .dlg-msg.ok  { color: #0f766e; }
+    .dlg-msg.err { color: #b91c1c; }
+    .dlg-actions { display: flex; gap: 8px; justify-content: flex-end; margin-top: 18px; }
+  </style>
+  <script src="config.js"></script>
+</head>
+<body>
+<header>
+  <h1>Departments</h1>
+  <div class="menu-wrap">
+    <button class="menu-btn" id="menuBtn" aria-label="Open menu" aria-expanded="false" aria-controls="hrMenu">
+      <span></span><span></span><span></span>
+    </button>
+    <nav class="menu" id="hrMenu" aria-hidden="true">
+      <a href="homepage.html">Home</a>
+      <a href="profile.html">Profile</a>
+      <a href="employees.html">Employees</a>
+      <a href="departments.html">Departments</a>
+      <a href="shifts.html">Shifts</a>
+      <a href="payroll.html">Payroll</a>
+      <a href="benefits.html">Benefits</a>
+      <a href="taxes.html">Taxes</a>
+      <a href="reports.html">Reports</a>
+      <a href="audit.html">Audit Log</a>
+      <a href="settings.html">Settings</a>
+      <a href="logout.html" style="color:#ef4444;">Sign Out</a>
+    </nav>
+  </div>
+</header>
+
+<main>
+  <div id="statusBar" class="status-bar"></div>
+
+  <div class="toolbar">
+    <h2>Department Management</h2>
+    <button class="btn-primary" onclick="document.getElementById('dlgAdd').showModal()">+ New Department</button>
+  </div>
+
+  <div class="card">
+    <table>
+      <thead>
+        <tr>
+          <th>Department Name</th>
+          <th>Manager</th>
+          <th>Employees</th>
+          <th>Actions</th>
+        </tr>
+      </thead>
+      <tbody id="deptBody">
+        <tr><td colspan="4" class="empty">Loading...</td></tr>
+      </tbody>
+    </table>
+  </div>
+</main>
+
+<!-- Add Department Dialog -->
+<dialog id="dlgAdd">
+  <div class="dlg-header">
+    <h3>New Department</h3>
+    <button class="dlg-close" onclick="document.getElementById('dlgAdd').close()">✕</button>
+  </div>
+  <div class="dlg-body">
+    <label>Department Name</label>
+    <input id="addName" type="text" placeholder="e.g. Engineering" />
+    <div class="dlg-msg" id="addMsg"></div>
+    <div class="dlg-actions">
+      <button class="btn-secondary" onclick="document.getElementById('dlgAdd').close()">Cancel</button>
+      <button class="btn-primary" onclick="createDept()">Create</button>
+    </div>
+  </div>
+</dialog>
+
+<!-- Edit Department Dialog -->
+<dialog id="dlgEdit">
+  <div class="dlg-header">
+    <h3>Edit Department</h3>
+    <button class="dlg-close" onclick="document.getElementById('dlgEdit').close()">✕</button>
+  </div>
+  <div class="dlg-body">
+    <input type="hidden" id="editDeptId" />
+    <label>Department Name</label>
+    <input id="editName" type="text" />
+    <label>Manager (Employee ID)</label>
+    <select id="editManager">
+      <option value="">— No manager assigned —</option>
+    </select>
+    <div class="dlg-msg" id="editMsg"></div>
+    <div class="dlg-actions">
+      <button class="btn-secondary" onclick="document.getElementById('dlgEdit').close()">Cancel</button>
+      <button class="btn-primary" onclick="saveDept()">Save</button>
+    </div>
+  </div>
+</dialog>
+
+<script>
+  const token = localStorage.getItem('access_token');
+  if (!token) window.location.replace('login.html');
+  const role = localStorage.getItem('user_role');
+  if (role === 'employee') window.location.replace('employee_portal.html');
+
+  if (localStorage.getItem('theme') === 'dark') document.body.classList.add('dark');
+
+  const hdrs = { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` };
+
+  const menuBtn = document.getElementById('menuBtn');
+  const hrMenu  = document.getElementById('hrMenu');
+  menuBtn.addEventListener('click', () => {
+    const open = hrMenu.classList.toggle('open');
+    menuBtn.setAttribute('aria-expanded', String(open));
+    hrMenu.setAttribute('aria-hidden', String(!open));
+  });
+  document.addEventListener('click', e => {
+    if (!e.target.closest('.menu-wrap')) {
+      hrMenu.classList.remove('open');
+      menuBtn.setAttribute('aria-expanded', 'false');
+      hrMenu.setAttribute('aria-hidden', 'true');
+    }
+  });
+
+  function showStatus(msg, type) {
+    const bar = document.getElementById('statusBar');
+    bar.textContent = msg;
+    bar.className = `status-bar ${type}`;
+    setTimeout(() => { bar.className = 'status-bar'; }, 4000);
+  }
+
+  let allDepts = [];
+  let empMap   = {};   // employee_id → full name
+
+  async function loadData() {
+    const [dRes, eRes] = await Promise.allSettled([
+      fetch(`${API}/department/`,  { headers: hdrs }),
+      fetch(`${API}/employee/all`, { headers: hdrs }),
+    ]);
+
+    const depts = dRes.status === 'fulfilled' && dRes.value.ok ? await dRes.value.json() : [];
+    const emps  = eRes.status === 'fulfilled' && eRes.value.ok ? await eRes.value.json() : [];
+
+    allDepts = depts;
+    empMap   = Object.fromEntries(emps.map(e => [e.employee_id, `${e.first_name} ${e.last_name}`]));
+
+    // Count employees per dept
+    const empCount = {};
+    emps.forEach(e => { if (e.department_id) empCount[e.department_id] = (empCount[e.department_id] ?? 0) + 1; });
+
+    // Populate manager select in edit dialog
+    const sel = document.getElementById('editManager');
+    sel.innerHTML = '<option value="">— No manager assigned —</option>';
+    emps.filter(e => e.employment_status === 'active').forEach(e => {
+      sel.appendChild(new Option(`${e.first_name} ${e.last_name} (#${e.employee_id})`, e.employee_id));
+    });
+
+    renderDepts(depts, empCount);
+  }
+
+  function renderDepts(depts, empCount) {
+    const tbody = document.getElementById('deptBody');
+    if (!depts.length) {
+      tbody.innerHTML = `<tr><td colspan="4" class="empty">No departments yet. Create one to get started.</td></tr>`;
+      return;
+    }
+    tbody.innerHTML = depts.map(d => {
+      const manager = d.manager_id ? (empMap[d.manager_id] ? `<span class="badge-manager">${empMap[d.manager_id]}</span>` : `#${d.manager_id}`) : '<span style="color:var(--muted);">—</span>';
+      const count = empCount?.[d.department_id] ?? 0;
+      return `<tr>
+        <td class="dept-name">${d.department_name}</td>
+        <td>${manager}</td>
+        <td>${count} employee${count !== 1 ? 's' : ''}</td>
+        <td style="display:flex;gap:6px;">
+          <button class="btn-secondary" style="padding:4px 10px;font-size:0.8rem;" onclick="openEdit(${d.department_id},'${d.department_name.replace(/'/g,"\\'")}',${d.manager_id ?? 'null'})">Edit</button>
+          ${role === 'admin' ? `<button class="btn-danger" onclick="deleteDept(${d.department_id},'${d.department_name.replace(/'/g,"\\'")}')">Delete</button>` : ''}
+        </td>
+      </tr>`;
+    }).join('');
+  }
+
+  async function createDept() {
+    const msg  = document.getElementById('addMsg');
+    const name = document.getElementById('addName').value.trim();
+    if (!name) { msg.className = 'dlg-msg err'; msg.textContent = 'Name is required.'; return; }
+    msg.className = 'dlg-msg'; msg.textContent = 'Creating...';
+    try {
+      const res = await fetch(`${API}/department/create`, {
+        method: 'POST', headers: hdrs, body: JSON.stringify({ department_name: name }),
+      });
+      if (!res.ok) throw new Error((await res.json()).detail ?? res.status);
+      document.getElementById('addName').value = '';
+      msg.textContent = '';
+      document.getElementById('dlgAdd').close();
+      showStatus(`Department "${name}" created.`, 'success');
+      loadData();
+    } catch (e) {
+      msg.className = 'dlg-msg err'; msg.textContent = e.message;
+    }
+  }
+
+  function openEdit(id, name, managerId) {
+    document.getElementById('editDeptId').value = id;
+    document.getElementById('editName').value   = name;
+    document.getElementById('editManager').value = managerId ?? '';
+    document.getElementById('editMsg').textContent = '';
+    document.getElementById('dlgEdit').showModal();
+  }
+
+  async function saveDept() {
+    const msg  = document.getElementById('editMsg');
+    const id   = document.getElementById('editDeptId').value;
+    const name = document.getElementById('editName').value.trim();
+    const mgr  = document.getElementById('editManager').value;
+    if (!name) { msg.className = 'dlg-msg err'; msg.textContent = 'Name is required.'; return; }
+    msg.className = 'dlg-msg'; msg.textContent = 'Saving...';
+    try {
+      const body = { department_name: name, manager_id: mgr ? Number(mgr) : null };
+      const res  = await fetch(`${API}/department/${id}`, {
+        method: 'PATCH', headers: hdrs, body: JSON.stringify(body),
+      });
+      if (!res.ok) throw new Error((await res.json()).detail ?? res.status);
+      document.getElementById('dlgEdit').close();
+      showStatus('Department updated.', 'success');
+      loadData();
+    } catch (e) {
+      msg.className = 'dlg-msg err'; msg.textContent = e.message;
+    }
+  }
+
+  async function deleteDept(id, name) {
+    if (!confirm(`Delete department "${name}"? Employees in this department will become unassigned.`)) return;
+    try {
+      const res = await fetch(`${API}/department/${id}`, { method: 'DELETE', headers: hdrs });
+      if (!res.ok) throw new Error((await res.json()).detail ?? res.status);
+      showStatus(`Department "${name}" deleted.`, 'success');
+      loadData();
+    } catch (e) {
+      showStatus(e.message ?? 'Delete failed.', 'error');
+    }
+  }
+
+  loadData();
+</script>
+</body>
+</html>

@@ -1,0 +1,822 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>My Portal | PayCentral</title>
+  <style>
+    :root {
+      --bg: #eef3f9; --text: #1f2937; --surface: #ffffff; --border: #d4dde8;
+      --primary: #1d4ed8; --primary-dark: #1e40af; --muted: #64748b;
+      --success: #0f766e; --warning: #b45309; --danger: #b91c1c;
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0; font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+      background: radial-gradient(circle at top left, #dbeafe 0%, transparent 35%),
+                  radial-gradient(circle at top right, #e0f2fe 0%, transparent 30%), var(--bg);
+      color: var(--text);
+    }
+
+    header {
+      display: flex; justify-content: space-between; align-items: center;
+      padding: 14px 24px; background: var(--primary);
+      border-bottom: 1px solid var(--primary-dark);
+      position: sticky; top: 0; z-index: 100;
+    }
+    .header-left { display: flex; align-items: center; gap: 12px; }
+    .header-left h1 { margin: 0; font-size: 1.2rem; color: #fff; }
+    .header-left span { font-size: 0.8rem; color: rgba(255,255,255,0.65); }
+    .topnav { display: flex; gap: 6px; align-items: center; }
+    .topnav a {
+      color: rgba(255,255,255,0.85); text-decoration: none;
+      font-size: 0.82rem; padding: 5px 10px; border-radius: 6px;
+      border: 1px solid rgba(255,255,255,0.2); cursor: pointer;
+    }
+    .topnav a:hover, .topnav button:hover { background: rgba(255,255,255,0.15); color: #fff; }
+    .topnav a.signout { color: #fca5a5; border-color: rgba(252,165,165,0.3); }
+    .topnav button {
+      color: rgba(255,255,255,0.85); background: none; cursor: pointer;
+      font-size: 0.82rem; padding: 5px 10px; border-radius: 6px;
+      border: 1px solid rgba(255,255,255,0.2); font-family: inherit;
+    }
+
+    main { max-width: 1100px; margin: 0 auto; padding: 28px 24px 60px; }
+
+    .welcome {
+      background: linear-gradient(135deg, var(--primary) 0%, #1e40af 100%);
+      border-radius: 14px; padding: 28px 32px; margin-bottom: 28px;
+      display: flex; justify-content: space-between; align-items: center;
+      box-shadow: 0 8px 24px rgba(29,78,216,0.25);
+    }
+    .welcome-text h2 { margin: 0 0 4px; font-size: 1.5rem; color: #fff; }
+    .welcome-text p  { margin: 0; color: rgba(255,255,255,0.75); font-size: 0.9rem; }
+    .welcome-badge {
+      background: rgba(255,255,255,0.15); border: 1px solid rgba(255,255,255,0.25);
+      border-radius: 10px; padding: 12px 20px; text-align: center; color: #fff;
+    }
+    .welcome-badge .badge-val { font-size: 1.4rem; font-weight: 700; display: block; }
+    .welcome-badge .badge-lbl { font-size: 0.75rem; opacity: 0.75; }
+
+    .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin-bottom: 20px; }
+    @media (max-width: 720px) { .grid-2 { grid-template-columns: 1fr; } }
+
+    .card {
+      background: var(--surface); border: 1px solid var(--border);
+      border-radius: 14px; padding: 20px;
+      box-shadow: 0 4px 16px rgba(15,23,42,0.06);
+    }
+    .card-title {
+      font-size: 0.72rem; font-weight: 700; text-transform: uppercase;
+      letter-spacing: 0.06em; color: var(--muted); margin: 0 0 16px;
+      padding-bottom: 10px; border-bottom: 1px solid var(--border);
+      display: flex; justify-content: space-between; align-items: center;
+    }
+    .card-title button {
+      font-size: 0.7rem; font-weight: 600; padding: 3px 10px;
+      border-radius: 6px; border: 1px solid var(--border);
+      background: #f8fbff; color: var(--primary); cursor: pointer;
+      text-transform: none; letter-spacing: 0; font-family: inherit;
+    }
+    .card-title button:hover { background: #eff6ff; }
+
+    .info-row { display: flex; justify-content: space-between; align-items: baseline; padding: 6px 0; border-bottom: 1px solid #f1f5f9; }
+    .info-row:last-child { border-bottom: none; }
+    .info-label { font-size: 0.82rem; color: var(--muted); }
+    .info-value { font-size: 0.88rem; font-weight: 600; color: #0f172a; }
+
+    .table-wrap { overflow-x: auto; }
+    table { width: 100%; border-collapse: collapse; min-width: 500px; }
+    thead th {
+      font-size: 0.72rem; font-weight: 700; text-align: left; color: var(--muted);
+      background: #f8fbff; border-bottom: 1px solid var(--border);
+      padding: 10px 12px; text-transform: uppercase; letter-spacing: 0.3px;
+    }
+    tbody td { padding: 10px 12px; font-size: 0.88rem; color: #374151; }
+    tbody tr + tr td { border-top: 1px solid var(--border); }
+    tbody tr:hover td { background: #f8fbff; }
+    .mono { font-family: monospace; font-size: 0.88rem; }
+
+    .badge {
+      display: inline-block; font-size: 0.72rem; border-radius: 999px;
+      padding: 2px 9px; border: 1px solid transparent; white-space: nowrap; font-weight: 600;
+    }
+    .badge-paid     { background: #ecfdf5; color: #065f46; border-color: #a7f3d0; }
+    .badge-pending  { background: #fffbeb; color: #92400e; border-color: #fde68a; }
+    .badge-active   { background: #ecfdf5; color: #065f46; border-color: #a7f3d0; }
+    .badge-inactive { background: #f1f5f9; color: #475569; border-color: #e2e8f0; }
+    .badge-approved { background: #ecfdf5; color: #065f46; border-color: #a7f3d0; }
+    .badge-review   { background: #fffbeb; color: #92400e; border-color: #fde68a; }
+
+    .benefit-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 12px; }
+    .benefit-item {
+      border: 1px solid var(--border); border-radius: 10px;
+      padding: 14px; background: #f8fbff;
+    }
+    .benefit-item-type { font-size: 0.7rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.05em; color: var(--primary); margin-bottom: 4px; }
+    .benefit-item-name { font-size: 0.9rem; font-weight: 600; color: #0f172a; margin-bottom: 2px; }
+    .benefit-item-provider { font-size: 0.78rem; color: var(--muted); margin-bottom: 8px; }
+    .benefit-item-cost { font-size: 0.8rem; color: #334155; }
+    .benefit-item-cost span { font-weight: 600; color: #0f172a; }
+
+    .empty { text-align: center; padding: 32px 0; color: var(--muted); font-size: 0.88rem; font-style: italic; }
+
+    .stat-row { display: flex; gap: 12px; margin-bottom: 20px; flex-wrap: wrap; }
+    .stat-pill {
+      flex: 1; min-width: 130px; background: var(--surface);
+      border: 1px solid var(--border); border-radius: 12px;
+      padding: 14px 18px; box-shadow: 0 2px 8px rgba(15,23,42,0.05);
+    }
+    .stat-pill .sp-val { font-size: 1.3rem; font-weight: 700; color: var(--primary); }
+    .stat-pill .sp-lbl { font-size: 0.75rem; color: var(--muted); margin-top: 2px; }
+
+    .full-width { grid-column: 1 / -1; }
+
+    /* MODAL */
+    dialog { border: none; border-radius: 14px; padding: 0; box-shadow: 0 20px 60px rgba(15,23,42,0.2); max-width: 420px; width: 90%; }
+    dialog:not([open]) { display: none; }
+    dialog::backdrop { background: rgba(15,23,42,0.45); }
+    .dlg-header { padding: 20px 24px 0; display: flex; justify-content: space-between; align-items: center; }
+    .dlg-header h3 { margin: 0; font-size: 1rem; color: #0f172a; }
+    .dlg-close { background: none; border: none; font-size: 1.3rem; cursor: pointer; color: var(--muted); padding: 0 4px; }
+    .dlg-body { padding: 20px 24px 24px; }
+    .dlg-body label { display: block; font-size: 0.8rem; font-weight: 600; color: var(--muted); margin-bottom: 4px; margin-top: 14px; }
+    .dlg-body label:first-child { margin-top: 0; }
+    .dlg-body input {
+      width: 100%; padding: 9px 12px; border: 1px solid var(--border); border-radius: 8px;
+      font-size: 0.9rem; font-family: inherit; outline: none;
+    }
+    .dlg-body input:focus { border-color: var(--primary); box-shadow: 0 0 0 3px rgba(29,78,216,0.1); }
+    .dlg-msg { font-size: 0.82rem; margin-top: 10px; min-height: 18px; }
+    .dlg-msg.ok  { color: var(--success); }
+    .dlg-msg.err { color: var(--danger); }
+    .dlg-actions { display: flex; gap: 8px; justify-content: flex-end; margin-top: 18px; }
+    .btn-primary {
+      background: var(--primary); color: #fff; border: none; border-radius: 8px;
+      padding: 9px 20px; font-size: 0.88rem; font-weight: 600; cursor: pointer; font-family: inherit;
+    }
+    .btn-primary:hover { background: var(--primary-dark); }
+    .btn-secondary {
+      background: #f1f5f9; color: #475569; border: 1px solid var(--border); border-radius: 8px;
+      padding: 9px 16px; font-size: 0.88rem; font-weight: 600; cursor: pointer; font-family: inherit;
+    }
+  </style>
+  <script src="config.js"></script>
+</head>
+<body>
+
+<header>
+  <div class="header-left">
+    <h1>PayCentral</h1>
+    <span>Employee Portal</span>
+  </div>
+  <nav class="topnav">
+    <button id="clockBtn" onclick="handleClock()">Clock In</button>
+    <button onclick="document.getElementById('dlgLogTime').showModal()">Log Time</button>
+    <button onclick="openTimeOffRequest()">Request Time Off</button>
+    <button onclick="document.getElementById('dlgEditInfo').showModal()">Edit Info</button>
+    <button onclick="document.getElementById('dlgChangePwd').showModal()">Change Password</button>
+    <a href="logout.html" class="signout">Sign Out</a>
+  </nav>
+</header>
+
+<main>
+  <div class="welcome">
+    <div class="welcome-text">
+      <h2 id="welcomeName">Welcome back</h2>
+      <p id="welcomeSub">Loading your profile...</p>
+    </div>
+    <div class="welcome-badge">
+      <span class="badge-val" id="welcomeJob">—</span>
+      <span class="badge-lbl" id="welcomeJobLbl">Position</span>
+    </div>
+  </div>
+
+  <div class="stat-row">
+    <div class="stat-pill">
+      <div class="sp-val" id="statGross">—</div>
+      <div class="sp-lbl">Last Gross Pay</div>
+    </div>
+    <div class="stat-pill">
+      <div class="sp-val" id="statNet">—</div>
+      <div class="sp-lbl">Last Net Pay</div>
+    </div>
+    <div class="stat-pill">
+      <div class="sp-val" id="statChecks">—</div>
+      <div class="sp-lbl">Paychecks on Record</div>
+    </div>
+    <div class="stat-pill">
+      <div class="sp-val" id="statBenefits">—</div>
+      <div class="sp-lbl">Active Benefits</div>
+    </div>
+    <div class="stat-pill">
+      <div class="sp-val" id="statYtdGross">—</div>
+      <div class="sp-lbl">YTD Gross</div>
+    </div>
+    <div class="stat-pill">
+      <div class="sp-val" id="statYtdTax">—</div>
+      <div class="sp-lbl">YTD Taxes</div>
+    </div>
+    <div class="stat-pill">
+      <div class="sp-val" id="statYtdNet">—</div>
+      <div class="sp-lbl">YTD Net</div>
+    </div>
+  </div>
+
+  <div class="grid-2">
+    <!-- Profile -->
+    <div class="card">
+      <p class="card-title">My Profile</p>
+      <div id="profileRows"><div class="empty">Loading...</div></div>
+    </div>
+
+    <!-- Tax Info -->
+    <div class="card">
+      <p class="card-title">Tax Withholding</p>
+      <div id="taxRows"><div class="empty">Loading...</div></div>
+    </div>
+
+    <!-- Benefits -->
+    <div class="card full-width">
+      <p class="card-title">My Benefits</p>
+      <div class="benefit-grid" id="benefitGrid"><div class="empty">Loading...</div></div>
+    </div>
+
+    <!-- Paychecks -->
+    <div class="card full-width">
+      <p class="card-title">Paychecks
+        <select id="paycheckYearFilter" onchange="renderPaychecks()" style="font-size:0.78rem;padding:3px 8px;border:1px solid var(--border);border-radius:6px;background:#f8fbff;color:var(--primary);font-family:inherit;font-weight:600;cursor:pointer;"></select>
+      </p>
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th>Pay Period</th><th>Gross Pay</th><th>Federal Tax</th>
+              <th>SS / Medicare</th><th>Other Deductions</th><th>Net Pay</th>
+              <th>Status</th><th>Payment Date</th><th></th>
+            </tr>
+          </thead>
+          <tbody id="paycheckTable"></tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- Time Entries -->
+    <div class="card full-width">
+      <p class="card-title">Recent Time Entries</p>
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th>Date</th><th>Type</th><th>Clock In</th><th>Clock Out</th>
+              <th>Regular Hrs</th><th>Overtime Hrs</th><th>Status</th><th>Notes</th>
+            </tr>
+          </thead>
+          <tbody id="timeTable"></tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+</main>
+
+<!-- Log Time Modal -->
+<dialog id="dlgLogTime">
+  <div class="dlg-header">
+    <h3>Log Time</h3>
+    <button class="dlg-close" onclick="document.getElementById('dlgLogTime').close()">✕</button>
+  </div>
+  <div class="dlg-body">
+    <label>Date</label>
+    <input id="logDate" type="date" />
+    <label>Entry Type</label>
+    <select id="logType" style="width:100%;padding:9px 12px;border:1px solid var(--border);border-radius:8px;font-size:0.9rem;font-family:inherit;">
+      <option value="work">Work</option>
+      <option value="sick">Sick</option>
+      <option value="vacation">Vacation</option>
+      <option value="holiday">Holiday</option>
+    </select>
+    <label>Clock In</label>
+    <input id="logClockIn" type="time" />
+    <label>Clock Out</label>
+    <input id="logClockOut" type="time" />
+    <label>Notes (optional)</label>
+    <input id="logNotes" type="text" placeholder="Any additional notes..." />
+    <div class="dlg-msg" id="logTimeMsg"></div>
+    <div class="dlg-actions">
+      <button class="btn-secondary" onclick="document.getElementById('dlgLogTime').close()">Cancel</button>
+      <button class="btn-primary" onclick="submitTime()">Submit</button>
+    </div>
+  </div>
+</dialog>
+
+<!-- Edit Info Modal -->
+<dialog id="dlgEditInfo">
+  <div class="dlg-header">
+    <h3>Edit Contact Info</h3>
+    <button class="dlg-close" onclick="document.getElementById('dlgEditInfo').close()">✕</button>
+  </div>
+  <div class="dlg-body">
+    <label>Phone</label>
+    <input id="editPhone" type="text" placeholder="555-0100" />
+    <label>Address</label>
+    <input id="editAddress" type="text" placeholder="123 Main St" />
+    <label>City</label>
+    <input id="editCity" type="text" placeholder="New York" />
+    <label>State</label>
+    <input id="editState" type="text" placeholder="NY" maxlength="2" />
+    <label>Zip Code</label>
+    <input id="editZip" type="text" placeholder="10001" />
+    <div class="dlg-msg" id="editInfoMsg"></div>
+    <div class="dlg-actions">
+      <button class="btn-secondary" onclick="document.getElementById('dlgEditInfo').close()">Cancel</button>
+      <button class="btn-primary" onclick="saveInfo()">Save Changes</button>
+    </div>
+  </div>
+</dialog>
+
+<!-- Change Password Modal -->
+<dialog id="dlgChangePwd">
+  <div class="dlg-header">
+    <h3>Change Password</h3>
+    <button class="dlg-close" onclick="document.getElementById('dlgChangePwd').close()">✕</button>
+  </div>
+  <div class="dlg-body">
+    <label>Current Password</label>
+    <input id="pwdCurrent" type="password" autocomplete="current-password" />
+    <label>New Password</label>
+    <input id="pwdNew" type="password" autocomplete="new-password" />
+    <label>Confirm New Password</label>
+    <input id="pwdConfirm" type="password" autocomplete="new-password" />
+    <div class="dlg-msg" id="pwdMsg"></div>
+    <div class="dlg-actions">
+      <button class="btn-secondary" onclick="document.getElementById('dlgChangePwd').close()">Cancel</button>
+      <button class="btn-primary" onclick="changePassword()">Update Password</button>
+    </div>
+  </div>
+</dialog>
+
+<script>
+  const token = localStorage.getItem('access_token');
+  if (!token) { window.location.href = 'login.html'; }
+
+  const hdrs = { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` };
+  let _employeeId = null;
+  let _fullName = '';
+
+  function fmt(n) { return '$' + Number(n ?? 0).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 }); }
+
+  // ── PROFILE ──────────────────────────────────────────────────────────
+  async function loadProfile() {
+    try {
+      const res = await fetch(`${API}/employee/me`, { headers: hdrs });
+      if (!res.ok) throw new Error(res.status);
+      const e = await res.json();
+      _employeeId = e.employee_id;
+      _fullName = `${e.first_name} ${e.last_name}`;
+
+      document.getElementById('welcomeName').textContent = `Welcome back, ${e.first_name}!`;
+      document.getElementById('welcomeSub').textContent  = `${e.email}  •  Employee #${e.employee_id}`;
+
+      // Pre-fill edit modal
+      document.getElementById('editPhone').value   = e.phone   ?? '';
+      document.getElementById('editAddress').value = e.address ?? '';
+      document.getElementById('editCity').value    = e.city    ?? '';
+      document.getElementById('editState').value   = e.state   ?? '';
+      document.getElementById('editZip').value     = e.zip_code ?? '';
+
+      const rows = [
+        ['Full Name',    `${e.first_name} ${e.last_name}`],
+        ['Email',        e.email    ?? '—'],
+        ['Phone',        e.phone    ?? '—'],
+        ['Address',      [e.address, e.city, e.state].filter(Boolean).join(', ') || '—'],
+        ['Employee ID',  `#${e.employee_id}`],
+        ['Department',   e.department_id ? `Dept #${e.department_id}` : '—'],
+        ['Status',       e.employment_status ?? '—'],
+      ];
+      document.getElementById('profileRows').innerHTML = rows.map(([l, v]) =>
+        `<div class="info-row"><span class="info-label">${l}</span><span class="info-value">${v}</span></div>`
+      ).join('');
+    } catch {
+      document.getElementById('profileRows').innerHTML = `<div class="empty">Could not load profile.</div>`;
+    }
+  }
+
+  // ── POSITION ─────────────────────────────────────────────────────────
+  async function loadPosition() {
+    try {
+      const res = await fetch(`${API}/positions/me`, { headers: hdrs });
+      if (!res.ok) throw new Error(res.status);
+      const positions = await res.json();
+      const current = positions.find(p => p.is_current) ?? positions[0];
+      if (current) {
+        document.getElementById('welcomeJob').textContent    = current.position_title ?? '—';
+        document.getElementById('welcomeJobLbl').textContent = current.pay_frequency?.replace(/_/g, ' ') ?? 'Position';
+      }
+    } catch {
+      document.getElementById('welcomeJob').textContent = 'Employee';
+    }
+  }
+
+  // ── TAX INFO ─────────────────────────────────────────────────────────
+  async function loadTax() {
+    try {
+      const res = await fetch(`${API}/tax/me`, { headers: hdrs });
+      if (!res.ok) throw new Error(res.status);
+      const taxes = await res.json();
+      if (!taxes.length) {
+        document.getElementById('taxRows').innerHTML = `<div class="empty">No tax info on file.</div>`;
+        return;
+      }
+      const t = taxes[0];
+      const rows = [
+        ['Filing Status',          t.filing_status ?? '—'],
+        ['Federal Allowances',     t.federal_allowances ?? '—'],
+        ['State Allowances',       t.state_allowances ?? '—'],
+        ['Additional Withholding', fmt(t.additional_withholding)],
+        ['Federal Exempt',         t.exempt_federal ? 'Yes' : 'No'],
+        ['State Exempt',           t.exempt_state   ? 'Yes' : 'No'],
+        ['Effective Date',         t.effective_date ?? '—'],
+      ];
+      document.getElementById('taxRows').innerHTML = rows.map(([l, v]) =>
+        `<div class="info-row"><span class="info-label">${l}</span><span class="info-value">${v}</span></div>`
+      ).join('');
+    } catch {
+      document.getElementById('taxRows').innerHTML = `<div class="empty">Could not load tax info.</div>`;
+    }
+  }
+
+  // ── PAYCHECKS ────────────────────────────────────────────────────────
+  let allMyChecks = [];
+
+  async function loadPaychecks() {
+    const tb = document.getElementById('paycheckTable');
+    try {
+      const res = await fetch(`${API}/payroll/me`, { headers: hdrs });
+      if (!res.ok) throw new Error(res.status);
+      const checks = await res.json();
+      if (!checks.length) {
+        tb.innerHTML = `<tr><td colspan="9" style="text-align:center;color:var(--muted);font-style:italic;padding:28px;">No paychecks yet.</td></tr>`;
+        return;
+      }
+      allMyChecks = checks;
+      const sorted = [...checks].sort((a, b) => b.paycheck_id - a.paycheck_id);
+      const latest = sorted[0];
+      document.getElementById('statGross').textContent  = fmt(latest.gross_pay);
+      document.getElementById('statNet').textContent    = fmt(latest.net_pay);
+      document.getElementById('statChecks').textContent = checks.length;
+
+      // YTD stats (current calendar year)
+      const thisYear = new Date().getFullYear().toString();
+      const ytd = checks.filter(c => (c.payment_date ?? '').startsWith(thisYear));
+      const ytdGross = ytd.reduce((s, c) => s + (Number(c.gross_pay) || 0), 0);
+      const ytdTax   = ytd.reduce((s, c) => s + (Number(c.federal_tax)||0) + (Number(c.state_tax)||0)
+        + (Number(c.social_security)||0) + (Number(c.medicare)||0), 0);
+      const ytdNet   = ytd.reduce((s, c) => s + (Number(c.net_pay) || 0), 0);
+      document.getElementById('statYtdGross').textContent = fmt(ytdGross);
+      document.getElementById('statYtdTax').textContent   = fmt(ytdTax);
+      document.getElementById('statYtdNet').textContent   = fmt(ytdNet);
+
+      // Populate year filter
+      const years = [...new Set(checks.map(c => (c.payment_date ?? '').slice(0, 4)).filter(Boolean))].sort().reverse();
+      const sel = document.getElementById('paycheckYearFilter');
+      sel.innerHTML = '<option value="">All Years</option>' + years.map(y => `<option value="${y}">${y}</option>`).join('');
+
+      renderPaychecks();
+    } catch {
+      tb.innerHTML = `<tr><td colspan="9" style="text-align:center;color:var(--muted);font-style:italic;padding:28px;">Could not load paychecks.</td></tr>`;
+    }
+  }
+
+  function renderPaychecks() {
+    const tb = document.getElementById('paycheckTable');
+    const year = document.getElementById('paycheckYearFilter').value;
+    const sorted = [...allMyChecks].sort((a, b) => b.paycheck_id - a.paycheck_id);
+    const filtered = year ? sorted.filter(c => (c.payment_date ?? '').startsWith(year)) : sorted;
+    if (!filtered.length) {
+      tb.innerHTML = `<tr><td colspan="9" style="text-align:center;color:var(--muted);font-style:italic;padding:28px;">No paychecks for this period.</td></tr>`;
+      return;
+    }
+    tb.innerHTML = filtered.map(c => {
+      const statusCls = c.payment_status === 'paid' ? 'badge-paid' : 'badge-pending';
+      const ss    = (c.social_security ?? 0) + (c.medicare ?? 0);
+      const other = (c.health_insurance ?? 0) + (c.retirement_401k ?? 0) + (c.other_deductions ?? 0);
+      return `<tr>
+        <td>Period #${c.pay_period_id}</td>
+        <td class="mono">${fmt(c.gross_pay)}</td>
+        <td class="mono">${fmt(c.federal_tax)}</td>
+        <td class="mono">${fmt(ss)}</td>
+        <td class="mono">${fmt(other)}</td>
+        <td class="mono" style="font-weight:700;color:#0f172a;">${fmt(c.net_pay)}</td>
+        <td><span class="badge ${statusCls}">${c.payment_status ?? 'pending'}</span></td>
+        <td>${c.payment_date ?? '—'}</td>
+        <td><button onclick="showMyPayStub(${c.paycheck_id})" style="padding:4px 10px;font-size:0.78rem;border:1px solid #d1d5db;border-radius:6px;background:#f8fbff;color:#1d4ed8;cursor:pointer;font-weight:600;">View Stub</button></td>
+      </tr>`;
+    }).join('');
+  }
+
+  function showMyPayStub(paycheckId) {
+    const p = allMyChecks.find(x => x.paycheck_id === paycheckId);
+    if (!p) return;
+    const fmtN = n => '$' + Number(n ?? 0).toFixed(2);
+    const totalDeductions = [p.federal_tax, p.state_tax, p.social_security, p.medicare,
+      p.health_insurance, p.retirement_401k, p.other_deductions]
+      .reduce((s, v) => s + (Number(v) || 0), 0);
+    const empName = _fullName || 'Employee';
+
+    document.getElementById('myStubContent').innerHTML = `
+      <div class="stub-header">
+        <div class="stub-company">PayCentral</div>
+        <div class="stub-title">Pay Stub</div>
+      </div>
+      <div class="stub-meta">
+        <div><strong>Employee:</strong> ${empName}</div>
+        <div><strong>Pay Period:</strong> Period #${p.pay_period_id}</div>
+        <div><strong>Check #:</strong> ${p.check_number ?? p.paycheck_id}</div>
+        <div><strong>Payment Date:</strong> ${p.payment_date ?? '—'}</div>
+        <div><strong>Status:</strong> ${p.payment_status ?? '—'}</div>
+      </div>
+      <table class="stub-table">
+        <thead><tr><th colspan="2">Earnings</th></tr></thead>
+        <tbody>
+          <tr><td>Gross Pay</td><td class="amount">${fmtN(p.gross_pay)}</td></tr>
+        </tbody>
+      </table>
+      <table class="stub-table">
+        <thead><tr><th colspan="2">Deductions</th></tr></thead>
+        <tbody>
+          <tr><td>Federal Income Tax</td><td class="amount">${fmtN(p.federal_tax)}</td></tr>
+          <tr><td>State Income Tax</td><td class="amount">${fmtN(p.state_tax)}</td></tr>
+          <tr><td>Social Security</td><td class="amount">${fmtN(p.social_security)}</td></tr>
+          <tr><td>Medicare</td><td class="amount">${fmtN(p.medicare)}</td></tr>
+          <tr><td>Health Insurance</td><td class="amount">${fmtN(p.health_insurance)}</td></tr>
+          <tr><td>401(k)</td><td class="amount">${fmtN(p.retirement_401k)}</td></tr>
+          <tr><td>Other Deductions</td><td class="amount">${fmtN(p.other_deductions)}</td></tr>
+          <tr class="stub-subtotal"><td>Total Deductions</td><td class="amount">${'$' + totalDeductions.toFixed(2)}</td></tr>
+        </tbody>
+      </table>
+      <div class="stub-net">
+        <span>Net Pay</span>
+        <span>${fmtN(p.net_pay)}</span>
+      </div>`;
+
+    document.getElementById('dlgMyPayStub').showModal();
+  }
+
+  // ── BENEFITS ─────────────────────────────────────────────────────────
+  async function loadBenefits() {
+    const grid = document.getElementById('benefitGrid');
+    try {
+      const [enrollRes, planRes] = await Promise.all([
+        fetch(`${API}/benefits/enrollments/me`, { headers: hdrs }),
+        fetch(`${API}/benefits/plans/all`,       { headers: hdrs }),
+      ]);
+      if (!enrollRes.ok) throw new Error(enrollRes.status);
+      const enrollments = await enrollRes.json();
+      const plans = planRes.ok ? await planRes.json() : [];
+      const planMap = Object.fromEntries(plans.map(p => [p.plan_id, p]));
+
+      const active = enrollments.filter(e => e.status === 'Active');
+      document.getElementById('statBenefits').textContent = active.length;
+
+      if (!enrollments.length) {
+        grid.innerHTML = `<div class="empty">No benefit enrollments found.</div>`;
+        return;
+      }
+      grid.innerHTML = enrollments.map(e => {
+        const plan = planMap[e.plan_id] ?? {};
+        const statusCls = e.status === 'Active' ? 'badge-active' : 'badge-inactive';
+        return `<div class="benefit-item">
+          <div class="benefit-item-type">${plan.plan_type ?? '—'}</div>
+          <div class="benefit-item-name">${plan.plan_name ?? 'Plan #' + e.plan_id}</div>
+          <div class="benefit-item-provider">${plan.provider ?? '—'}</div>
+          <div class="benefit-item-cost">Your cost: <span>${fmt(e.employee_cost ?? plan.employee_cost)}</span>/period</div>
+          <div style="margin-top:8px;"><span class="badge ${statusCls}">${e.status}</span></div>
+        </div>`;
+      }).join('');
+    } catch {
+      grid.innerHTML = `<div class="empty">Could not load benefits.</div>`;
+    }
+  }
+
+  // ── TIME ENTRIES ─────────────────────────────────────────────────────
+  async function loadTimeEntries() {
+    const tb = document.getElementById('timeTable');
+    try {
+      const res = await fetch(`${API}/timeentries/me`, { headers: hdrs });
+      if (!res.ok) throw new Error(res.status);
+      const entries = await res.json();
+      if (!entries.length) {
+        tb.innerHTML = `<tr><td colspan="8" style="text-align:center;color:var(--muted);font-style:italic;padding:28px;">No time entries found.</td></tr>`;
+        return;
+      }
+      const sorted = [...entries].sort((a, b) => b.entry_id - a.entry_id);
+      tb.innerHTML = sorted.slice(0, 15).map(e => {
+        const statusCls = e.approved ? 'badge-approved' : 'badge-review';
+        const statusLbl = e.approved ? 'Approved' : 'Pending';
+        return `<tr>
+          <td>${e.entry_date ?? '—'}</td>
+          <td><span class="badge badge-review" style="background:#eff6ff;color:#1e40af;border-color:#bfdbfe;">${e.entry_type ?? '—'}</span></td>
+          <td>${e.clock_in ?? '—'}</td>
+          <td>${e.clock_out ?? '—'}</td>
+          <td class="mono">${e.regular_hours ?? 0}h</td>
+          <td class="mono">${e.overtime_hours ?? 0}h</td>
+          <td><span class="badge ${statusCls}">${statusLbl}</span></td>
+          <td style="color:var(--muted);font-size:0.82rem;">${e.notes ?? ''}</td>
+        </tr>`;
+      }).join('');
+    } catch {
+      tb.innerHTML = `<tr><td colspan="8" style="text-align:center;color:var(--muted);font-style:italic;padding:28px;">Could not load time entries.</td></tr>`;
+    }
+  }
+
+  // ── LOG TIME ─────────────────────────────────────────────────────────
+  document.getElementById('logDate').value = new Date().toISOString().slice(0, 10);
+
+  async function submitTime() {
+    const msg = document.getElementById('logTimeMsg');
+    msg.className = 'dlg-msg';
+    const date    = document.getElementById('logDate').value;
+    const clockIn = document.getElementById('logClockIn').value;
+    const clockOut= document.getElementById('logClockOut').value;
+    if (!date) { msg.className = 'dlg-msg err'; msg.textContent = 'Date is required.'; return; }
+    msg.textContent = 'Submitting...';
+    try {
+      const res = await fetch(`${API}/timeentries/me`, {
+        method: 'POST',
+        headers: hdrs,
+        body: JSON.stringify({
+          employee_id: _employeeId,
+          entry_date:  date,
+          clock_in:    clockIn || null,
+          clock_out:   clockOut || null,
+          entry_type:  document.getElementById('logType').value,
+          notes:       document.getElementById('logNotes').value.trim() || null,
+        }),
+      });
+      if (!res.ok) throw new Error((await res.json()).detail ?? res.status);
+      msg.className = 'dlg-msg ok';
+      msg.textContent = 'Time entry submitted! Awaiting approval.';
+      loadTimeEntries();
+      setTimeout(() => {
+        document.getElementById('dlgLogTime').close();
+        document.getElementById('logClockIn').value = '';
+        document.getElementById('logClockOut').value = '';
+        document.getElementById('logNotes').value = '';
+        msg.textContent = '';
+      }, 1500);
+    } catch (e) {
+      msg.className = 'dlg-msg err';
+      msg.textContent = e.message ?? 'Could not submit time entry.';
+    }
+  }
+
+  // ── EDIT INFO ────────────────────────────────────────────────────────
+  async function saveInfo() {
+    const msg = document.getElementById('editInfoMsg');
+    msg.className = 'dlg-msg';
+    msg.textContent = 'Saving...';
+    try {
+      const res = await fetch(`${API}/employee/me`, {
+        method: 'PATCH',
+        headers: hdrs,
+        body: JSON.stringify({
+          phone:    document.getElementById('editPhone').value.trim() || null,
+          address:  document.getElementById('editAddress').value.trim() || null,
+          city:     document.getElementById('editCity').value.trim() || null,
+          state:    document.getElementById('editState').value.trim() || null,
+          zip_code: document.getElementById('editZip').value.trim() || null,
+        }),
+      });
+      if (!res.ok) throw new Error((await res.json()).detail ?? res.status);
+      msg.className = 'dlg-msg ok';
+      msg.textContent = 'Saved!';
+      loadProfile();
+      setTimeout(() => document.getElementById('dlgEditInfo').close(), 1200);
+    } catch (e) {
+      msg.className = 'dlg-msg err';
+      msg.textContent = e.message ?? 'Could not save changes.';
+    }
+  }
+
+  // ── CHANGE PASSWORD ──────────────────────────────────────────────────
+  async function changePassword() {
+    const msg     = document.getElementById('pwdMsg');
+    const current = document.getElementById('pwdCurrent').value;
+    const newPwd  = document.getElementById('pwdNew').value;
+    const confirm = document.getElementById('pwdConfirm').value;
+
+    msg.className = 'dlg-msg';
+    if (!current || !newPwd) { msg.className = 'dlg-msg err'; msg.textContent = 'All fields are required.'; return; }
+    if (newPwd !== confirm)  { msg.className = 'dlg-msg err'; msg.textContent = 'New passwords do not match.'; return; }
+
+    msg.textContent = 'Updating...';
+    try {
+      const res = await fetch(`${API}/auth/change-password`, {
+        method: 'POST',
+        headers: hdrs,
+        body: JSON.stringify({ current_password: current, new_password: newPwd }),
+      });
+      if (!res.ok) throw new Error((await res.json()).detail ?? res.status);
+      msg.className = 'dlg-msg ok';
+      msg.textContent = 'Password updated!';
+      document.getElementById('pwdCurrent').value = '';
+      document.getElementById('pwdNew').value = '';
+      document.getElementById('pwdConfirm').value = '';
+      setTimeout(() => document.getElementById('dlgChangePwd').close(), 1200);
+    } catch (e) {
+      msg.className = 'dlg-msg err';
+      msg.textContent = e.message ?? 'Could not update password.';
+    }
+  }
+
+  // ── CLOCK IN / OUT ───────────────────────────────────────────────────
+  function initClockWidget() {
+    const btn = document.getElementById('clockBtn');
+    const clockedIn = localStorage.getItem('clock_in_time');
+    if (clockedIn) {
+      const since = localStorage.getItem('clock_in_time');
+      btn.textContent = `Clock Out (since ${since})`;
+      btn.style.cssText = 'background:rgba(239,68,68,0.18);border-color:rgba(239,68,68,0.4);color:#fca5a5;';
+    } else {
+      btn.textContent = 'Clock In';
+      btn.style.cssText = '';
+    }
+  }
+
+  async function handleClock() {
+    const clockedIn = localStorage.getItem('clock_in_time');
+    if (!clockedIn) {
+      localStorage.setItem('clock_in_time', new Date().toTimeString().slice(0, 5));
+      localStorage.setItem('clock_in_date', new Date().toISOString().slice(0, 10));
+      initClockWidget();
+    } else {
+      const clockIn  = localStorage.getItem('clock_in_time');
+      const date     = localStorage.getItem('clock_in_date');
+      const clockOut = new Date().toTimeString().slice(0, 5);
+      try {
+        const res = await fetch(`${API}/timeentries/me`, {
+          method: 'POST', headers: hdrs,
+          body: JSON.stringify({ employee_id: _employeeId, entry_date: date,
+            clock_in: clockIn, clock_out: clockOut, entry_type: 'work' }),
+        });
+        if (!res.ok) throw new Error((await res.json()).detail ?? res.status);
+        localStorage.removeItem('clock_in_time');
+        localStorage.removeItem('clock_in_date');
+        initClockWidget();
+        loadTimeEntries();
+      } catch (e) {
+        alert('Clock out failed: ' + (e.message ?? 'Unknown error'));
+      }
+    }
+  }
+
+  // ── REQUEST TIME OFF ─────────────────────────────────────────────────
+  function openTimeOffRequest() {
+    document.getElementById('logDate').value = new Date().toISOString().slice(0, 10);
+    document.getElementById('logType').value = 'vacation';
+    document.getElementById('logTimeMsg').textContent = '';
+    document.getElementById('dlgLogTime').showModal();
+  }
+
+  // ── INIT ─────────────────────────────────────────────────────────────
+  initClockWidget();
+  (async () => {
+    await Promise.all([loadProfile(), loadPosition(), loadPaychecks(), loadBenefits(), loadTax(), loadTimeEntries()]);
+  })();
+</script>
+
+<!-- My Pay Stub Dialog -->
+<dialog id="dlgMyPayStub" style="border:none;border-radius:12px;padding:0;width:480px;max-width:95vw;box-shadow:0 20px 60px rgba(0,0,0,0.25);">
+  <div style="padding:24px 28px;">
+    <div id="myStubContent"></div>
+    <div style="display:flex;gap:10px;justify-content:flex-end;margin-top:20px;">
+      <button onclick="window.print()" style="padding:8px 18px;background:#1d4ed8;color:#fff;border:none;border-radius:8px;font-weight:600;cursor:pointer;font-size:0.9rem;">Print</button>
+      <button onclick="document.getElementById('dlgMyPayStub').close()" style="padding:8px 18px;background:#f3f4f6;color:#374151;border:1px solid #d1d5db;border-radius:8px;font-weight:600;cursor:pointer;font-size:0.9rem;">Close</button>
+    </div>
+  </div>
+</dialog>
+
+<style>
+  dialog:not([open]) { display: none; }
+  dialog::backdrop { background: rgba(0,0,0,0.45); }
+
+  .stub-header { text-align:center; margin-bottom:16px; border-bottom:2px solid #1d4ed8; padding-bottom:12px; }
+  .stub-company { font-size:1.4rem; font-weight:700; color:#1d4ed8; }
+  .stub-title { font-size:0.9rem; color:#6b7280; text-transform:uppercase; letter-spacing:1px; }
+  .stub-meta { display:grid; grid-template-columns:1fr 1fr; gap:4px 16px; font-size:0.85rem; margin-bottom:16px; color:#374151; }
+  .stub-table { width:100%; border-collapse:collapse; margin-bottom:12px; font-size:0.85rem; }
+  .stub-table th { background:#f1f5f9; text-align:left; padding:6px 10px; font-size:0.8rem; color:#374151; text-transform:uppercase; letter-spacing:0.5px; }
+  .stub-table td { padding:5px 10px; border-bottom:1px solid #e5e7eb; }
+  .stub-table td.amount { text-align:right; font-variant-numeric:tabular-nums; }
+  .stub-subtotal td { font-weight:600; color:#374151; border-top:2px solid #d1d5db; border-bottom:none; }
+  .stub-net { display:flex; justify-content:space-between; align-items:center; background:#1d4ed8; color:#fff; border-radius:8px; padding:12px 16px; font-size:1.05rem; font-weight:700; margin-top:4px; }
+
+  @media print {
+    body > *:not(#dlgMyPayStub) { display: none !important; }
+    #dlgMyPayStub { display: block !important; position: static; box-shadow: none; width: 100%; }
+    #dlgMyPayStub button { display: none; }
+    dialog::backdrop { display: none; }
+  }
+</style>
+</body>
+</html>
