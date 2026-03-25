@@ -3,7 +3,7 @@ from sqlalchemy.orm import Session
 from fastapi.security import OAuth2PasswordRequestForm
 from Backend.Utility.dependencies import get_db, admin_only, get_current_user
 from Backend.Models.User import User
-from Backend.Models.department import Department
+from Backend.Models.Department import Department
 from Backend.Models.LoginLog import LoginLog
 from Backend.Schemas.Employee import EmployeeCreate, EmployeeOut
 from Backend.Schemas.User import UserCreate, UserOut, ChangePassword, UpdateProfile, UserRegister
@@ -88,7 +88,7 @@ async def register_user(
 
     department_id = None
     if body.department_name:
-        from Backend.Models.department import Department
+        from Backend.Models.Department import Department
         dept = db.query(Department).filter(Department.department_name == body.department_name).first()
         if not dept:
             raise HTTPException(status_code=404, detail=f"Department '{body.department_name}' not found")

@@ -2,7 +2,7 @@ from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.orm import Session
 from Backend.Utility.dependencies import get_db, admin_only, hr_only, manager_only
 from Backend.Models.User import User
-from Backend.Models.department import Department
+from Backend.Models.Department import Department
 from Backend.Schemas.department import DepartmentCreate, DepartmentOut, DepartmentUpdate
 from Backend.Services.Department_service import show_department, get_department_by_manager_id, assign_manager, create_department, delete_department, get_my_department
 

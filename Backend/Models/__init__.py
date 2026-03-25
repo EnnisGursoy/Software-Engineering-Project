@@ -1,6 +1,6 @@
 from .Employee import Employee
 from .User import User
-from .department import Department
+from .Department import Department
 from .employee_position import EmployeePosition
 from .Positions import Positions
 from .Paychecks import Paychecks

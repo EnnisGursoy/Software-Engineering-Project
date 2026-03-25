@@ -31,7 +31,7 @@ from Backend.Utility.dependencies import get_db
 from Backend.Utility.security import hash_password, create_access_token, encrypt_ssn
 from Backend.Models.User import User
 from Backend.Models.Employee import Employee
-from Backend.Models.department import Department
+from Backend.Models.Department import Department
 
 
 def _make_test_engine():
