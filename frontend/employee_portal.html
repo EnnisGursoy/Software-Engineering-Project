@@ -173,16 +173,26 @@
       padding: 9px 16px; font-size: 0.88rem; font-weight: 600; cursor: pointer; font-family: inherit;
     }
   </style>
+  <link rel="stylesheet" href="app-theme.css">
   <script src="config.js"></script>
+  <script src="app-shell.js"></script>
 </head>
 <body>
 
-<header>
-  <div class="header-left">
-    <h1>PayCentral</h1>
-    <span>Employee Portal</span>
+<header class="topbar">
+  <div class="topbar-left">
+    <a href="employee_portal.html" class="brand">
+      <div class="brand-logo">
+        <img src="PAY CENTRAL LOGO.png" alt="PayCentral logo">
+      </div>
+      <div class="brand-text">
+        <h1>PayCentral</h1>
+        <p>Employee Portal</p>
+      </div>
+    </a>
   </div>
   <nav class="topnav">
+    <button id="themeToggle" type="button">Toggle Theme</button>
     <button id="clockBtn" onclick="handleClock()">Clock In</button>
     <button onclick="document.getElementById('dlgLogTime').showModal()">Log Time</button>
     <button onclick="openTimeOffRequest()">Request Time Off</button>

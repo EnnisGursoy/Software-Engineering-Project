@@ -257,34 +257,44 @@
       .divider { display: none; }
     }
   </style>
+  <link rel="stylesheet" href="app-theme.css">
   <script src="config.js"></script>
 </head>
 <body>
-  <header>
-    <h1>Payroll</h1>
-    <div style="display:flex;align-items:center;gap:10px;">
-      <button id="themeToggle" style="border:1px solid rgba(255,255,255,0.45);background:rgba(255,255,255,0.12);color:#fff;padding:8px 14px;border-radius:8px;font-size:0.88rem;cursor:pointer;">Toggle Theme</button>
-    <div class="menu-wrap">
-      <button class="menu-btn" id="menuBtn" aria-label="Open menu" aria-expanded="false" aria-controls="hrMenu">
-        <span></span><span></span><span></span>
-      </button>
-                  <nav class="menu" id="hrMenu" aria-hidden="true">
-        <a href="homepage.html">Home</a>
-        <a href="profile.html">Profile</a>
-        <a href="employees.html">Employees</a>
-        <a href="departments.html">Departments</a>
-        <a href="shifts.html">Shifts</a>
-        <a href="payroll.html">Payroll</a>
-        <a href="benefits.html">Benefits</a>
-        <a href="taxes.html">Taxes</a>
-        <a href="reports.html">Reports</a>
-        <a href="audit.html">Audit Log</a>
-        <a href="settings.html">Settings</a>
-        <a href="logout.html" style="color:#ef4444;">Sign Out</a>
-      </nav>
-    </div>
-    </div>
-  </header>
+  <header class="topbar">
+  <div class="topbar-left">
+    <a href="homepage.html" class="brand">
+      <div class="brand-logo">
+        <img src="PAY CENTRAL LOGO.png" alt="PayCentral logo">
+      </div>
+      <div class="brand-text">
+        <h1>PayCentral</h1>
+        <p>Payroll</p>
+      </div>
+    </a>
+  </div>
+  <div class="topbar-actions">
+    <button class="top-btn" id="themeToggle" type="button">Toggle Theme</button>
+      <div class="menu-wrap">
+        <button class="menu-btn" id="menuBtn" aria-label="Open menu" aria-expanded="false" aria-controls="hrMenu">
+          <span></span><span></span><span></span>
+        </button>
+        <nav class="menu" id="hrMenu" aria-hidden="true">
+          <a href="homepage.html">Home</a>
+          <a href="profile.html">Profile</a>
+          <a href="employees.html">Employees</a>
+          <a href="departments.html">Departments</a>
+          <a href="shifts.html">Shifts</a>
+          <a href="payroll.html">Payroll</a>
+          <a href="benefits.html">Benefits</a>
+          <a href="taxes.html">Taxes</a>
+          <a href="reports.html">Reports</a>
+          <a href="audit.html">Audit Log</a>
+          <a href="settings.html">Settings</a>
+          <a href="logout.html" class="signout">Sign Out</a>
+        </nav>
+      </div>  </div>
+</header>
 
   <main>
     <div id="statusBar" class="status-bar"></div>
@@ -401,12 +411,12 @@
     });
 
     // ── Dark mode ─────────────────────────────────────────────────
-    if (localStorage.getItem('theme') === 'dark') {
+    if (localStorage.getItem('payroll_dark_mode') === 'enabled') {
       document.body.classList.add('dark');
     }
     document.getElementById('themeToggle').addEventListener('click', () => {
       document.body.classList.toggle('dark');
-      localStorage.setItem('theme', document.body.classList.contains('dark') ? 'dark' : 'light');
+      localStorage.setItem('payroll_dark_mode', document.body.classList.contains('dark') ? 'enabled' : 'disabled');
     });
 
     // ── Config ────────────────────────────────────────────────────
@@ -432,6 +442,12 @@
     // ── Modal helpers ─────────────────────────────────────────────
     function openModal(id)  { document.getElementById(id).classList.add('open'); }
     function closeModal(id) { document.getElementById(id).classList.remove('open'); }
+
+    document.addEventListener('keydown', event => {
+      if (event.key !== 'Escape') return;
+      const openModal = document.querySelector('.modal-backdrop.open');
+      if (openModal) openModal.classList.remove('open');
+    });
 
     // ── Load employees → build name map ──────────────────────────
     async function loadEmployees() {

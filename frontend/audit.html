@@ -134,6 +134,7 @@
     .mono { font-family: "Courier New", monospace; font-size: 0.82rem; color: var(--muted); }
     .empty-row { text-align: center; padding: 32px; color: var(--muted); font-style: italic; }
   </style>
+  <link rel="stylesheet" href="app-theme.css">
 </head>
 <body>
   <header class="topbar">
@@ -148,7 +149,7 @@
         </div>
         <div class="brand-text">
           <h1>PayCentral</h1>
-          <p>HR Dashboard</p>
+          <p>Audit Log</p>
         </div>
       </a>
     </div>
@@ -248,10 +249,10 @@
     const hdrs  = authHeaders();
 
     // ── Theme ─────────────────────────────────────────────────────
-    if (localStorage.getItem('theme') === 'dark') document.body.classList.add('dark');
+    if (localStorage.getItem('payroll_dark_mode') === 'enabled') document.body.classList.add('dark');
     document.getElementById('themeToggle').addEventListener('click', () => {
       document.body.classList.toggle('dark');
-      localStorage.setItem('theme', document.body.classList.contains('dark') ? 'dark' : 'light');
+      localStorage.setItem('payroll_dark_mode', document.body.classList.contains('dark') ? 'enabled' : 'disabled');
     });
 
     // ── Menu ──────────────────────────────────────────────────────

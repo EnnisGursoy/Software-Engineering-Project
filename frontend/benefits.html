@@ -194,29 +194,89 @@
       display: flex; justify-content: flex-end; gap: 10px;
       padding: 12px 16px; border-top: 1px solid var(--border); background: #fff;
     }
+    body.dark .dlg-head,
+    body.dark .dlg-body,
+    body.dark .dlg-actions {
+      background: var(--surface) !important;
+      border-color: var(--border) !important;
+    }
+    body.dark .dlg-head h3,
+    body.dark .dlg-body p,
+    body.dark .field label {
+      color: var(--text) !important;
+    }
+    body.dark .dlg-head p {
+      color: var(--muted) !important;
+    }
+    .dlg-head .btn.ghost {
+      min-width: 34px;
+      height: 34px;
+      padding: 0 !important;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      color: var(--text) !important;
+      border-color: var(--border) !important;
+      background: var(--surface-soft) !important;
+      font-size: 1rem;
+      line-height: 1;
+    }
+    .dlg-actions .btn.ghost {
+      color: var(--text) !important;
+      border-color: var(--border) !important;
+      background: var(--surface) !important;
+      min-width: 72px;
+    }
+    .dlg-actions .btn.ghost:hover,
+    .dlg-head .btn.ghost:hover {
+      background: var(--surface-soft) !important;
+      color: var(--primary) !important;
+    }
     .section-divider {
       font-size: 0.72rem; text-transform: uppercase; letter-spacing: 0.06em;
       color: var(--muted); font-weight: 600; grid-column: 1/-1;
       padding: 6px 0 2px; border-top: 1px solid var(--border); margin-top: 4px;
     }
   </style>
+  <link rel="stylesheet" href="app-theme.css">
   <script src="config.js"></script>
+  <script src="app-shell.js"></script>
 </head>
 <body>
 
-<header>
-  <h1>Benefits</h1>
-  <nav class="topnav">
-    <a href="homepage.html">Home</a>
-    <a href="employees.html">Employees</a>
-    <a href="departments.html">Departments</a>
-    <a href="payroll.html">Payroll</a>
-    <a href="benefits.html">Benefits</a>
-    <a href="taxes.html">Taxes</a>
-    <a href="reports.html">Reports</a>
-    <a href="audit.html">Audit Log</a>
-    <a href="logout.html" class="signout">Sign Out</a>
-  </nav>
+<header class="topbar">
+  <div class="topbar-left">
+    <a href="homepage.html" class="brand">
+      <div class="brand-logo">
+        <img src="PAY CENTRAL LOGO.png" alt="PayCentral logo">
+      </div>
+      <div class="brand-text">
+        <h1>PayCentral</h1>
+        <p>Benefits</p>
+      </div>
+    </a>
+  </div>
+  <div class="topbar-actions">
+    <button class="top-btn" id="themeToggle" type="button">Toggle Theme</button>
+      <div class="menu-wrap">
+        <button class="menu-btn" id="menuBtn" aria-label="Open menu" aria-expanded="false" aria-controls="hrMenu">
+          <span></span><span></span><span></span>
+        </button>
+        <nav class="menu" id="hrMenu" aria-hidden="true">
+          <a href="homepage.html">Home</a>
+          <a href="profile.html">Profile</a>
+          <a href="employees.html">Employees</a>
+          <a href="departments.html">Departments</a>
+          <a href="shifts.html">Shifts</a>
+          <a href="payroll.html">Payroll</a>
+          <a href="benefits.html">Benefits</a>
+          <a href="taxes.html">Taxes</a>
+          <a href="reports.html">Reports</a>
+          <a href="audit.html">Audit Log</a>
+          <a href="settings.html">Settings</a>
+          <a href="logout.html" class="signout">Sign Out</a>
+        </nav>
+      </div>  </div>
 </header>
 
 <main>

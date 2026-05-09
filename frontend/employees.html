@@ -699,7 +699,7 @@
 
         <div class="brand-text">
           <h1>PayCentral</h1>
-          <p>Employee Management</p>
+          <p>Employees</p>
         </div>
       </a>
     </div>
@@ -1035,6 +1035,12 @@
 
     requireAuth({ roles: ['admin', 'hr', 'manager'] });
     const token = getToken();
+
+    document.addEventListener("keydown", (event) => {
+      if (event.key !== "Escape") return;
+      const openModal = document.querySelector(".modal-backdrop.open");
+      if (openModal) openModal.classList.remove("open");
+    });
     const role  = localStorage.getItem('user_role');
 
     const authHdrs = authHeaders({ 'Content-Type': 'application/json' });

@@ -104,7 +104,9 @@
     .tab-panel { display: none; }
     .tab-panel.active { display: block; }
   </style>
+  <link rel="stylesheet" href="app-theme.css">
   <script src="config.js"></script>
+  <script src="app-shell.js"></script>
 </head>
 <body>
 
@@ -119,6 +121,7 @@
     </div>
   </a>
   <div class="topbar-actions">
+    <button class="top-btn" id="themeToggle" type="button">Toggle Theme</button>
     <div class="menu-wrap">
       <button class="menu-btn" id="menuBtn" aria-label="Open menu">
         <span></span><span></span><span></span>

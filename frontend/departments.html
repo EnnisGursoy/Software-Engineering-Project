@@ -108,30 +108,44 @@
     .dlg-actions { display: flex; gap: 8px; justify-content: flex-end; margin-top: 18px; }
     .hidden { display: none; }
   </style>
+  <link rel="stylesheet" href="app-theme.css">
   <script src="config.js"></script>
+  <script src="app-shell.js"></script>
 </head>
 <body>
-<header>
-  <h1>Departments</h1>
-  <div class="menu-wrap">
-    <button class="menu-btn" id="menuBtn" aria-label="Open menu" aria-expanded="false" aria-controls="hrMenu">
-      <span></span><span></span><span></span>
-    </button>
-    <nav class="menu" id="hrMenu" aria-hidden="true">
-      <a href="homepage.html">Home</a>
-      <a href="profile.html">Profile</a>
-      <a href="employees.html">Employees</a>
-      <a href="departments.html">Departments</a>
-      <a href="shifts.html">Shifts</a>
-      <a href="payroll.html">Payroll</a>
-      <a href="benefits.html">Benefits</a>
-      <a href="taxes.html">Taxes</a>
-      <a href="reports.html">Reports</a>
-      <a href="audit.html">Audit Log</a>
-      <a href="settings.html">Settings</a>
-      <a href="logout.html" style="color:#ef4444;">Sign Out</a>
-    </nav>
+<header class="topbar">
+  <div class="topbar-left">
+    <a href="homepage.html" class="brand">
+      <div class="brand-logo">
+        <img src="PAY CENTRAL LOGO.png" alt="PayCentral logo">
+      </div>
+      <div class="brand-text">
+        <h1>PayCentral</h1>
+        <p>Departments</p>
+      </div>
+    </a>
   </div>
+  <div class="topbar-actions">
+    <button class="top-btn" id="themeToggle" type="button">Toggle Theme</button>
+      <div class="menu-wrap">
+        <button class="menu-btn" id="menuBtn" aria-label="Open menu" aria-expanded="false" aria-controls="hrMenu">
+          <span></span><span></span><span></span>
+        </button>
+        <nav class="menu" id="hrMenu" aria-hidden="true">
+          <a href="homepage.html">Home</a>
+          <a href="profile.html">Profile</a>
+          <a href="employees.html">Employees</a>
+          <a href="departments.html">Departments</a>
+          <a href="shifts.html">Shifts</a>
+          <a href="payroll.html">Payroll</a>
+          <a href="benefits.html">Benefits</a>
+          <a href="taxes.html">Taxes</a>
+          <a href="reports.html">Reports</a>
+          <a href="audit.html">Audit Log</a>
+          <a href="settings.html">Settings</a>
+          <a href="logout.html" class="signout">Sign Out</a>
+        </nav>
+      </div>  </div>
 </header>
 
 <main>
@@ -204,7 +218,7 @@
   const role  = localStorage.getItem('user_role');
   const canManageDepts = (role === 'admin' || role === 'hr');
 
-  if (localStorage.getItem('theme') === 'dark') document.body.classList.add('dark');
+  if (localStorage.getItem('payroll_dark_mode') === 'enabled') document.body.classList.add('dark');
 
   const hdrs = authHeaders({ 'Content-Type': 'application/json' });
 
