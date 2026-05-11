@@ -410,11 +410,10 @@
     });
 
     // ── Config ────────────────────────────────────────────────────
-    const token = localStorage.getItem('access_token');
+    requireAuth({ roles: ['admin', 'hr', 'manager'] });
+    const token = getToken();
     const role  = localStorage.getItem('user_role');
-    if (!token) { window.location.href = 'login.html'; }
-    if (role === 'employee') { window.location.href = 'employee_portal.html'; }
-    const hdrs  = { 'Authorization': `Bearer ${token}`, 'Content-Type': 'application/json' };
+    const hdrs  = authHeaders({ 'Content-Type': 'application/json' });
 
     const fmt = n => n != null ? '$' + Number(n).toFixed(2) : '—';
 

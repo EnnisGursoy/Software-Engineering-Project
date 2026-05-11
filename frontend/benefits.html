@@ -514,9 +514,9 @@
 
 
 <script>
-  const token   = localStorage.getItem('access_token');
-  if (!token) { window.location.replace('login.html'); }
-  const authHdrs = { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` };
+  requireAuth();
+  const token   = getToken();
+  const authHdrs = authHeaders({ 'Content-Type': 'application/json' });
 
   // ── UTILITY ──
   function openDlg(id) {

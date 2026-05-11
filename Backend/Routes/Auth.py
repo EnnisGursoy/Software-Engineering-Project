@@ -1,10 +1,12 @@
 from fastapi import APIRouter, Depends, HTTPException, Request
+from sqlalchemy import func
 from sqlalchemy.orm import Session
 from fastapi.security import OAuth2PasswordRequestForm
 from Backend.Utility.dependencies import get_db, admin_only, get_current_user
 from Backend.Models.User import User
 from Backend.Models.Department import Department
 from Backend.Models.LoginLog import LoginLog
+from Backend.Models.Employee import Employee
 from Backend.Schemas.Employee import EmployeeCreate, EmployeeOut
 from Backend.Schemas.User import UserCreate, UserOut, ChangePassword, UpdateProfile, UserRegister
 from Backend.Utility.security import hash_password, verify_password, create_access_token
@@ -21,19 +23,43 @@ class ResetPassword(BaseModel):
     new_password: str
 
 
+class ForgotPassword(BaseModel):
+    email: str
+    new_password: str
+
+
 
 router = APIRouter()
 
 
-def authenticate(username: str, password: str, db: Session):
-    # Find user by username
-    existing_user = db.query(User).filter(User.username == username).first()
+def authenticate(identifier: str, password: str, db: Session):
+    """Authenticate a user by either username OR work email.
+
+    The OAuth2 form-data spec uses the field name `username`, but we accept
+    either form here so employees who only know their email can still log in
+    (closes SRS FR-2). Email lookup is case-insensitive and follows the
+    Employee → User foreign key.
+    """
+    # 1. Try username first (preserves existing admin/HR/manager logins)
+    existing_user = db.query(User).filter(User.username == identifier).first()
+
+    # 2. Fall back to email lookup via the Employee table when the input
+    #    looks like an email and isn't a known username.
+    if not existing_user and "@" in identifier:
+        employee = (
+            db.query(Employee)
+            .filter(func.lower(Employee.email) == identifier.strip().lower())
+            .first()
+        )
+        if employee and employee.user_id:
+            existing_user = (
+                db.query(User).filter(User.user_id == employee.user_id).first()
+            )
 
     if not existing_user:
-       return None
-    # Verify password
+        return None
     if not verify_password(password, existing_user.password_hash):
-       return None
+        return None
 
     return existing_user
 
@@ -50,7 +76,7 @@ async def auth_login(
     db: Session = Depends(get_db)
 ):
     user = authenticate(
-        username=form_data.username,
+        identifier=form_data.username,
         password=form_data.password,
         db=db
     )
@@ -175,6 +201,36 @@ async def admin_reset_password(
     user.password_hash = hash_password(body.new_password)
     db.commit()
     return {"detail": f"Password reset for '{body.username}'"}
+
+
+@router.post("/forgot-password")
+async def forgot_password(
+    body: ForgotPassword,
+    request: Request,
+    db: Session = Depends(get_db),
+):
+    """Public self-serve password reset. Looks up the user by their employee
+    email and updates the password. No authentication required.
+
+    Resets are recorded in login_logs with a 'RESET:' / 'RESET-FAIL:' prefix
+    on the username column so admins can audit them via GET /auth/logs."""
+    email = body.email.strip().lower()
+    ip = request.client.host if request.client else None
+    employee = db.query(Employee).filter(func.lower(Employee.email) == email).first()
+    user = (
+        db.query(User).filter(User.user_id == employee.user_id).first()
+        if employee and employee.user_id else None
+    )
+
+    if not user:
+        db.add(LoginLog(username=f"RESET-FAIL:{email}", ip_address=ip, success=False))
+        db.commit()
+        raise HTTPException(status_code=404, detail="No account found with that email")
+
+    user.password_hash = hash_password(body.new_password)
+    db.add(LoginLog(username=f"RESET:{user.username}", ip_address=ip, success=True))
+    db.commit()
+    return {"detail": "Password reset successfully. You can now sign in."}
 
 
 @router.get("/logs")

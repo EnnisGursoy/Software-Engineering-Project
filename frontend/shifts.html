@@ -423,12 +423,11 @@
   <script>
     if (localStorage.getItem('theme') === 'dark') document.body.classList.add('dark');
 
-    const token  = localStorage.getItem('access_token');
-    if (!token) window.location.replace('login.html');
-    const role = localStorage.getItem('user_role');
-    if (role === 'employee') window.location.replace('employee_portal.html');
+    requireAuth({ roles: ['admin', 'hr', 'manager'] });
+    const token = getToken();
+    const role  = localStorage.getItem('user_role');
 
-    const headers = { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` };
+    const headers = authHeaders({ 'Content-Type': 'application/json' });
 
     // ── Menu ─────────────────────────────────────────────────────
     const menuBtn = document.getElementById('menuBtn');

@@ -1,6 +1,6 @@
 from fastapi import APIRouter, Depends
 from sqlalchemy.orm import Session
-from Backend.Utility.dependencies import get_db, hr_only, manager_only, get_current_employee
+from Backend.Utility.dependencies import get_db, hr_only, manager_only, manager_or_hr_read, get_current_employee
 from Backend.Models.Employee import Employee
 from Backend.Models.User import User
 from Backend.Schemas.Position import (
@@ -53,7 +53,7 @@ async def my_positions(
 
 @router.get("/all", response_model=list[PositionOut])
 async def list_positions(
-    user: User = Depends(manager_only),
+    user: User = Depends(manager_or_hr_read),
     db: Session = Depends(get_db),
 ):
     return get_all_positions(db)
@@ -62,7 +62,7 @@ async def list_positions(
 @router.get("/{position_id}", response_model=PositionOut)
 async def get_one(
     position_id: int,
-    user: User = Depends(manager_only),
+    user: User = Depends(manager_or_hr_read),
     db: Session = Depends(get_db),
 ):
     return get_position(position_id, db)
@@ -108,7 +108,7 @@ async def assign_to_employee(
 @router.get("/employee/{employee_id}", response_model=list[EmployeePositionOut])
 async def employee_positions(
     employee_id: int,
-    user: User = Depends(manager_only),
+    user: User = Depends(manager_or_hr_read),
     db: Session = Depends(get_db),
 ):
     return get_positions_by_employee(employee_id, db)

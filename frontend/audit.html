@@ -212,6 +212,14 @@
         <option value="success">Successful only</option>
         <option value="fail">Failed only</option>
       </select>
+      <label style="font-size:0.82rem;color:var(--muted);">From
+        <input type="date" id="fromDate" onchange="renderTable()" style="margin-left:6px;">
+      </label>
+      <label style="font-size:0.82rem;color:var(--muted);">To
+        <input type="date" id="toDate" onchange="renderTable()" style="margin-left:6px;">
+      </label>
+      <button type="button" class="top-btn" onclick="clearFilters()" style="padding:8px 12px;font-size:0.85rem;">Clear</button>
+      <button type="button" class="top-btn" onclick="exportCsv()" style="padding:8px 14px;font-size:0.85rem;background:var(--primary);color:#fff;border-color:var(--primary);margin-left:auto;">⤓ Export CSV</button>
     </div>
 
     <div class="card">
@@ -234,12 +242,10 @@
 
   <script>
     // ── Auth guard — admin only ────────────────────────────────────
-    const token = localStorage.getItem('access_token');
+    requireAuth({ admin: true });
+    const token = getToken();
     const role  = localStorage.getItem('user_role');
-    if (!token) { window.location.replace('login.html'); }
-    if (role !== 'admin') { window.location.replace('homepage.html'); }
-
-    const hdrs = { Authorization: `Bearer ${token}` };
+    const hdrs  = authHeaders();
 
     // ── Theme ─────────────────────────────────────────────────────
     if (localStorage.getItem('theme') === 'dark') document.body.classList.add('dark');
@@ -295,16 +301,69 @@
       }
     }
 
-    function renderTable() {
+    // ── Filtering pipeline ────────────────────────────────────────────
+    // Returns the rows currently visible. Reused by the table renderer
+    // AND by the CSV export so they stay in sync.
+    function currentlyVisibleRows() {
       const search = document.getElementById('searchInput').value.trim().toLowerCase();
       const status = document.getElementById('statusFilter').value;
+      const from   = document.getElementById('fromDate').value;   // YYYY-MM-DD
+      const to     = document.getElementById('toDate').value;
 
-      const rows = allLogs.filter(l => {
+      return allLogs.filter(l => {
         if (search && !l.username.toLowerCase().includes(search) && !(l.ip_address ?? '').includes(search)) return false;
         if (status === 'success' && !l.success) return false;
         if (status === 'fail'    &&  l.success) return false;
+        if (from || to) {
+          const day = (l.attempted_at ?? '').slice(0, 10);  // first 10 chars = date
+          if (from && day < from) return false;
+          if (to   && day > to)   return false;
+        }
         return true;
       });
+    }
+
+    function clearFilters() {
+      document.getElementById('searchInput').value = '';
+      document.getElementById('statusFilter').value = '';
+      document.getElementById('fromDate').value = '';
+      document.getElementById('toDate').value = '';
+      renderTable();
+    }
+
+    // ── CSV export — for audit handoff or spreadsheet review ────────────
+    function exportCsv() {
+      const rows = currentlyVisibleRows();
+      if (!rows.length) { alert('No rows to export with the current filters.'); return; }
+      const header = ['log_id', 'attempted_at', 'username', 'ip_address', 'result'];
+      const csvLines = [header.join(',')];
+      for (const l of rows) {
+        const cells = [
+          l.log_id,
+          l.attempted_at ?? '',
+          l.username ?? '',
+          l.ip_address ?? '',
+          l.success ? 'success' : 'failed',
+        ].map(v => {
+          // Escape per RFC 4180 — wrap in quotes only if cell contains comma/quote/newline
+          const s = String(v);
+          return /[",\n]/.test(s) ? `"${s.replace(/"/g, '""')}"` : s;
+        });
+        csvLines.push(cells.join(','));
+      }
+      const blob = new Blob([csvLines.join('\n')], { type: 'text/csv;charset=utf-8;' });
+      const url  = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `audit_log_${new Date().toISOString().slice(0,10)}.csv`;
+      document.body.appendChild(a);
+      a.click();
+      a.remove();
+      URL.revokeObjectURL(url);
+    }
+
+    function renderTable() {
+      const rows = currentlyVisibleRows();
 
       const tbody = document.getElementById('logBody');
       if (!rows.length) {

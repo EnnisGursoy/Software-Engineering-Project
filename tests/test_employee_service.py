@@ -1,7 +1,8 @@
 """
 Tests for Backend/Services/employee_service.py
 
-Covers: SSN validation, duplicate checks, employee CRUD, soft/hard delete.
+Covers: SSN validation, duplicate checks, employee CRUD, soft delete (terminate)
+and purge (permanent record removal).
 """
 import pytest
 from datetime import date
@@ -14,7 +15,7 @@ from Backend.Services.employee_service import (
     show_all_employees,
     update_employee,
     delete_employee,
-    hard_delete_employee,
+    purge_employee,
     get_employees_by_department,
 )
 from Backend.Schemas.Employee import EmployeeCreate, EmployeeUpdate
@@ -74,14 +75,14 @@ class TestCreateEmployee:
 
     def test_create_success_returns_employee(self, db):
         data = self._make_data("Creatable", "321-45-6789", "creatable@test.com")
-        emp = create_employee(data, db)
+        emp, _ = create_employee(data, db)
         assert emp.employee_id is not None
         assert emp.first_name == "Test"
         assert emp.last_name == "Creatable"
 
     def test_ssn_is_stored_encrypted(self, db):
         data = self._make_data("Encrypted", "321-45-6780", "encrypted@test.com")
-        emp = create_employee(data, db)
+        emp, _ = create_employee(data, db)
         # The stored SSN should not be the plaintext value
         assert emp.ssn != "321-45-6780"
 
@@ -100,12 +101,12 @@ class TestCreateEmployee:
     def test_known_department_assigns_department_id(self, db, sample_department):
         data = self._make_data("WithDept", "543-67-8901", "withdept@test.com",
                                dept_name="Engineering")
-        emp = create_employee(data, db)
+        emp, _ = create_employee(data, db)
         assert emp.department_id == sample_department.department_id
 
     def test_default_employment_status_is_active(self, db):
         data = self._make_data("DefaultStatus", "654-78-9012", "defaultstatus@test.com")
-        emp = create_employee(data, db)
+        emp, _ = create_employee(data, db)
         assert emp.employment_status == "active"
 
 
@@ -167,16 +168,16 @@ class TestDeleteEmployee:
         assert exc.value.status_code == 404
 
 
-class TestHardDeleteEmployee:
-    def test_hard_delete_removes_record(self, db, sample_employee):
+class TestPurgeEmployee:
+    def test_purge_removes_record(self, db, sample_employee):
         eid = sample_employee.employee_id
-        result = hard_delete_employee(eid, db)
+        result = purge_employee(eid, db)
         assert db.query(Employee).filter(Employee.employee_id == eid).first() is None
-        assert "deleted" in result["message"].lower()
+        assert "purged" in result["message"].lower()
 
-    def test_hard_delete_nonexistent_raises_404(self, db):
+    def test_purge_nonexistent_raises_404(self, db):
         with pytest.raises(HTTPException) as exc:
-            hard_delete_employee(99999, db)
+            purge_employee(99999, db)
         assert exc.value.status_code == 404
 
 

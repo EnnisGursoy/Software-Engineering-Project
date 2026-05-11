@@ -13,6 +13,6 @@ class NoCacheHandler(SimpleHTTPRequestHandler):
         pass  # suppress request logs
 
 if __name__ == "__main__":
-    server = HTTPServer(("", 5500), NoCacheHandler)
-    print("Frontend running at http://localhost:5500")
+    server = HTTPServer(("", 5501), NoCacheHandler)
+    print("Frontend running at http://localhost:5501")
     server.serve_forever()

@@ -234,7 +234,7 @@
           <option value="processed">Processed</option>
           <option value="void">Void</option>
         </select>
-        <button onclick="window.print()" style="margin-left:auto;padding:7px 14px;background:#1d4ed8;color:#fff;border:none;border-radius:8px;font-size:0.88rem;font-family:inherit;cursor:pointer;">&#x1F4C4; Export PDF</button>
+        <button onclick="exportPayrollReportPdf()" style="margin-left:auto;padding:7px 14px;background:#1d4ed8;color:#fff;border:none;border-radius:8px;font-size:0.88rem;font-family:inherit;cursor:pointer;">&#x1F4C4; Export PDF</button>
       </div>
       <div class="table-shell">
         <div class="table-card">
@@ -336,11 +336,10 @@
       document.body.classList.add('dark');
     }
 
-    const token = localStorage.getItem('access_token');
+    requireAuth({ roles: ['admin', 'hr', 'manager'] });
+    const token = getToken();
     const role  = localStorage.getItem('user_role');
-    if (!token) { window.location.href = 'login.html'; }
-    if (role === 'employee') { window.location.href = 'employee_portal.html'; }
-    const hdrs  = { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` };
+    const hdrs  = authHeaders({ 'Content-Type': 'application/json' });
     const fmt   = (n) => n != null ? '$' + Number(n).toFixed(2) : '—';
 
     // ── Menu ─────────────────────────────────────────────────────────────
@@ -382,6 +381,38 @@
     // ── Tab 1: Payroll Summary ────────────────────────────────────────────
     let allPaychecks = [];
     let periodMap    = {};
+
+    // FR-15: download a real server-rendered PDF of the payroll summary
+    // report, respecting whatever pay-period + status filters are active.
+    // Browser can't pass an Authorization header on plain <a href>, so we
+    // fetch the file as a blob and trigger a virtual click on a hidden <a>.
+    async function exportPayrollReportPdf() {
+      const periodVal = document.getElementById('periodFilter').value;
+      const statusVal = document.getElementById('statusFilter').value;
+      const qs = new URLSearchParams();
+      if (periodVal) qs.set('pay_period_id', periodVal);
+      if (statusVal) qs.set('status', statusVal);
+      const url = `${API}/payroll/report-pdf${qs.toString() ? '?' + qs : ''}`;
+      try {
+        const res = await fetch(url, { headers: hdrs });
+        if (!res.ok) {
+          alert(`Could not generate PDF (HTTP ${res.status}).`);
+          return;
+        }
+        const blob = await res.blob();
+        const objectUrl = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = objectUrl;
+        a.download = periodVal ? `payroll_report_period${periodVal}.pdf`
+                               : 'payroll_report_all.pdf';
+        document.body.appendChild(a);
+        a.click();
+        a.remove();
+        URL.revokeObjectURL(objectUrl);
+      } catch (e) {
+        alert('Could not reach the server to generate the PDF.');
+      }
+    }
 
     async function loadPayrollSummary() {
       const [pcRes, ppRes] = await Promise.all([

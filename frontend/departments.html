@@ -106,6 +106,7 @@
     .dlg-msg.ok  { color: #0f766e; }
     .dlg-msg.err { color: #b91c1c; }
     .dlg-actions { display: flex; gap: 8px; justify-content: flex-end; margin-top: 18px; }
+    .hidden { display: none; }
   </style>
   <script src="config.js"></script>
 </head>
@@ -138,7 +139,7 @@
 
   <div class="toolbar">
     <h2>Department Management</h2>
-    <button class="btn-primary" onclick="document.getElementById('dlgAdd').showModal()">+ New Department</button>
+    <button id="btnAddDept" class="btn-primary hidden" onclick="document.getElementById('dlgAdd').showModal()">+ New Department</button>
   </div>
 
   <div class="card">
@@ -198,14 +199,25 @@
 </dialog>
 
 <script>
-  const token = localStorage.getItem('access_token');
-  if (!token) window.location.replace('login.html');
-  const role = localStorage.getItem('user_role');
-  if (role === 'employee') window.location.replace('employee_portal.html');
+  requireAuth({ roles: ['admin', 'hr', 'manager'] });
+  const token = getToken();
+  const role  = localStorage.getItem('user_role');
+  const canManageDepts = (role === 'admin' || role === 'hr');
 
   if (localStorage.getItem('theme') === 'dark') document.body.classList.add('dark');
 
-  const hdrs = { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` };
+  const hdrs = authHeaders({ 'Content-Type': 'application/json' });
+
+  // Show "+ New Department" only for HR/admin; managers get read-only view
+  if (canManageDepts) {
+    document.getElementById('btnAddDept').classList.remove('hidden');
+  } else {
+    // Read-only notice for managers
+    const bar = document.getElementById('statusBar');
+    bar.textContent = 'Read-only view — only HR or Admin can create departments or assign managers.';
+    bar.className = 'status-bar';
+    bar.style.cssText = 'display:block;background:#f1f5f9;color:#475569;border:1px solid #cbd5e1;';
+  }
 
   const menuBtn = document.getElementById('menuBtn');
   const hrMenu  = document.getElementById('hrMenu');
@@ -272,8 +284,9 @@
         <td>${manager}</td>
         <td>${count} employee${count !== 1 ? 's' : ''}</td>
         <td style="display:flex;gap:6px;">
-          <button class="btn-secondary" style="padding:4px 10px;font-size:0.8rem;" onclick="openEdit(${d.department_id},'${d.department_name.replace(/'/g,"\\'")}',${d.manager_id ?? 'null'})">Edit</button>
+          ${canManageDepts ? `<button class="btn-secondary" style="padding:4px 10px;font-size:0.8rem;" onclick="openEdit(${d.department_id},'${d.department_name.replace(/'/g,"\\'")}',${d.manager_id ?? 'null'})">Edit</button>` : ''}
           ${role === 'admin' ? `<button class="btn-danger" onclick="deleteDept(${d.department_id},'${d.department_name.replace(/'/g,"\\'")}')">Delete</button>` : ''}
+          ${!canManageDepts && role !== 'admin' ? '<span style="color:var(--muted);font-style:italic;font-size:0.85rem;">Read-only</span>' : ''}
         </td>
       </tr>`;
     }).join('');

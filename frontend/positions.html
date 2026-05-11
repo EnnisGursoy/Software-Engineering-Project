@@ -280,8 +280,9 @@
 </main>
 
 <script>
-  const token    = localStorage.getItem('access_token');
-  const hdrs     = { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` };
+  requireAuth({ roles: ['admin', 'hr', 'manager'] });
+  const token    = getToken();
+  const hdrs     = authHeaders({ 'Content-Type': 'application/json' });
   const fmt      = n => n != null ? '$' + Number(n).toFixed(2) : '—';
 
   // Read query params — if coming from employees page with a specific employee

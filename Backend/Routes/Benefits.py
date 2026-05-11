@@ -1,6 +1,6 @@
 from fastapi import APIRouter, Depends
 from sqlalchemy.orm import Session
-from Backend.Utility.dependencies import get_db, hr_only, manager_only, get_current_user, get_current_employee
+from Backend.Utility.dependencies import get_db, hr_only, manager_or_hr_read, get_current_user, get_current_employee
 from Backend.Models.Employee import Employee
 from Backend.Models.User import User
 from Backend.Schemas.Benefits import (
@@ -66,7 +66,7 @@ async def my_enrollments(
 
 @router.get("/enrollments/all", response_model=list[EnrollmentOut])
 async def list_enrollments(
-    user: User = Depends(manager_only),
+    user: User = Depends(manager_or_hr_read),
     db: Session = Depends(get_db),
 ):
     return get_all_enrollments(db)
@@ -75,7 +75,7 @@ async def list_enrollments(
 @router.get("/enrollments/employee/{employee_id}", response_model=list[EnrollmentOut])
 async def enrollments_for_employee(
     employee_id: int,
-    user: User = Depends(manager_only),
+    user: User = Depends(manager_or_hr_read),
     db: Session = Depends(get_db),
 ):
     return get_enrollments_by_employee(employee_id, db)

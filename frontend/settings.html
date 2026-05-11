@@ -402,8 +402,9 @@
       }
     });
 
+    requireAuth();
     const role  = localStorage.getItem('user_role');
-    const token = localStorage.getItem('access_token');
+    const token = getToken();
 
     // Show admin-only sections
     if (role === 'admin') {
@@ -446,10 +447,7 @@
       try {
         const res = await fetch(`${API}/auth/create`, {
           method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-            'Authorization': `Bearer ${token}`
-          },
+          headers: authHeaders({ 'Content-Type': 'application/json' }),
           body: JSON.stringify({
             username,
             password,
@@ -498,7 +496,7 @@
       try {
         const res = await fetch(`${API}/auth/reset-password`, {
           method: 'POST',
-          headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
+          headers: authHeaders({ 'Content-Type': 'application/json' }),
           body: JSON.stringify({ username, new_password: password })
         });
         const data = await res.json();
@@ -522,7 +520,7 @@
       const tbody = document.getElementById('loginLogsBody');
       try {
         const res = await fetch(`${API}/auth/logs`, {
-          headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` }
+          headers: authHeaders({ 'Content-Type': 'application/json' })
         });
         if (!res.ok) throw new Error(res.status);
         const logs = await res.json();

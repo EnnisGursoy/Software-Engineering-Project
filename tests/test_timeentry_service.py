@@ -17,7 +17,7 @@ from Backend.Services.timeentry_service import (
     approve_time_entry,
     delete_time_entry,
 )
-from Backend.Schemas.TimeEntry import TimeEntryCreate, TimeEntryUpdate, TimeEntryApprove
+from Backend.Schemas.TimeEntry import TimeEntryCreate, TimeEntryUpdate
 
 
 # ── _calc_hours ────────────────────────────────────────────────────────────────
@@ -215,14 +215,13 @@ class TestApproveTimeEntry:
             entry_date=date(2024, 7, 1),
             regular_hours=8.0,
         ), db)
-        approval = TimeEntryApprove(approved=True, approved_by=sample_employee.employee_id)
-        updated = approve_time_entry(entry.entry_id, approval, db)
+        updated = approve_time_entry(entry.entry_id, sample_employee.employee_id, db)
         assert updated.approved is True
         assert updated.approved_by == sample_employee.employee_id
 
     def test_approve_nonexistent_entry_raises_404(self, db, sample_employee):
         with pytest.raises(HTTPException) as exc:
-            approve_time_entry(99999, TimeEntryApprove(approved=True, approved_by=sample_employee.employee_id), db)
+            approve_time_entry(99999, sample_employee.employee_id, db)
         assert exc.value.status_code == 404
 
     def test_approve_with_nonexistent_approver_raises_404(self, db, sample_employee):
@@ -232,8 +231,20 @@ class TestApproveTimeEntry:
             regular_hours=8.0,
         ), db)
         with pytest.raises(HTTPException) as exc:
-            approve_time_entry(entry.entry_id, TimeEntryApprove(approved=True, approved_by=99999), db)
+            approve_time_entry(entry.entry_id, 99999, db)
         assert exc.value.status_code == 404
+
+    def test_approve_with_none_approver_succeeds(self, db, sample_employee):
+        # HR/admin users without a linked Employee can still approve;
+        # approved_by is left NULL.
+        entry = create_time_entry(TimeEntryCreate(
+            employee_id=sample_employee.employee_id,
+            entry_date=date(2024, 7, 3),
+            regular_hours=8.0,
+        ), db)
+        updated = approve_time_entry(entry.entry_id, None, db)
+        assert updated.approved is True
+        assert updated.approved_by is None
 
 
 # ── Delete ─────────────────────────────────────────────────────────────────────

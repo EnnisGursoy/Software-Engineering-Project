@@ -31,8 +31,9 @@ class TimeEntryOut(BaseModel):
 
 
 class TimeEntryApprove(BaseModel):
-    approved: bool
-    approved_by: int
+    # `approved` is accepted for compatibility with the frontend body; the
+    # approver's identity is derived server-side from the authenticated user.
+    approved: bool = True
 
 class TimeEntryUpdate(BaseModel):
     clock_in: Optional[time] = None

@@ -1,4 +1,6 @@
 import re
+import secrets
+import string
 from sqlalchemy.orm import Session
 from fastapi import HTTPException
 from Backend.Models.Employee import Employee
@@ -11,6 +13,13 @@ from Backend.Utility.security import encrypt_ssn, hash_password
 from Backend.Schemas.Employee import EmployeeCreate, EmployeeUpdate
 from datetime import date
 from Backend.Models.User import User
+
+
+def _generate_temp_password(length: int = 10) -> str:
+    """Build a memorable-but-random temp password admins can hand out once.
+    Mix of letters and digits — no symbols, so it's easy to type."""
+    alphabet = string.ascii_letters + string.digits
+    return "".join(secrets.choice(alphabet) for _ in range(length))
 
 
 def validate_ssn_format(ssn: str):
@@ -51,6 +60,13 @@ def duplicate_ssn(social_security: str, db: Session):
 
 
 def create_employee(data: EmployeeCreate, db: Session):
+    """Create an Employee, auto-provisioning a login when one isn't supplied.
+
+    Returns a tuple `(employee, temp_password)` — `temp_password` is a
+    plaintext one-time password the admin must communicate out-of-band, or
+    `None` when no User row was created (e.g. the email is already taken
+    as a username, or the caller passed an explicit `data.user`).
+    """
     # 1. Handle first-user-ever admin logic
     # 2. Resolve department (must already exist)
     department_id = None
@@ -67,8 +83,13 @@ def create_employee(data: EmployeeCreate, db: Session):
     duplicate_ssn(data.ssn, db)
     encrypted = encrypt_ssn(data.ssn)
 
-    # 4. Optionally create a linked User account
+    # 4. Provision a linked User account
+    #    - If the caller supplied `data.user`, honor it (legacy path).
+    #    - Otherwise auto-create one with username=email + a temp password
+    #      so the new hire can log in immediately. Closes SRS FR-2.
     user_id = None
+    temp_password: str | None = None
+
     if data.user is not None:
         total_users = db.query(User).count()
         if total_users == 0:
@@ -90,6 +111,25 @@ def create_employee(data: EmployeeCreate, db: Session):
         db.commit()
         db.refresh(new_user)
         user_id = new_user.user_id
+    else:
+        # Auto-provision: username = email. Skip silently if already taken
+        # (e.g. an admin manually claimed that email as a username earlier).
+        clash = db.query(User).filter(User.username == data.email).first()
+        if not clash:
+            temp_password = _generate_temp_password()
+            new_user = User(
+                username=data.email,
+                password_hash=hash_password(temp_password),
+                role="employee",
+                first_name=data.first_name,
+                last_name=data.last_name,
+                department_id=department_id,
+                is_active=True,
+            )
+            db.add(new_user)
+            db.commit()
+            db.refresh(new_user)
+            user_id = new_user.user_id
 
     # 5. Create Employee
     employee = Employee(
@@ -113,7 +153,7 @@ def create_employee(data: EmployeeCreate, db: Session):
     db.commit()
     db.refresh(employee)
 
-    return employee
+    return employee, temp_password
 
 
 
@@ -155,7 +195,10 @@ def get_employees_by_department(department_id: int, db: Session):
     )
 
 
-def hard_delete_employee(id: int, db: Session):
+def purge_employee(id: int, db: Session):
+    """Permanently remove an employee record and all dependent rows.
+    Irreversible — used for compliance/cleanup, distinct from soft-delete
+    (`delete_employee`) which only sets employment_status to 'terminated'."""
     employee = db.query(Employee).filter(Employee.employee_id == id).first()
 
     if not employee:
@@ -174,7 +217,7 @@ def hard_delete_employee(id: int, db: Session):
 
     db.delete(employee)
     db.commit()
-    return {"message": "Employee permanently deleted"}
+    return {"message": "Employee record purged"}
 
 
 def delete_employee(id: int, db: Session):

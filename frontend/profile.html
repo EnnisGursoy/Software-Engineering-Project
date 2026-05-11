@@ -696,8 +696,7 @@
 
   <script>
     // Employees have their own portal — redirect immediately without waiting for API
-    if (!localStorage.getItem("access_token")) { window.location.replace("login.html"); }
-    if (localStorage.getItem("user_role") === "employee") { window.location.replace("employee_portal.html"); }
+    requireAuth({ roles: ['admin', 'hr', 'manager'] });
 
     const body = document.body;
     const menuBtn = document.getElementById("menuBtn");
@@ -773,9 +772,8 @@
 
     async function loadProfile() {
   try {
-    const token = localStorage.getItem('access_token');
     const res = await fetch(`${API}/auth/me`, {
-      headers: { 'Authorization': `Bearer ${token}` }
+      headers: authHeaders()
     });
 
     if (handleUnauthorized(res)) return;
@@ -802,10 +800,9 @@
       profileMsg.textContent = '';
       profileMsg.className = 'msg';
       try {
-        const token = localStorage.getItem('access_token');
         const res = await fetch(`${API}/auth/me`, {
           method: 'PATCH',
-          headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
+          headers: authHeaders({ 'Content-Type': 'application/json' }),
           body: JSON.stringify({
             first_name: document.getElementById('firstName').value.trim() || null,
             last_name:  document.getElementById('lastName').value.trim()  || null,

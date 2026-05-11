@@ -229,6 +229,7 @@
       border: 1px solid var(--border);
       border-radius: 14px;
       padding: 14px 16px;
+      -webkit-backdrop-filter: blur(5px);
       backdrop-filter: blur(5px);
     }
 
@@ -509,6 +510,64 @@
         align-items: flex-start;
       }
     }
+
+    /* Forgot-password dialog */
+    .forgot-dialog {
+      border: none;
+      border-radius: 14px;
+      padding: 0;
+      width: 420px;
+      max-width: 92%;
+      box-shadow: 0 20px 60px rgba(15, 23, 42, 0.25);
+    }
+    .forgot-dialog::backdrop { background: rgba(15, 23, 42, 0.45); }
+    .forgot-body { padding: 22px 26px 24px; }
+    .forgot-head {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 6px;
+    }
+    .forgot-head h3 { margin: 0; font-size: 1.1rem; font-weight: 800; color: #0f172a; }
+    .forgot-close {
+      background: none; border: none; font-size: 1.3rem;
+      color: var(--muted); cursor: pointer; padding: 0 4px;
+    }
+    .forgot-intro { margin: 0 0 16px; font-size: 0.88rem; color: var(--muted); line-height: 1.5; }
+    .forgot-label {
+      display: block; font-size: 0.78rem; font-weight: 700;
+      color: var(--muted); text-transform: uppercase;
+      letter-spacing: 0.4px; margin-bottom: 6px;
+    }
+    .forgot-input {
+      width: 100%; padding: 11px 13px; border: 1px solid var(--border);
+      border-radius: 10px; font-size: 0.95rem; font-family: inherit;
+      outline: none; margin-bottom: 14px;
+    }
+    .forgot-input:focus {
+      border-color: var(--primary);
+      box-shadow: 0 0 0 3px rgba(29, 78, 216, 0.14);
+    }
+    .forgot-input.last { margin-bottom: 6px; }
+    .forgot-msg {
+      font-size: 0.85rem; min-height: 20px; margin: 8px 0 0;
+    }
+    .forgot-msg.ok  { color: var(--success); }
+    .forgot-msg.err { color: var(--error); }
+    .forgot-actions {
+      display: flex; gap: 8px; justify-content: flex-end; margin-top: 12px;
+    }
+    .btn-cancel {
+      padding: 9px 16px; background: #f1f5f9; color: #475569;
+      border: 1px solid var(--border); border-radius: 9px;
+      font-size: 0.9rem; font-weight: 600; cursor: pointer; font-family: inherit;
+    }
+    .btn-submit {
+      padding: 9px 20px; background: var(--primary); color: #fff;
+      border: none; border-radius: 9px; font-size: 0.9rem;
+      font-weight: 700; cursor: pointer; font-family: inherit;
+    }
+    .btn-submit:hover { background: var(--primary-dark); }
   </style>
   <script src="config.js"></script>
 </head>
@@ -586,13 +645,13 @@
 
         <form id="loginForm">
           <div class="field">
-            <label for="username">Username</label>
+            <label for="username">Email or Username</label>
             <div class="input-wrap">
               <input
                 type="text"
                 id="username"
                 name="username"
-                placeholder="Enter your username"
+                placeholder="you@company.com or your username"
                 autocomplete="username"
                 required
               />
@@ -620,7 +679,7 @@
               <span>Remember username</span>
             </label>
 
-            <a href="#" class="helper-link">Need help?</a>
+            <a href="#" class="helper-link" id="forgotPasswordLink">Forgot password?</a>
           </div>
 
           <p id="loginError"></p>
@@ -646,6 +705,38 @@
       </div>
     </section>
   </div>
+
+  <!-- Forgot Password Modal -->
+  <dialog id="dlgForgot" class="forgot-dialog">
+    <div class="forgot-body">
+      <div class="forgot-head">
+        <h3>Reset your password</h3>
+        <button type="button" id="forgotClose" class="forgot-close" aria-label="Close">✕</button>
+      </div>
+      <p class="forgot-intro">
+        Enter the email on file for your employee record and choose a new password.
+      </p>
+
+      <label for="forgotEmail" class="forgot-label">Email</label>
+      <input id="forgotEmail" class="forgot-input" type="email"
+             autocomplete="email" placeholder="you@company.com" />
+
+      <label for="forgotNew" class="forgot-label">New password</label>
+      <input id="forgotNew" class="forgot-input" type="password"
+             autocomplete="new-password" placeholder="At least 6 characters" />
+
+      <label for="forgotConfirm" class="forgot-label">Confirm new password</label>
+      <input id="forgotConfirm" class="forgot-input last" type="password"
+             autocomplete="new-password" placeholder="Re-enter new password" />
+
+      <p id="forgotMsg" class="forgot-msg"></p>
+
+      <div class="forgot-actions">
+        <button type="button" id="forgotCancel" class="btn-cancel">Cancel</button>
+        <button type="button" id="forgotSubmit" class="btn-submit">Reset Password</button>
+      </div>
+    </div>
+  </dialog>
 
   <script>
     const body = document.body;
@@ -724,26 +815,12 @@
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({
-  first_name: "Admin",
-  last_name: "User",
-  ssn: "000-00-0000",
-  email: "admin@example.com",
-  phone: "0000000000",
-  address: "N/A",
-  city: "N/A",
-  state: "N/A",
-  zip_code: "00000",
-  date_of_birth: "1990-01-01",
-  hire_date: "2024-01-01",
-  employment_status: "active",
-  department_name: "Administration",
-
-  user: {
-    username: "Admin",
-    password: "Admin123",
-    role: "admin"
-  }
-})
+            username: "Admin",
+            password: "Admin123",
+            role: "admin",
+            first_name: "Admin",
+            last_name: "User"
+          })
         });
         const data = await res.json();
         if (res.ok) {
@@ -771,7 +848,7 @@
       const password = passwordInput.value;
 
       if (!username || !password) {
-        loginError.textContent = "Please enter both username and password.";
+        loginError.textContent = "Please enter your email/username and password.";
         loginError.style.display = "block";
         return;
       }
@@ -827,6 +904,76 @@
         loginError.textContent = "Could not reach the server. Please make sure the backend is running.";
         loginError.style.display = "block";
         setLoadingState(false);
+      }
+    });
+
+    // ── Forgot Password ─────────────────────────────────────────────
+    const dlgForgot     = document.getElementById("dlgForgot");
+    const forgotLink    = document.getElementById("forgotPasswordLink");
+    const forgotEmail   = document.getElementById("forgotEmail");
+    const forgotNew     = document.getElementById("forgotNew");
+    const forgotConfirm = document.getElementById("forgotConfirm");
+    const forgotMsg     = document.getElementById("forgotMsg");
+
+    function resetForgotForm() {
+      forgotEmail.value = "";
+      forgotNew.value = "";
+      forgotConfirm.value = "";
+      forgotMsg.textContent = "";
+      forgotMsg.className = "forgot-msg";
+    }
+
+    forgotLink.addEventListener("click", (e) => {
+      e.preventDefault();
+      resetForgotForm();
+      // Pre-fill nothing — username may not match employee email
+      dlgForgot.showModal();
+    });
+
+    document.getElementById("forgotClose").addEventListener("click", () => dlgForgot.close());
+    document.getElementById("forgotCancel").addEventListener("click", () => dlgForgot.close());
+
+    document.getElementById("forgotSubmit").addEventListener("click", async () => {
+      const email = forgotEmail.value.trim();
+      const pwd   = forgotNew.value;
+      const conf  = forgotConfirm.value;
+      forgotMsg.className = "forgot-msg";
+
+      if (!email || !pwd || !conf) {
+        forgotMsg.className = "forgot-msg err";
+        forgotMsg.textContent = "All fields are required.";
+        return;
+      }
+      if (pwd.length < 6) {
+        forgotMsg.className = "forgot-msg err";
+        forgotMsg.textContent = "Password must be at least 6 characters.";
+        return;
+      }
+      if (pwd !== conf) {
+        forgotMsg.className = "forgot-msg err";
+        forgotMsg.textContent = "Passwords do not match.";
+        return;
+      }
+
+      forgotMsg.textContent = "Resetting…";
+      try {
+        const res = await fetch(API + "/auth/forgot-password", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ email: email, new_password: pwd }),
+        });
+        const data = await res.json().catch(() => ({}));
+        if (!res.ok) {
+          forgotMsg.className = "forgot-msg err";
+          forgotMsg.textContent = data.detail || "Could not reset password.";
+          return;
+        }
+        forgotMsg.className = "forgot-msg ok";
+        forgotMsg.textContent = "Password reset! You can sign in now.";
+        setTimeout(() => dlgForgot.close(), 1400);
+      } catch {
+        forgotMsg.className = "forgot-msg err";
+        forgotMsg.textContent = "Could not reach the server.";
       }
     });
   </script>

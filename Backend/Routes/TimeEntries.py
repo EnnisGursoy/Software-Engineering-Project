@@ -1,6 +1,6 @@
 from fastapi import APIRouter, Depends
 from sqlalchemy.orm import Session
-from Backend.Utility.dependencies import get_db, hr_only, manager_only, admin_or_manager, get_current_employee
+from Backend.Utility.dependencies import get_db, hr_only, manager_only, manager_or_hr_read, get_current_employee
 from Backend.Models.Employee import Employee
 from Backend.Models.User import User
 from Backend.Schemas.TimeEntry import TimeEntryCreate, TimeEntryOut, TimeEntryUpdate, TimeEntryApprove
@@ -37,7 +37,7 @@ async def submit_my_time_entry(
 
 @router.get("/all", response_model=list[TimeEntryOut])
 async def list_all_entries(
-    user: User = Depends(manager_only),
+    user: User = Depends(manager_or_hr_read),
     db: Session = Depends(get_db),
 ):
     return get_all_entries(db)
@@ -45,7 +45,7 @@ async def list_all_entries(
 
 @router.get("/pending", response_model=list[TimeEntryOut])
 async def list_pending(
-    user: User = Depends(manager_only),
+    user: User = Depends(manager_or_hr_read),
     db: Session = Depends(get_db),
 ):
     return get_pending_approvals(db)
@@ -54,7 +54,7 @@ async def list_pending(
 @router.get("/employee/{employee_id}", response_model=list[TimeEntryOut])
 async def entries_for_employee(
     employee_id: int,
-    user: User = Depends(manager_only),
+    user: User = Depends(manager_or_hr_read),
     db: Session = Depends(get_db),
 ):
     return get_entries_by_employee(employee_id, db)
@@ -86,7 +86,13 @@ async def approve_entry(
     user: User = Depends(hr_only),
     db: Session = Depends(get_db),
 ):
-    return approve_time_entry(entry_id, data, db)
+    # Body is accepted for shape compatibility but the approver is the
+    # authenticated user — never trust the client to declare who approved.
+    # `approved_by` is nullable; if the HR/admin user has no linked Employee
+    # record, approve the entry without recording an approver.
+    approver = db.query(Employee).filter(Employee.user_id == user.user_id).first()
+    approver_id = approver.employee_id if approver else None
+    return approve_time_entry(entry_id, approver_id, db)
 
 
 @router.delete("/{entry_id}")

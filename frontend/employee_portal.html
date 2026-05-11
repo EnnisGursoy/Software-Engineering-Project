@@ -80,6 +80,18 @@
     }
     .card-title button:hover { background: #eff6ff; }
 
+    .year-filter {
+      font-size: 0.78rem;
+      padding: 3px 8px;
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      background: #f8fbff;
+      color: var(--primary);
+      font-family: inherit;
+      font-weight: 600;
+      cursor: pointer;
+    }
+
     .info-row { display: flex; justify-content: space-between; align-items: baseline; padding: 6px 0; border-bottom: 1px solid #f1f5f9; }
     .info-row:last-child { border-bottom: none; }
     .info-label { font-size: 0.82rem; color: var(--muted); }
@@ -356,10 +368,9 @@
 </dialog>
 
 <script>
-  const token = localStorage.getItem('access_token');
-  if (!token) { window.location.href = 'login.html'; }
-
-  const hdrs = { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` };
+  requireAuth();
+  const token = getToken();
+  const hdrs = authHeaders({ 'Content-Type': 'application/json' });
   let _employeeId = null;
   let _fullName = '';
 
@@ -509,14 +520,44 @@
         <td class="mono" style="font-weight:700;color:#0f172a;">${fmt(c.net_pay)}</td>
         <td><span class="badge ${statusCls}">${c.payment_status ?? 'pending'}</span></td>
         <td>${c.payment_date ?? '—'}</td>
-        <td><button onclick="showMyPayStub(${c.paycheck_id})" style="padding:4px 10px;font-size:0.78rem;border:1px solid #d1d5db;border-radius:6px;background:#f8fbff;color:#1d4ed8;cursor:pointer;font-weight:600;">View Stub</button></td>
+        <td style="white-space:nowrap;">
+          <button onclick="showMyPayStub(${c.paycheck_id})" style="padding:4px 10px;font-size:0.78rem;border:1px solid #d1d5db;border-radius:6px;background:#f8fbff;color:#1d4ed8;cursor:pointer;font-weight:600;">View</button>
+          <button onclick="downloadMyPayStub(${c.paycheck_id})" style="padding:4px 10px;font-size:0.78rem;border:1px solid #1d4ed8;border-radius:6px;background:#1d4ed8;color:#fff;cursor:pointer;font-weight:600;margin-left:4px;">PDF</button>
+        </td>
       </tr>`;
     }).join('');
+  }
+
+  // Download a pay stub as a real PDF from the backend. We can't use a plain
+  // <a href> because the endpoint needs the JWT — fetch it as a blob, then
+  // trigger a virtual click on an <a download="…">.
+  async function downloadMyPayStub(paycheckId) {
+    try {
+      const res = await fetch(`${API}/payroll/me/${paycheckId}/pdf`, { headers: hdrs });
+      if (!res.ok) throw new Error(`Server returned ${res.status}`);
+      const blob = await res.blob();
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `paystub_${paycheckId}.pdf`;
+      document.body.appendChild(a);
+      a.click();
+      a.remove();
+      URL.revokeObjectURL(url);
+    } catch (err) {
+      alert('Could not download pay stub: ' + err.message);
+    }
+  }
+
+  let _currentStubId = null;
+  function downloadCurrentStub() {
+    if (_currentStubId != null) downloadMyPayStub(_currentStubId);
   }
 
   function showMyPayStub(paycheckId) {
     const p = allMyChecks.find(x => x.paycheck_id === paycheckId);
     if (!p) return;
+    _currentStubId = paycheckId;
     const fmtN = n => '$' + Number(n ?? 0).toFixed(2);
     const totalDeductions = [p.federal_tax, p.state_tax, p.social_security, p.medicare,
       p.health_insurance, p.retirement_401k, p.other_deductions]
@@ -790,7 +831,8 @@
   <div style="padding:24px 28px;">
     <div id="myStubContent"></div>
     <div style="display:flex;gap:10px;justify-content:flex-end;margin-top:20px;">
-      <button onclick="window.print()" style="padding:8px 18px;background:#1d4ed8;color:#fff;border:none;border-radius:8px;font-weight:600;cursor:pointer;font-size:0.9rem;">Print</button>
+      <button onclick="downloadCurrentStub()" style="padding:8px 18px;background:#1d4ed8;color:#fff;border:none;border-radius:8px;font-weight:600;cursor:pointer;font-size:0.9rem;">Download PDF</button>
+      <button onclick="window.print()" style="padding:8px 18px;background:#f8fbff;color:#1d4ed8;border:1px solid #1d4ed8;border-radius:8px;font-weight:600;cursor:pointer;font-size:0.9rem;">Print</button>
       <button onclick="document.getElementById('dlgMyPayStub').close()" style="padding:8px 18px;background:#f3f4f6;color:#374151;border:1px solid #d1d5db;border-radius:8px;font-weight:600;cursor:pointer;font-size:0.9rem;">Close</button>
     </div>
   </div>

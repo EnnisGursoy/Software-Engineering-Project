@@ -1,6 +1,6 @@
 from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.orm import Session
-from Backend.Utility.dependencies import get_db, admin_only, hr_only, manager_only
+from Backend.Utility.dependencies import get_db, admin_only, hr_only, manager_or_hr_read
 from Backend.Models.User import User
 from Backend.Models.Department import Department
 from Backend.Schemas.department import DepartmentCreate, DepartmentOut, DepartmentUpdate
@@ -16,16 +16,16 @@ async def create_dept(data: DepartmentCreate, user: User = Depends(hr_only), db:
     return create_department(data, db)
 
 @router.get('/mine')
-async def get_my_dept(user: User = Depends(manager_only), db: Session = Depends(get_db)):
+async def get_my_dept(user: User = Depends(manager_or_hr_read), db: Session = Depends(get_db)):
     return get_my_department(user, db)
 
 
 @router.get('/')
-async def get_all(user : User = Depends(manager_only), db : Session = Depends(get_db)):
+async def get_all(user : User = Depends(manager_or_hr_read), db : Session = Depends(get_db)):
     return show_department(db)
 
 @router.get('/{manager_id}')
-async def get_by_manager_id(manager_id : int, user : User = Depends(manager_only), db : Session = Depends(get_db)):
+async def get_by_manager_id(manager_id : int, user : User = Depends(manager_or_hr_read), db : Session = Depends(get_db)):
     return get_department_by_manager_id(manager_id, db)
 
 
@@ -38,7 +38,7 @@ async def remove_department(department_id: int, user: User = Depends(admin_only)
 async def manager_assign(
     department_id: int,
     department: DepartmentUpdate,
-    user: User = Depends(manager_only),
+    user: User = Depends(hr_only),
     db: Session = Depends(get_db)
 ):
     if department.manager_id is None:

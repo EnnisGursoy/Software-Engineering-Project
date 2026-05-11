@@ -95,8 +95,19 @@ def hr_only(current_user: User = Depends(get_current_user)) -> User:
 # Manager dependency
 # ---------------------------------------------------------
 def manager_only(current_user: User = Depends(get_current_user)) -> User:
-    if not current_user or current_user.role not in ["manager", "admin", "hr"]:
-        raise HTTPException(status_code=403, detail="Manager, Admin, or HR access required")
+    if not current_user or current_user.role not in ["manager", "admin"]:
+        raise HTTPException(status_code=403, detail="Manager or Admin access required")
+    return current_user
+
+
+# ---------------------------------------------------------
+# Read-only access for any internal staff role (admin, manager, hr)
+# Use this on GET endpoints where HR needs visibility but should
+# not be able to perform manager-only write/approve actions.
+# ---------------------------------------------------------
+def manager_or_hr_read(current_user: User = Depends(get_current_user)) -> User:
+    if not current_user or current_user.role not in ["admin", "manager", "hr"]:
+        raise HTTPException(status_code=403, detail="Admin, Manager, or HR access required")
     return current_user
 
 

@@ -3,7 +3,7 @@ from fastapi import HTTPException
 from datetime import datetime, timedelta
 from Backend.Models.Time_entries import TimeEntries
 from Backend.Models.Employee import Employee
-from Backend.Schemas.TimeEntry import TimeEntryCreate, TimeEntryUpdate, TimeEntryApprove
+from Backend.Schemas.TimeEntry import TimeEntryCreate, TimeEntryUpdate
 
 
 def _calc_hours(clock_in, clock_out):
@@ -56,17 +56,22 @@ def update_time_entry(entry_id: int, data: TimeEntryUpdate, db: Session):
     return entry
 
 
-def approve_time_entry(entry_id: int, data: TimeEntryApprove, db: Session):
+def approve_time_entry(entry_id: int, approver_employee_id: int | None, db: Session):
     entry = db.query(TimeEntries).filter(TimeEntries.entry_id == entry_id).first()
     if not entry:
         raise HTTPException(status_code=404, detail="Time entry not found")
 
-    approver = db.query(Employee).filter(Employee.employee_id == data.approved_by).first()
-    if not approver:
-        raise HTTPException(status_code=404, detail="Approver employee not found")
+    # approver_employee_id may be None when the authenticated HR/admin user
+    # has no linked Employee record; the column is nullable.
+    if approver_employee_id is not None:
+        approver = db.query(Employee).filter(Employee.employee_id == approver_employee_id).first()
+        if not approver:
+            raise HTTPException(status_code=404, detail="Approver employee not found")
+        entry.approved_by = approver.employee_id
+    else:
+        entry.approved_by = None
 
     entry.approved = True
-    entry.approved_by = approver.employee_id
 
     db.commit()
     db.refresh(entry)
