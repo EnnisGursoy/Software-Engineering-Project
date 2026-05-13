@@ -6,6 +6,7 @@ from Backend.Models.pay_periods import PayPeriods
 from Backend.Models.employee_position import EmployeePosition
 from Backend.Models.Tax_information import TaxInformation
 from Backend.Models.Time_entries import TimeEntries
+from Backend.Models.Department import Department
 from Backend.Schemas.Paycheck import PaycheckCreate, PaycheckStatusUpdate
 import random, string
 
@@ -89,6 +90,65 @@ def get_paychecks_by_period(pay_period_id: int, db: Session):
 
 def get_all_pay_periods(db: Session):
     return db.query(PayPeriods).order_by(PayPeriods.period_start_date.desc()).all()
+
+
+def get_paychecks_for_manager(manager_employee_id: int, db: Session):
+    """Get all paychecks for employees managed by the given manager.
+
+    A manager sees paychecks for employees in departments where they are
+    the assigned manager (via departments.manager_id).
+    """
+    # Find departments where this employee is the manager
+    managed_depts = db.query(Department).filter(
+        Department.manager_id == manager_employee_id
+    ).all()
+
+    if not managed_depts:
+        return []
+
+    dept_ids = [d.department_id for d in managed_depts]
+
+    # Find all employees in those departments
+    managed_employees = db.query(Employee).filter(
+        Employee.department_id.in_(dept_ids),
+        Employee.employment_status == 'active'
+    ).all()
+
+    if not managed_employees:
+        return []
+
+    emp_ids = [e.employee_id for e in managed_employees]
+
+    # Return all paychecks for those employees
+    return db.query(Paychecks).filter(
+        Paychecks.employee_id.in_(emp_ids)
+    ).order_by(PayChecks.pay_period_id.desc(), Paychecks.paycheck_id.desc()).all()
+
+
+def get_paychecks_for_manager_by_period(manager_employee_id: int, pay_period_id: int, db: Session):
+    """Get paychecks for employees managed by the given manager for a specific period."""
+    managed_depts = db.query(Department).filter(
+        Department.manager_id == manager_employee_id
+    ).all()
+
+    if not managed_depts:
+        return []
+
+    dept_ids = [d.department_id for d in managed_depts]
+    managed_employees = db.query(Employee).filter(
+        Employee.department_id.in_(dept_ids),
+        Employee.employment_status == 'active'
+    ).all()
+
+    if not managed_employees:
+        return []
+
+    emp_ids = [e.employee_id for e in managed_employees]
+
+    return db.query(Paychecks).filter(
+        Paychecks.employee_id.in_(emp_ids),
+        Paychecks.pay_period_id == pay_period_id
+    ).all()
 
 def update_paycheck_status(paycheck_id: int, data: PaycheckStatusUpdate, db: Session):
     paycheck = db.query(Paychecks).filter(Paychecks.paycheck_id == paycheck_id).first()

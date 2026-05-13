@@ -207,6 +207,10 @@ def purge_employee(id: int, db: Session):
             detail="Employee does not exist in the database"
         )
 
+    # Capture the linked login (if any) before we wipe the employee row —
+    # the FK is on employees.user_id, so we need the value before delete.
+    linked_user_id = employee.user_id
+
     # Remove all child records before deleting the employee to avoid FK constraint errors
     db.query(TimeEntries).filter(TimeEntries.employee_id == id).delete()
     db.query(TimeEntries).filter(TimeEntries.approved_by == id).update({"approved_by": None})
@@ -216,6 +220,15 @@ def purge_employee(id: int, db: Session):
     db.query(Department).filter(Department.manager_id == id).update({"manager_id": None})
 
     db.delete(employee)
+
+    # Also drop the auto-provisioned login so the username/email is freed
+    # up. Without this, purging a Demo User (or any employee with a linked
+    # account) leaves an orphaned row in the users table.
+    if linked_user_id:
+        user_row = db.query(User).filter(User.user_id == linked_user_id).first()
+        if user_row:
+            db.delete(user_row)
+
     db.commit()
     return {"message": "Employee record purged"}
 

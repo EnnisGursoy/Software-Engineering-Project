@@ -172,6 +172,22 @@
       background: #f1f5f9; color: #475569; border: 1px solid var(--border); border-radius: 8px;
       padding: 9px 16px; font-size: 0.88rem; font-weight: 600; cursor: pointer; font-family: inherit;
     }
+
+    /* Dark-mode overrides — these rules hardcode near-black text colors
+       above, which vanish on dark surfaces. Re-target them at --text so
+       the profile rows, tax rows, table cells, and benefit cards stay
+       readable when the theme is toggled. */
+    body.dark .info-value,
+    body.dark .benefit-item-name,
+    body.dark .benefit-item-cost span,
+    body.dark .dlg-header h3 { color: var(--text); }
+    body.dark tbody td { color: var(--text); }
+    body.dark .badge-inactive { background: #1f2937; color: #cbd5e1; border-color: #374151; }
+    body.dark .btn-secondary  { background: #1f2937; color: #e2e8f0; }
+    body.dark .card-title button,
+    body.dark .year-filter    { background: rgba(59,130,246,0.12); color: #93c5fd; }
+    body.dark .info-row       { border-bottom-color: var(--border); }
+    body.dark .benefit-item   { background: var(--surface-soft); }
   </style>
   <link rel="stylesheet" href="app-theme.css">
   <script src="config.js"></script>

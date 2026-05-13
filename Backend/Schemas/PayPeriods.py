@@ -53,3 +53,8 @@ class PayPeriodOut(BaseModel):
     status: Optional[PeriodStatus]
 
     model_config = ConfigDict(from_attributes=True)
+
+class PayPeriodStatusUpdate(BaseModel):
+    status: PeriodStatus
+
+    model_config = ConfigDict(from_attributes=True)

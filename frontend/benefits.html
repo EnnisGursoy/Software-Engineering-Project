@@ -925,6 +925,22 @@
     pendingDeleteType = pendingDeleteId = null;
   });
 
+  // ── MENU ──
+  const menuBtn = document.getElementById('menuBtn');
+  const hrMenu  = document.getElementById('hrMenu');
+  menuBtn.addEventListener('click', () => {
+    const isOpen = hrMenu.classList.toggle('open');
+    menuBtn.setAttribute('aria-expanded', String(isOpen));
+    hrMenu.setAttribute('aria-hidden', String(!isOpen));
+  });
+  document.addEventListener('click', e => {
+    if (!e.target.closest('.menu-wrap')) {
+      hrMenu.classList.remove('open');
+      menuBtn.setAttribute('aria-expanded', 'false');
+      hrMenu.setAttribute('aria-hidden', 'true');
+    }
+  });
+
   // ── SUBNAV ──
   const subLinks  = Array.from(document.querySelectorAll('.subnav a[data-panel]'));
   const subPanels = Array.from(document.querySelectorAll('.panel[data-panel]'));

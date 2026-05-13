@@ -975,6 +975,34 @@
     </div>
   </div>
 
+  <!-- Terminate confirmation (replaces native confirm() so it works in embedded webviews) -->
+  <div class="modal-backdrop" id="terminateModal">
+    <div class="modal" style="max-width:420px;">
+      <h3 style="margin:0 0 8px 0;">Terminate employee?</h3>
+      <p id="terminateMsg" style="margin:0 0 16px 0;color:#475569;line-height:1.5;"></p>
+      <div class="modal-actions">
+        <button type="button" class="btn btn-secondary" onclick="closeModal('terminateModal')">Cancel</button>
+        <button type="button" class="btn btn-danger" id="terminateConfirmBtn">Terminate</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Purge confirmation (replaces native prompt() so it works in embedded webviews) -->
+  <div class="modal-backdrop" id="purgeModal">
+    <div class="modal" style="max-width:480px;">
+      <h3 style="margin:0 0 8px 0;color:#7f1d1d;">Permanently purge record</h3>
+      <p id="purgeMsg" style="margin:0 0 12px 0;color:#475569;line-height:1.5;"></p>
+      <p style="margin:0 0 6px 0;font-size:0.85rem;color:#475569;">Type the employee's full name to confirm:</p>
+      <input id="purgeConfirmInput" type="text" autocomplete="off"
+             style="width:100%;padding:10px 12px;border:1px solid #d4dde8;border-radius:8px;font-size:0.95rem;margin-bottom:14px;" />
+      <div class="modal-actions">
+        <button type="button" class="btn btn-secondary" onclick="closeModal('purgeModal')">Cancel</button>
+        <button type="button" class="btn" id="purgeConfirmBtn"
+                style="background:#450a0a;color:#fca5a5;border:1px solid #7f1d1d;">Purge Permanently</button>
+      </div>
+    </div>
+  </div>
+
   <script>
     const menuBtn = document.getElementById("menuBtn");
     const hrMenu = document.getElementById("hrMenu");
@@ -1324,8 +1352,18 @@
     }
 
     // ── Terminate employee (soft delete — sets employment_status to 'terminated') ─
-    async function terminateEmployee(id, name) {
-      if (!confirm(`Terminate ${name}?`)) return;
+    // Uses an in-page modal instead of native confirm() because embedded webviews
+    // (VS Code Simple Browser, sandboxed iframes) throw "confirm() is not supported".
+    function terminateEmployee(id, name) {
+      document.getElementById('terminateMsg').textContent =
+        `${name} will be marked terminated. They will lose portal access but their records stay on file.`;
+      const btn = document.getElementById('terminateConfirmBtn');
+      btn.onclick = () => doTerminate(id, name);
+      openModal('terminateModal');
+    }
+
+    async function doTerminate(id, name) {
+      closeModal('terminateModal');
       try {
         const res = await fetch(`${API}/employee/${id}/delete`, { method: 'DELETE', headers: authHdrs });
         if (!res.ok) { showStatus('Failed to terminate employee.', 'error'); return; }
@@ -1337,13 +1375,28 @@
     }
 
     // ── Purge employee record (admin only — permanent) ──────────────
-    async function purgeEmployee(id, name) {
-      const input = prompt(`This will permanently purge ${name} and ALL their records (paychecks, time entries, tax info, positions).\n\nType the employee's full name to confirm:`);
-      if (input === null) return;
-      if (input.trim().toLowerCase() !== name.toLowerCase()) {
+    // Uses an in-page modal instead of native prompt() because embedded webviews
+    // (VS Code Simple Browser, sandboxed iframes) throw "prompt() is not supported".
+    function purgeEmployee(id, name) {
+      document.getElementById('purgeMsg').textContent =
+        `This will permanently purge ${name} and ALL their records (paychecks, time entries, tax info, positions). This cannot be undone.`;
+      const input = document.getElementById('purgeConfirmInput');
+      input.value = '';
+      input.placeholder = name;
+      const btn = document.getElementById('purgeConfirmBtn');
+      btn.onclick = () => doPurge(id, name);
+      openModal('purgeModal');
+      setTimeout(() => input.focus(), 50);
+    }
+
+    async function doPurge(id, name) {
+      const input = document.getElementById('purgeConfirmInput');
+      if (input.value.trim().toLowerCase() !== name.toLowerCase()) {
         showStatus('Name did not match — purge cancelled.', 'error');
+        closeModal('purgeModal');
         return;
       }
+      closeModal('purgeModal');
       try {
         const res = await fetch(`${API}/employee/${id}/purge`, { method: 'DELETE', headers: authHdrs });
         const data = await res.json();

@@ -59,7 +59,7 @@ class TestShowDepartment:
         assert show_department(db) == []
 
     def test_contains_created_department(self, db, sample_department):
-        names = [d.department_name for d in show_department(db)]
+        names = [d['department_name'] for d in show_department(db)]
         assert "Engineering" in names
 
     def test_count_matches_created(self, db):

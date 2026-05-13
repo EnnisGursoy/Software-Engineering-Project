@@ -16,6 +16,8 @@ from Backend.Services.paycheck_service import (
     get_paychecks_by_period,
     get_all_pay_periods,
     update_paycheck_status,
+    get_paychecks_for_manager,
+    get_paychecks_for_manager_by_period,
 )
 from Backend.Services.paycheck_pdf import render_paystub_pdf
 from Backend.Services.payroll_report_pdf import render_payroll_report_pdf
@@ -83,7 +85,20 @@ async def list_all_paychecks(
     user: User = Depends(manager_or_hr_read),
     db: Session = Depends(get_db),
 ):
-    return get_all_paychecks(db)
+    """List paychecks. Managers see only their subordinates' paychecks; HR/Admin see all."""
+    # Get the employee record for the current user
+    employee = db.query(Employee).filter(Employee.user_id == user.user_id).first()
+
+    # If user is admin or HR, show all paychecks
+    if user.role in ['admin', 'hr']:
+        return get_all_paychecks(db)
+
+    # If user is a manager, filter to their subordinates
+    if employee:
+        return get_paychecks_for_manager(employee.employee_id, db)
+
+    # Fallback: no employee record linked, return empty
+    return []
 
 
 @router.get("/report-pdf")
@@ -200,7 +215,22 @@ async def paychecks_for_period(
     user: User = Depends(manager_or_hr_read),
     db: Session = Depends(get_db),
 ):
-    return get_paychecks_by_period(pay_period_id, db)
+    """Get paychecks for a period. Managers see only their subordinates; HR/Admin see all."""
+    # Verify period exists first
+    period = db.query(PayPeriods).filter(PayPeriods.pay_period_id == pay_period_id).first()
+    if not period:
+        raise HTTPException(status_code=404, detail="Pay period not found")
+
+    # If user is admin or HR, show all paychecks for this period
+    if user.role in ['admin', 'hr']:
+        return get_paychecks_by_period(pay_period_id, db)
+
+    # If user is a manager, filter to their subordinates
+    employee = db.query(Employee).filter(Employee.user_id == user.user_id).first()
+    if employee:
+        return get_paychecks_for_manager_by_period(employee.employee_id, pay_period_id, db)
+
+    return []
 
 
 @router.get("/calculate/{employee_id}/{pay_period_id}")
