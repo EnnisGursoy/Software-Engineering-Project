@@ -18,6 +18,10 @@ from Backend.Services.paycheck_service import (
     update_paycheck_status,
     get_paychecks_for_manager,
     get_paychecks_for_manager_by_period,
+    get_paychecks_for_employee_ids,
+    get_paychecks_for_employee_ids_by_period,
+    get_managed_employee_ids,
+    get_managed_employee_ids_for_user,
 )
 from Backend.Services.paycheck_pdf import render_paystub_pdf
 from Backend.Services.payroll_report_pdf import render_payroll_report_pdf
@@ -77,6 +81,12 @@ async def paystub_pdf_admin(
     employee = db.query(Employee).filter(Employee.employee_id == paycheck.employee_id).first()
     if not employee:
         raise HTTPException(status_code=404, detail="Employee not found")
+
+    if user.role == "manager":
+        allowed_ids = get_managed_employee_ids_for_user(user, db)
+        if paycheck.employee_id not in allowed_ids:
+            raise HTTPException(status_code=404, detail="Paycheck not found")
+
     return _build_paystub_response(paycheck, employee, db)
 
 
@@ -86,19 +96,15 @@ async def list_all_paychecks(
     db: Session = Depends(get_db),
 ):
     """List paychecks. Managers see only their subordinates' paychecks; HR/Admin see all."""
-    # Get the employee record for the current user
-    employee = db.query(Employee).filter(Employee.user_id == user.user_id).first()
 
-    # If user is admin or HR, show all paychecks
     if user.role in ['admin', 'hr']:
         return get_all_paychecks(db)
 
-    # If user is a manager, filter to their subordinates
-    if employee:
-        return get_paychecks_for_manager(employee.employee_id, db)
+    allowed_ids = get_managed_employee_ids_for_user(user, db)
+    if not allowed_ids:
+        return []
 
-    # Fallback: no employee record linked, return empty
-    return []
+    return get_paychecks_for_employee_ids(allowed_ids, db)
 
 
 @router.get("/report-pdf")
@@ -119,6 +125,11 @@ async def payroll_summary_report_pdf(
         q = q.filter(Paychecks.pay_period_id == pay_period_id)
     if status:
         q = q.filter(Paychecks.payment_status == status)
+
+    if user.role == 'manager':
+        allowed_ids = get_managed_employee_ids_for_user(user, db)
+        q = q.filter(Paychecks.employee_id.in_(allowed_ids))
+
     paychecks = q.order_by(Paychecks.pay_period_id, Paychecks.paycheck_id).all()
 
     # Join employee + period info so the PDF can show real names and
@@ -206,6 +217,10 @@ async def paychecks_for_employee(
     user: User = Depends(manager_or_hr_read),
     db: Session = Depends(get_db),
 ):
+    if user.role == 'manager':
+        allowed_ids = get_managed_employee_ids_for_user(user, db)
+        if employee_id not in allowed_ids:
+            raise HTTPException(status_code=404, detail="Employee not found")
     return get_paychecks_by_employee(employee_id, db)
 
 
@@ -226,11 +241,8 @@ async def paychecks_for_period(
         return get_paychecks_by_period(pay_period_id, db)
 
     # If user is a manager, filter to their subordinates
-    employee = db.query(Employee).filter(Employee.user_id == user.user_id).first()
-    if employee:
-        return get_paychecks_for_manager_by_period(employee.employee_id, pay_period_id, db)
-
-    return []
+    allowed_ids = get_managed_employee_ids_for_user(user, db)
+    return get_paychecks_for_employee_ids_by_period(allowed_ids, pay_period_id, db)
 
 
 @router.get("/calculate/{employee_id}/{pay_period_id}")
@@ -240,6 +252,10 @@ async def preview_paycheck(
     user: User = Depends(manager_or_hr_read),
     db: Session = Depends(get_db),
 ):
+    if user.role == 'manager':
+        allowed_ids = get_managed_employee_ids_for_user(user, db)
+        if employee_id not in allowed_ids:
+            raise HTTPException(status_code=404, detail="Employee not found")
     return calculate_paycheck(employee_id, pay_period_id, db)
 
 
@@ -249,6 +265,11 @@ async def process_payroll(
     user: User = Depends(admin_or_manager),
     db: Session = Depends(get_db),
 ):
+    if user.role == 'manager':
+        allowed_ids = get_managed_employee_ids_for_user(user, db)
+        if not allowed_ids:
+            return {'paychecks_created': 0, 'pay_period_id': pay_period_id}
+        return run_payroll(pay_period_id, db, employee_ids=allowed_ids)
     return run_payroll(pay_period_id, db)
 
 

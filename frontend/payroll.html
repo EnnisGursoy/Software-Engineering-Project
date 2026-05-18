@@ -299,6 +299,11 @@
   <main>
     <div id="statusBar" class="status-bar"></div>
 
+    <!-- Manager View Indicator -->
+    <div id="managerIndicator" style="display:none;padding:12px 16px;background:#dbeafe;border:1px solid #bfdbfe;border-radius:8px;margin-bottom:16px;color:#1e40af;font-size:0.9rem;font-weight:600;">
+      📊 Viewing payroll for your department only
+    </div>
+
     <!-- Toolbar -->
     <div class="toolbar">
       <div class="toolbar-left">
@@ -741,6 +746,12 @@
     document.getElementById('periodFilter').addEventListener('change', loadPayroll);
 
     // ── Init ──────────────────────────────────────────────────────
+    // Show manager indicator if user is manager
+    if (role === 'manager') {
+      const indicator = document.getElementById('managerIndicator');
+      if (indicator) indicator.style.display = 'block';
+    }
+
     (async () => { await loadEmployees(); await loadPeriods(); await loadPayroll(); })();
   </script>
 

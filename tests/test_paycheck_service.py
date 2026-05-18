@@ -22,6 +22,11 @@ from Backend.Services.paycheck_service import (
 from Backend.Schemas.Paycheck import PaycheckCreate, PaycheckStatusUpdate
 from Backend.Models.Paychecks import Paychecks
 from Backend.Models.pay_periods import PayPeriods
+from Backend.Models.Department import Department
+from Backend.Models.Employee import Employee
+from Backend.Models.Positions import Positions
+from Backend.Models.employee_position import EmployeePosition
+from Backend.Models.Time_entries import TimeEntries
 
 
 # ── Helpers ────────────────────────────────────────────────────────────────────
@@ -268,3 +273,166 @@ class TestRunPayroll:
         run_payroll(period.pay_period_id, db)
         db.refresh(period)
         assert period.status == "processing"
+
+    def test_manager_run_only_processes_department_employees(self, db):
+        manager = Employee(
+            first_name="Manager",
+            last_name="One",
+            email="manager.one@example.com",
+            hire_date=date(2025, 1, 1),
+            ssn="111-11-1111",
+            employment_status="active",
+        )
+        db.add(manager)
+        db.commit()
+        db.refresh(manager)
+
+        dept = Department(department_name="Engineering", manager_id=manager.employee_id)
+        db.add(dept)
+        db.commit()
+        db.refresh(dept)
+
+        emp_in_dept = Employee(
+            first_name="Alice",
+            last_name="Smith",
+            email="alice.smith@example.com",
+            hire_date=date(2025, 1, 1),
+            ssn="222-22-2222",
+            employment_status="active",
+            department_id=dept.department_id,
+        )
+        emp_out_dept = Employee(
+            first_name="Bob",
+            last_name="Jones",
+            email="bob.jones@example.com",
+            hire_date=date(2025, 1, 1),
+            ssn="333-33-3333",
+            employment_status="active",
+        )
+        db.add_all([emp_in_dept, emp_out_dept])
+        db.commit()
+        db.refresh(emp_in_dept)
+        db.refresh(emp_out_dept)
+
+        position = Positions(
+            position_title="Engineer",
+            department_id=dept.department_id,
+            base_salary=50000.00,
+            hourly_rate=50.00,
+            employment_type="full_time",
+        )
+        db.add(position)
+        db.commit()
+        db.refresh(position)
+
+        emp_pos = EmployeePosition(
+            employee_id=emp_in_dept.employee_id,
+            position_id=position.position_id,
+            start_date=date(2025, 1, 1),
+            current_salary=0.00,
+            current_hourly_rate=50.00,
+            pay_frequency="bi_weekly",
+            is_current=True,
+        )
+        db.add(emp_pos)
+        db.commit()
+
+        period = _make_period(db, date(2026, 4, 1))
+        entry = TimeEntries(
+            employee_id=emp_in_dept.employee_id,
+            entry_date=period.period_start_date,
+            regular_hours=80.0,
+            overtime_hours=0.0,
+            entry_type="work",
+            approved=True,
+        )
+        db.add(entry)
+        db.commit()
+
+        result = run_payroll(period.pay_period_id, db, employee_ids=[emp_in_dept.employee_id])
+        assert result["paychecks_created"] == 1
+
+        created_paychecks = db.query(Paychecks).filter(Paychecks.pay_period_id == period.pay_period_id).all()
+        assert len(created_paychecks) == 1
+        assert created_paychecks[0].employee_id == emp_in_dept.employee_id
+
+    def test_manager_run_does_not_process_other_departments(self, db):
+        manager = Employee(
+            first_name="Manager",
+            last_name="Two",
+            email="manager.two@example.com",
+            hire_date=date(2025, 1, 1),
+            ssn="444-44-4444",
+            employment_status="active",
+        )
+        db.add(manager)
+        db.commit()
+        db.refresh(manager)
+
+        dept = Department(department_name="Sales", manager_id=manager.employee_id)
+        db.add(dept)
+        db.commit()
+        db.refresh(dept)
+
+        emp_other = Employee(
+            first_name="Carl",
+            last_name="Mason",
+            email="carl.mason@example.com",
+            hire_date=date(2025, 1, 1),
+            ssn="555-55-5555",
+            employment_status="active",
+        )
+        emp_in_dept = Employee(
+            first_name="Dana",
+            last_name="Price",
+            email="dana.price@example.com",
+            hire_date=date(2025, 1, 1),
+            ssn="666-66-6666",
+            employment_status="active",
+            department_id=dept.department_id,
+        )
+        db.add_all([emp_other, emp_in_dept])
+        db.commit()
+        db.refresh(emp_other)
+        db.refresh(emp_in_dept)
+
+        position = Positions(
+            position_title="Sales Rep",
+            department_id=dept.department_id,
+            base_salary=40000.00,
+            hourly_rate=40.00,
+            employment_type="full_time",
+        )
+        db.add(position)
+        db.commit()
+        db.refresh(position)
+
+        emp_pos = EmployeePosition(
+            employee_id=emp_in_dept.employee_id,
+            position_id=position.position_id,
+            start_date=date(2025, 1, 1),
+            current_salary=0.00,
+            current_hourly_rate=40.00,
+            pay_frequency="bi_weekly",
+            is_current=True,
+        )
+        db.add(emp_pos)
+        db.commit()
+
+        period = _make_period(db, date(2026, 5, 1))
+        entry = TimeEntries(
+            employee_id=emp_in_dept.employee_id,
+            entry_date=period.period_start_date,
+            regular_hours=80.0,
+            overtime_hours=0.0,
+            entry_type="work",
+            approved=True,
+        )
+        db.add(entry)
+        db.commit()
+
+        result = run_payroll(period.pay_period_id, db, employee_ids=[emp_in_dept.employee_id])
+        assert result["paychecks_created"] == 1
+        created_ids = [p.employee_id for p in db.query(Paychecks).filter(Paychecks.pay_period_id == period.pay_period_id).all()]
+        assert emp_other.employee_id not in created_ids
+        assert emp_in_dept.employee_id in created_ids

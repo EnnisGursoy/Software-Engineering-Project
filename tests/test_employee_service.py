@@ -17,6 +17,7 @@ from Backend.Services.employee_service import (
     delete_employee,
     purge_employee,
     get_employees_by_department,
+    get_employees_for_manager,
 )
 from Backend.Schemas.Employee import EmployeeCreate, EmployeeUpdate
 from Backend.Models.Employee import Employee
@@ -204,3 +205,54 @@ class TestGetEmployeesByDepartment:
 
         result = get_employees_by_department(sample_department.department_id, db)
         assert not any(e.employee_id == sample_employee.employee_id for e in result)
+
+
+class TestGetEmployeesForManager:
+    def test_returns_employees_in_manager_department(self, db, sample_department):
+        manager = Employee(
+            first_name="Mgr",
+            last_name="One",
+            email="mgr.one@example.com",
+            hire_date=date(2025, 1, 1),
+            ssn=encrypt_ssn("111-22-3333"),
+            employment_status="active",
+        )
+        db.add(manager)
+        db.commit()
+        db.refresh(manager)
+
+        dept = sample_department
+        dept.manager_id = manager.employee_id
+        db.commit()
+
+        emp = Employee(
+            first_name="Alice",
+            last_name="Manager",
+            email="alice.manager@example.com",
+            hire_date=date(2025, 2, 1),
+            ssn=encrypt_ssn("222-33-4444"),
+            employment_status="active",
+            department_id=dept.department_id,
+        )
+        db.add(emp)
+        db.commit()
+        db.refresh(emp)
+
+        result = get_employees_for_manager(manager.employee_id, db)
+        assert any(e.employee_id == emp.employee_id for e in result)
+
+    def test_returns_empty_when_manager_has_no_department(self, db):
+        manager = Employee(
+            first_name="Mgr",
+            last_name="NoDept",
+            email="mgr.nodept@example.com",
+            hire_date=date(2025, 1, 1),
+            ssn=encrypt_ssn("333-44-5555"),
+            employment_status="active",
+        )
+        db.add(manager)
+        db.commit()
+        db.refresh(manager)
+
+        result = get_employees_for_manager(manager.employee_id, db)
+        assert result == []

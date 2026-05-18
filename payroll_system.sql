@@ -18,7 +18,7 @@ SET @MYSQLDUMP_TEMP_LOG_BIN = @@SESSION.SQL_LOG_BIN;
 SET @@SESSION.SQL_LOG_BIN= 0;
 
 --
--- GTID state at the beginning of the backup 
+-- GTID state at the beginning of the backup
 --
 
 SET @@GLOBAL.GTID_PURGED='1a7b67ec-05c8-11f1-82d4-e33661484379:1-28';
@@ -34,10 +34,13 @@ CREATE TABLE `departments` (
   `department_id` int NOT NULL AUTO_INCREMENT,
   `department_name` varchar(100) NOT NULL,
   `manager_id` int DEFAULT NULL,
+  `manager_user_id` int DEFAULT NULL,
   `created_at` timestamp NULL DEFAULT CURRENT_TIMESTAMP,
   PRIMARY KEY (`department_id`),
   KEY `manager_id` (`manager_id`),
-  CONSTRAINT `departments_ibfk_1` FOREIGN KEY (`manager_id`) REFERENCES `employees` (`employee_id`)
+  KEY `manager_user_id` (`manager_user_id`),
+  CONSTRAINT `departments_ibfk_1` FOREIGN KEY (`manager_id`) REFERENCES `employees` (`employee_id`),
+  CONSTRAINT `departments_ibfk_2` FOREIGN KEY (`manager_user_id`) REFERENCES `users` (`user_id`)
 ) ENGINE=InnoDB AUTO_INCREMENT=5 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 

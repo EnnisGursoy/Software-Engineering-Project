@@ -672,6 +672,7 @@
           <a href="departments.html">Departments</a>
           <a href="shifts.html">Shifts</a>
           <a href="payroll.html">Payroll</a>
+          <a href="manager_payroll.html">View Employee Payroll</a>
           <a href="benefits.html">Benefits</a>
           <a href="taxes.html">Taxes</a>
           <a href="reports.html">Reports</a>
@@ -707,6 +708,7 @@
           <button class="btn primary" type="button" onclick="window.location.href='payroll.html'">Run Payroll Preview</button>
           <button class="btn secondary" type="button" onclick="window.location.href='shifts.html'">Create Shift Plan</button>
           <button class="btn" type="button" onclick="window.location.href='reports.html'">Export Monthly Report</button>
+          <button class="btn" type="button" id="managerPayrollBtn" onclick="window.location.href='manager_payroll.html'" style="display:none;">View Employee Payroll</button>
         </div>
       </article>
 
@@ -855,6 +857,12 @@
     // ── Load dashboard data ───────────────────────────────────────
     async function loadDashboard() {
       const role = localStorage.getItem('user_role');
+
+      // Show manager payroll button for managers
+      if (role === 'manager') {
+        const btn = document.getElementById('managerPayrollBtn');
+        if (btn) btn.style.display = 'block';
+      }
 
       // Managers are scoped to their department — fetch /auth/me first to get dept id
       let empUrl = `${API}/employee/all`;

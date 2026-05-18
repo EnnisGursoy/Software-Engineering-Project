@@ -12,6 +12,7 @@ from Backend.Services.employee_service import (
     delete_employee,
     purge_employee,
     get_employees_by_department,
+    get_employees_for_manager,
     _generate_temp_password,
 )
 from Backend.Utility.security import hash_password
@@ -39,8 +40,13 @@ async def update_my_profile(
 
 @router.get('/all', response_model=list[EmployeeOut])
 async def get_all(user : User = Depends(manager_or_hr_read), db : Session = Depends(get_db)):
-   all_employees = show_all_employees(db)
-   return all_employees
+    if user.role == 'manager':
+        manager_employee = db.query(Employee).filter(Employee.user_id == user.user_id).first()
+        if not manager_employee:
+            return []
+        return get_employees_for_manager(manager_employee.employee_id, db)
+
+    return show_all_employees(db)
 
 
 @router.get('/{employee_id}')

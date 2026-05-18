@@ -11,6 +11,9 @@ class Department(Base):
     # manager_id references employees table (nullable)
     manager_id = Column(Integer, ForeignKey("employees.employee_id"), nullable=True)
 
+    # manager_user_id: stores the user_id of the manager directly (for managers without employee records)
+    manager_user_id = Column(Integer, ForeignKey("users.user_id"), nullable=True)
+
     created_at = Column(TIMESTAMP, server_default=func.now())
 
     def __repr__(self):

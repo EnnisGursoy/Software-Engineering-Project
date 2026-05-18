@@ -9,6 +9,7 @@ from Backend.Models.Time_entries import TimeEntries
 from Backend.Models.Tax_information import TaxInformation
 from Backend.Models.employee_position import EmployeePosition
 from Backend.Models.Department import Department
+from Backend.Models.Positions import Positions
 from Backend.Utility.security import encrypt_ssn, hash_password
 from Backend.Schemas.Employee import EmployeeCreate, EmployeeUpdate
 from datetime import date
@@ -193,6 +194,43 @@ def get_employees_by_department(department_id: int, db: Session):
         .filter(Employee.department_id == department_id)
         .all()
     )
+
+
+def get_employees_for_manager(manager_employee_id: int, db: Session):
+    managed_depts = db.query(Department).filter(Department.manager_id == manager_employee_id).all()
+    if not managed_depts:
+        return []
+
+    dept_ids = [d.department_id for d in managed_depts]
+
+    direct_employee_ids = {
+        eid
+        for (eid,) in db.query(Employee.employee_id)
+        .filter(
+            Employee.department_id.in_(dept_ids),
+            Employee.employment_status == 'active'
+        )
+        .all()
+    }
+
+    position_employee_ids = {
+        eid
+        for (eid,) in db.query(Employee.employee_id)
+        .join(EmployeePosition, EmployeePosition.employee_id == Employee.employee_id)
+        .join(Positions, Positions.position_id == EmployeePosition.position_id)
+        .filter(
+            Positions.department_id.in_(dept_ids),
+            EmployeePosition.is_current == True,
+            Employee.employment_status == 'active'
+        )
+        .all()
+    }
+
+    employee_ids = sorted(direct_employee_ids | position_employee_ids)
+    if not employee_ids:
+        return []
+
+    return db.query(Employee).filter(Employee.employee_id.in_(employee_ids)).all()
 
 
 def purge_employee(id: int, db: Session):
